@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            color: #153643;
+            font: 12px Arial,sans-serif;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        td.cell {
+            padding: 5px;
+            vertical-align: top;
+            border: 1px solid #cccccc;
+        }
+        .headline {
+            margin: 40px 0 5px 0;
+            font: 14px Arial, sans-serif;
+        }
+        .leadtext {
+            margin: 0 0 12px 0;
+            font: 12px Arial,sans-serif;
+        }
+    </style>
+</head>
+<body>
+<table style="width: 100%; border: 0; border-spacing: 0; background: #ffffff">
+    <tr>
+        <td style="text-align: center; padding:0;">
+            <table style="border: 1px solid #cccccc; border-spacing: 0; text-align: left">
+                <tr>
+                    <td style="text-align: center; padding: 40px 0 30px 0; background: #70bbd9"></td>
+                </tr>
+                <tr>
+                    <td style="padding: 36px 30px 42px 30px">
+                        <table style="width: 100%; border: 0; border-spacing: 0">
+                            <tr>
+                                <td>
+                                    <h1 style="font-size: 16px; margin: 0 0 20px 0">Automatgenererad rapport för {{ familyType }}</h1>
+                                    <p style="margin: 0 0 12px 0; line-height: 24px">
+                                        Rapporten genererad: {{ metadata.reportTimestamp }}<br />
+                                        Omfattar registrerade ändringar i folkbokföringen från och med {{ metadata.metaStartDate }} och ärenden från {{ metadata.oepStartDate }}<br />
+                                        Antal ändringar i folkbokföringen under perioden: {{ metadata.changedAddressesCount }}<br />
+                                        Antal beslutade ärenden som uppfyller kriterier för granskning: {{ metadata.inspectErrandsCount }}<br />
+                                    </p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <h2 class="headline">{{ familyType }}</h2>
+                                    <p class="leadtext">
+                                        {% if familyType == 'Skolskjuts' %}
+                                        Avstämning av adress för vårdnadshavare med beviljad skolskjuts
+                                        {% else %}
+                                        Avstämning av adress för vårdnadshavare med beviljad skolskjuts
+                                        {% endif %}
+                                    </p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding: 0">
+                                    <table style="width: 100%; border: 1px solid #cccccc">
+                                        <tr style="background-color: #70bbd9">
+                                            <td class="cell">Ärende</td>
+                                            <td class="cell">Beslutsperiod start</td>
+                                            <td class="cell">Beslutsperiod slut</td>
+                                            <td class="cell">Flyttdatum</td>
+                                            <td class="cell">Adress (ny)</td>
+                                            <td class="cell">Adress (gammal)</td>
+                                            <td class="cell">Status</td>
+                                            {% if familyType == 'Skolskjuts' %}
+                                            <td></td>
+                                            {% endif %}
+                                            <td class="cell">Sekretess</td>
+                                        </tr>
+
+                                        {% for item in items %}
+                                        <tr>
+                                            <td class="cell"><a href="%%link%%">{{ item.flowInstanceId }}</a></td>
+                                            <td class="cell">{{ item.decisionStart }}</td>
+                                            <td class="cell">{{ item.decisionEnd }}</td>
+                                            <td class="cell">{{ item.newAddress.nrDate }}</td>
+                                            <td class="cell">
+                                                {{ item.newAddress.address }} {{ item.newAddress.appartmentNumber }}
+                                                {% if item.newAddress.co %}
+                                                {{ item.newAddress.co }}<br />
+                                                {% endif %}}
+                                                {{ item.newAddress.postalCode }} {{ item.newAddress.city }}
+                                                {% if item.newAddress.xCoordLocal != '' and item.newAddress.yCoordLocal != '' %}
+                                                <br />({{ item.newAddress.xCoordLocal }}, {{ item.newAddress.yCoordLocal }})
+                                                {% endif %}}
+                                            </td>
+                                            <td class="cell">
+                                                {{ item.oldAddress.address }} {{ item.oldAddress.appartmentNumber }}
+                                                {% if item.oldAddress.co %}
+                                                {{ item.oldAddress.co }}<br />
+                                                {% endif %}}
+                                                {{ item.oldAddress.postalCode }} {{ item.oldAddress.city }}
+                                                {% if item.oldAddress.xCoordLocal != '' and item.oldAddress.yCoordLocal != '' %}
+                                                <br />({{ item.oldAddress.xCoordLocal }}, {{ item.oldAddress.yCoordLocal }})
+                                                {% endif %}}
+                                            </td>
+                                            <td class="cell">{{ item.status }}</td>
+                                            {% if familyType == 'Skolskjuts' %}
+                                            <td class="cell">
+                                                {% if item.nameGuardian != '' %}{{ item.nameGuardian }}{% endif %}
+                                                {% if item.nameMinor != '' %}{{ item.nameMinor }}{% endif %}
+                                            </td>
+                                            {% endif %}
+                                            <td class="cell">{{ item.classified }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

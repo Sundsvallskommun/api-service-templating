@@ -1,0 +1,17 @@
+version: "3"
+services:
+  templating:
+    container_name: ms-templating-prod
+    image: 'ms-templating:latest'
+    network_mode: bridge
+    restart: always
+    ports:
+      - "9060:8080"
+    environment:
+      - JAVA_OPTS=-server -Dfile.encoding=UTF-8 -Xms128m -Xmx256m
+      - SPRING_PROFILES_ACTIVE=<profile>
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=<driver>
+      - SPRING_DATASOURCE_URL=<url>
+      - SPRING_DATASOURCE_USERNAME=<username>
+      - SPRING_DATASOURCE_PASSWORD=<password>
+
