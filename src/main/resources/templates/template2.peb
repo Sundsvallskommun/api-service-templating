@@ -1,0 +1,6 @@
+==>
+  This is the second template
+
+  Buenos dias, {{name}}!!
+
+  {% include 'test.template3' %}
