@@ -11,7 +11,7 @@
     </parent>
     <groupId>se.sundsvall</groupId>
     <artifactId>api-service-templating</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1-SNAPSHOT</version>
     <name>api-service-templating</name>
 
     <properties>
