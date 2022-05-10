@@ -21,15 +21,15 @@ public class DatabaseLoader implements Loader<String> {
     public Reader getReader(final String templateIdAndFlavor) {
         var key = new TemplateKey(templateIdAndFlavor);
 
-        return dbIntegration.getTemplate(key.getTemplateId())
+        return dbIntegration.getTemplateByIdentifier(key.getTemplateIdentifier())
             .map(template -> {
                 if (!template.getVariants().containsKey(key.getFlavor())) {
-                    throw new LoaderException(null, "Unable to find template variant '" + key.getFlavor() + "' for template '" + key.getTemplateId() + "'");
+                    throw new LoaderException(null, "Unable to find template variant '" + key.getFlavor() + "' for template '" + key.getTemplateIdentifier() + "'");
                 }
 
                 return new BufferedReader(new StringReader(template.getVariants().get(key.getFlavor())));
             })
-            .orElseThrow(() -> new LoaderException(null, "Unable to find template '" + key.getTemplateId() + "'"));
+            .orElseThrow(() -> new LoaderException(null, "Unable to find template '" + key.getTemplateIdentifier() + "'"));
     }
 
     @Override

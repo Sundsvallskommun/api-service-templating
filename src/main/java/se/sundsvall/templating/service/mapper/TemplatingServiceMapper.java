@@ -15,6 +15,7 @@ public class TemplatingServiceMapper {
         }
 
         return TemplateEntity.builder()
+            .withIdentifier(templateRequest.getIdentifier())
             .withName(templateRequest.getName())
             .withDescription(templateRequest.getDescription())
             .withVariants(templateRequest.getVariants())
@@ -28,6 +29,7 @@ public class TemplatingServiceMapper {
 
         return TemplateResponse.builder()
             .withId(templateEntity.getId())
+            .withIdentifier(templateEntity.getIdentifier())
             .withName(templateEntity.getName())
             .withDescription(templateEntity.getDescription())
             .withVariants(templateEntity.getVariants())

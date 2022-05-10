@@ -66,6 +66,7 @@ class TemplateResource {
         return templatingService.getAllTemplates().stream()
             .map(templateResponse -> TemplatesResponse.builder()
                 .withId(templateResponse.getId())
+                .withIdentifier(templateResponse.getIdentifier())
                 .withName(templateResponse.getName())
                 .withDescription(templateResponse.getDescription())
                 .withVariants(List.copyOf(templateResponse.getVariants().keySet()))

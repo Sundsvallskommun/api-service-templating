@@ -1,13 +1,22 @@
 package se.sundsvall.templating.api;
 
+import java.util.AbstractMap;
+import java.util.Base64;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.validation.Valid;
 
+import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.zalando.problem.Problem;
 
 import se.sundsvall.templating.api.domain.DirectRenderRequest;
@@ -55,8 +64,49 @@ class RenderResource {
     })
     @PostMapping
     ResponseEntity<RenderResponse> render(@Valid @RequestBody final RenderRequest request) {
+        var output = templatingService.renderTemplate(request);
+
         var response = RenderResponse.builder()
-            .withOutput(templatingService.renderTemplate(request))
+            .withOutput(output)
+            .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Render a stored template as a PDF, optionally with parameters")
+    @ApiResponses({
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successful operation",
+            content = @Content(schema = @Schema(implementation = RenderResponse.class))
+        )
+    })
+    @PostMapping("/pdf")
+    ResponseEntity<RenderResponse> renderPdf(@Valid @RequestBody final RenderRequest request) {
+        var output = templatingService.renderTemplate(request);
+
+        output = output.entrySet().stream()
+            .map(entry -> {
+                var document = Jsoup.parse(entry.getValue(), "UTF-8");
+                document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
+
+                var os = new ByteArrayOutputStream();
+                var renderer = new ITextRenderer();
+                var sharedContext = renderer.getSharedContext();
+                sharedContext.setPrint(true);
+                sharedContext.setInteractive(false);
+                renderer.setDocumentFromString(document.html());
+                renderer.layout();
+                renderer.createPDF(os);
+
+                var renderedPdf = os.toByteArray();
+
+                return new AbstractMap.SimpleEntry<>(entry.getKey(), Base64.getEncoder().encodeToString(renderedPdf));
+            })
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        var response = RenderResponse.builder()
+            .withOutput(output)
             .build();
 
         return ResponseEntity.ok(response);

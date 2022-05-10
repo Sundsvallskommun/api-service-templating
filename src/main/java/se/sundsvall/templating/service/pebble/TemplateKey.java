@@ -4,23 +4,23 @@ import se.sundsvall.templating.TemplateFlavor;
 
 public class TemplateKey {
 
-    private final String templateId;
+    private final String templateIdentifier;
     private final TemplateFlavor flavor;
 
-    public TemplateKey(final String templateIdAndFlavor) {
-        var tokens = templateIdAndFlavor.split(":");
+    public TemplateKey(final String templateIdentifierAndFlavor) {
+        var tokens = templateIdentifierAndFlavor.split(":");
 
-        templateId = tokens[0];
+        templateIdentifier = tokens[0];
         flavor = TemplateFlavor.valueOf(tokens[1]);
     }
 
-    public TemplateKey(final String templateId, final TemplateFlavor flavor) {
-        this.templateId = templateId;
+    public TemplateKey(final String templateIdentifier, final TemplateFlavor flavor) {
+        this.templateIdentifier = templateIdentifier;
         this.flavor = flavor;
     }
 
-    public String getTemplateId() {
-        return templateId;
+    public String getTemplateIdentifier() {
+        return templateIdentifier;
     }
 
     public TemplateFlavor getFlavor() {
@@ -29,6 +29,6 @@ public class TemplateKey {
 
     @Override
     public String toString() {
-        return String.format("%s:%s", templateId, flavor);
+        return String.format("%s:%s", templateIdentifier, flavor);
     }
 }

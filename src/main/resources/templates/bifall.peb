@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<html>
+<meta charset="utf-8" />
+<head>
+    <title></title>
+</head>
+<body>
+<p>
+    [% include 'resource.logo' %]
+</p>
+
+<strong>BESLUT</strong>
+<p>
+    [[FÖRNAMN]] [[EFTERNAMN]] är beviljad parkeringstillstånd för rörelsehindrad som förare till och
+    med [[GILTIGHETSTID]].
+</p>
+<p>
+    Parkeringstillståndet är personligt och får endast användas när du själv kör bilen.
+</p>
+<p>
+    Med detta beslut bifogas en information om hur du använder ditt parkeringstillstånd samt en
+    karta över handikapparkeringsplatser i centrala Sundsvall (med reservation om förändringar).
+    <br />
+    <br />
+    Information finns även på <a href="https://www.sundsvall.se">https://www.sundsvall.se</a>
+</p>
+
+<p>
+    Har du ett parkeringstillstånd sedan tidigare ska du klippa sönder det.
+</p>
+
+<p>
+    [[BESLUTSDATUM]]
+</p>
+
+<p>
+    [[HANDLÄGGARE]]<br />
+    Trafikutredare
+</p>
+
+<p>
+    <strong>Delgivningskvittot ska återsändas så snart du tagit del av beslutet.</strong>
+</p>
+</body>
+</html>

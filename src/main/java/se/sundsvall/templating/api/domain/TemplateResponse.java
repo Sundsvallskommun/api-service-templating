@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
 public class TemplateResponse {
 
     private String id;
+    private String identifier;
     private String name;
     private String description;
 

@@ -48,11 +48,11 @@ public class TemplatingService {
     }
 
     public Map<TemplateFlavor, String> renderTemplate(final RenderRequest request) {
-        return dbIntegration.getTemplate(request.getTemplateId())
+        return dbIntegration.getTemplateByIdentifier(request.getTemplateIdentifier())
             .map(template -> template.getVariants().keySet().stream()
                 .map(templateFlavor -> {
                     try (var writer = new StringWriter()) {
-                        pebbleEngine.getTemplate(new TemplateKey(request.getTemplateId(), templateFlavor).toString())
+                        pebbleEngine.getTemplate(new TemplateKey(request.getTemplateIdentifier(), templateFlavor).toString())
                             .evaluate(writer, request.getParameters());
 
                         return new AbstractMap.SimpleEntry<>(templateFlavor, writer.toString());
@@ -61,7 +61,7 @@ public class TemplatingService {
                     }
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
-            .orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "Unable to find template with id '" + request.getTemplateId() + "'"));
+            .orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "Unable to find template with identifier '" + request.getTemplateIdentifier() + "'"));
     }
 
     public String renderDirect(final DirectRenderRequest request) {

@@ -1,6 +1,6 @@
 ==>
   This is the second template
 
-  Buenos dias, {{name}}!!
+  Buenos dias, [[name]]!!
 
-  {% include 'test.template3' %}
+  [% include 'test.template3' %]

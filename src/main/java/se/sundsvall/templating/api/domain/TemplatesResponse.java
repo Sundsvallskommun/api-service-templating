@@ -22,6 +22,7 @@ import lombok.Setter;
 public class TemplatesResponse {
 
     private String id;
+    private String identifier;
     private String name;
     private String description;
     private List<TemplateFlavor> variants;

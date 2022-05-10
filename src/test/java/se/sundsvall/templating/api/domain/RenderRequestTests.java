@@ -12,10 +12,10 @@ class RenderRequestTests {
     void testGettersAndSetters() {
         var request = new RenderRequest();
 
-        request.setTemplateId("someTemplateId");
+        request.setTemplateIdentifier("someTemplateId");
         request.setParameters(Map.of("someParameter", "someValue"));
 
-        assertThat(request.getTemplateId()).isEqualTo("someTemplateId");
+        assertThat(request.getTemplateIdentifier()).isEqualTo("someTemplateId");
         assertThat(request.getParameters()).hasSize(1);
     }
 }

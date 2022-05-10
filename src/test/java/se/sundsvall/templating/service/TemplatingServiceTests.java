@@ -79,7 +79,7 @@ class TemplatingServiceTests {
 
     @Test
     void test_renderTemplate() {
-        when(mockRenderRequest.getTemplateId()).thenReturn("someTemplateId");
+        when(mockRenderRequest.getTemplateIdentifier()).thenReturn("someTemplateId");
         when(mockVariants.keySet()).thenReturn(Set.of(TemplateFlavor.TEXT));
         when(mockTemplateEntity.getVariants()).thenReturn(mockVariants);
         when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.of(mockTemplateEntity));
@@ -88,7 +88,7 @@ class TemplatingServiceTests {
         var result = service.renderTemplate(mockRenderRequest);
         assertThat(result).hasSize(1);
 
-        verify(mockRenderRequest, times(2)).getTemplateId();
+        verify(mockRenderRequest, times(2)).getTemplateIdentifier();
         verify(mockRenderRequest, times(1)).getParameters();
         verify(mockVariants, times(1)).keySet();
         verify(mockTemplateEntity, times(1)).getVariants();
@@ -98,7 +98,7 @@ class TemplatingServiceTests {
 
     @Test
     void test_renderTemplate_whenRenderingFails() throws IOException {
-        when(mockRenderRequest.getTemplateId()).thenReturn("someTemplateId");
+        when(mockRenderRequest.getTemplateIdentifier()).thenReturn("someTemplateId");
         when(mockVariants.keySet()).thenReturn(Set.of(TemplateFlavor.TEXT));
         when(mockTemplateEntity.getVariants()).thenReturn(mockVariants);
         when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.of(mockTemplateEntity));
@@ -111,14 +111,14 @@ class TemplatingServiceTests {
 
     @Test
     void test_renderTemplate_whenTemplateDoesNotExist() {
-        when(mockRenderRequest.getTemplateId()).thenReturn("someTemplateId");
+        when(mockRenderRequest.getTemplateIdentifier()).thenReturn("someTemplateId");
         when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(ThrowableProblem.class)
             .isThrownBy(() -> service.renderTemplate(mockRenderRequest));
 
         verify(mockDbIntegration, times(1)).getTemplate(any(String.class));
-        verify(mockRenderRequest, times(2)).getTemplateId();
+        verify(mockRenderRequest, times(2)).getTemplateIdentifier();
     }
 
     @Test

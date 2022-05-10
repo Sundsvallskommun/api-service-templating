@@ -1,6 +1,7 @@
 package se.sundsvall.templating.configuration;
 
 import com.mitchellbosecke.pebble.PebbleEngine;
+import com.mitchellbosecke.pebble.lexer.Syntax;
 import com.mitchellbosecke.pebble.loader.StringLoader;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -32,8 +33,19 @@ class PebbleConfiguration {
 
     @Bean
     PebbleEngine pebbleEngine(@Qualifier("pebble.delegating-loader") final DelegatingLoader loader) {
+        var syntaxBuilder = new Syntax.Builder()
+            .setCommentOpenDelimiter("[#")
+            .setCommentCloseDelimiter("#]")
+            .setExecuteOpenDelimiter("[%")
+            .setExecuteCloseDelimiter("%]")
+            .setPrintOpenDelimiter("[[")
+            .setPrintCloseDelimiter("]]");
+        syntaxBuilder.setInterpolationOpenDelimiter("#[");
+        syntaxBuilder.setInterpolationOpenDelimiter("]");
+
         return new PebbleEngine.Builder()
             .loader(loader)
+            .syntax(syntaxBuilder.build())
             .build();
     }
 }

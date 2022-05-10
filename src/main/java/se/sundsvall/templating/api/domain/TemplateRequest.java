@@ -12,6 +12,7 @@ import lombok.Setter;
 @Setter
 public class TemplateRequest {
 
+    private String identifier;
     private String name;
     private String description;
     @Schema(example = "{\"HTML\": \"...content...\",\"TEXT\": \"...content...\"}")
