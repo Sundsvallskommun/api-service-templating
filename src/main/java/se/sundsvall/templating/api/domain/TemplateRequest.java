@@ -1,10 +1,7 @@
 package se.sundsvall.templating.api.domain;
 
-import java.util.Map;
+import javax.validation.constraints.Pattern;
 
-import se.sundsvall.templating.TemplateFlavor;
-
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,9 +9,9 @@ import lombok.Setter;
 @Setter
 public class TemplateRequest {
 
+    @Pattern(regexp = "[A-Za-z0-9\\-\\.]+$")
     private String identifier;
     private String name;
     private String description;
-    @Schema(example = "{\"HTML\": \"...content...\",\"TEXT\": \"...content...\"}")
-    private Map<TemplateFlavor, String> variants;
+    private String content;
 }

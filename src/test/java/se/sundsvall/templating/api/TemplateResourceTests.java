@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
-import se.sundsvall.templating.TemplateFlavor;
+import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
 import se.sundsvall.templating.api.domain.TemplateRequest;
 import se.sundsvall.templating.api.domain.TemplateResponse;
 import se.sundsvall.templating.service.TemplatingService;
@@ -39,7 +38,6 @@ class TemplateResourceTests {
 
     @Test
     void test_getAll() {
-        when(mockTemplateResponse.getVariants()).thenReturn(Map.of(TemplateFlavor.TEXT, "someContent"));
         when(mockTemplatingService.getAllTemplates()).thenReturn(List.of(mockTemplateResponse));
 
         var result = resource.getAllTemplates();
@@ -50,7 +48,7 @@ class TemplateResourceTests {
 
     @Test
     void test_getTemplate() {
-        when(mockTemplatingService.getTemplate(any(String.class))).thenReturn(Optional.of(TemplateResponse.builder().build()));
+        when(mockTemplatingService.getTemplate(any(String.class))).thenReturn(Optional.of(DetailedTemplateResponse.builder().build()));
 
         var result = resource.getTemplate("someTemplateId");
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -71,34 +69,10 @@ class TemplateResourceTests {
     }
 
     @Test
-    void test_getTemplateVariant() {
-        when(mockTemplateResponse.getVariants()).thenReturn(Map.of(TemplateFlavor.TEXT, "someContent"));
-        when(mockTemplatingService.getTemplate(any(String.class))).thenReturn(Optional.of(mockTemplateResponse));
-
-        var result = resource.getTemplateVariant("someTemplateId", TemplateFlavor.TEXT);
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isNotNull();
-
-        verify(mockTemplatingService, times(1)).getTemplate(any(String.class));
-    }
-
-    @Test
-    void test_getTemplateVariant_whenTemplateVariantDoesNotExist() {
-        when(mockTemplateResponse.getVariants()).thenReturn(Map.of());
-        when(mockTemplatingService.getTemplate(any(String.class))).thenReturn(Optional.of(mockTemplateResponse));
-
-        var result = resource.getTemplateVariant("someTemplateId", TemplateFlavor.TEXT);
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(result.getBody()).isNull();
-
-        verify(mockTemplatingService, times(1)).getTemplate(any(String.class));
-    }
-
-    @Test
     void test_saveTemplate() {
         when(mockTemplatingService.saveTemplate(any(TemplateRequest.class)))
             .thenReturn(mockTemplateResponse);
-        when(mockTemplateResponse.getId()).thenReturn("someId");
+        when(mockTemplateResponse.getIdentifier()).thenReturn("someId");
 
         var result = resource.saveTemplate(new TemplateRequest());
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);

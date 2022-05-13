@@ -7,7 +7,7 @@
 </head>
 <body>
 <p>
-    [% include 'resource.logo' %]
+    [% include 'common.resources.sundsvalls-kommun-logo' %]
 </p>
 
 <strong>BESLUT</strong>

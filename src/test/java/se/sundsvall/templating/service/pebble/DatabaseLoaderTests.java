@@ -8,7 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
 import java.util.Optional;
 
 import com.mitchellbosecke.pebble.error.LoaderException;
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import se.sundsvall.templating.TemplateFlavor;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 
@@ -29,8 +27,6 @@ class DatabaseLoaderTests {
     private DbIntegration mockDbIntegration;
     @Mock
     private TemplateEntity mockTemplateEntity;
-    @Mock
-    private Map<TemplateFlavor, String> mockVariants;
 
     private DatabaseLoader loader;
 
@@ -41,23 +37,18 @@ class DatabaseLoaderTests {
 
     @Test
     void test_getReader() {
-        when(mockVariants.containsKey(any(TemplateFlavor.class))).thenReturn(true);
-        when(mockVariants.get(any(TemplateFlavor.class))).thenReturn("someContent");
-        when(mockTemplateEntity.getVariants()).thenReturn(mockVariants);
+        when(mockTemplateEntity.getContent()).thenReturn("someContent");
         when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.of(mockTemplateEntity));
 
-        var reader = loader.getReader("someTemplateId:TEXT");
+        var reader = loader.getReader("someTemplateId");
         assertThat(reader).isNotNull();
 
         verify(mockDbIntegration, times(1)).getTemplate(any(String.class));
-        verify(mockTemplateEntity, times(2)).getVariants();
-        verify(mockVariants, times(1)).containsKey(any(TemplateFlavor.class));
-        verify(mockVariants, times(1)).get(any(TemplateFlavor.class));
     }
 
     @Test
     void test_getReader_whenTemplateDoesNotExist() {
-        var templateId = "someTemplateId:TEXT";
+        var templateId = "someTemplateId";
 
         when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.empty());
 
@@ -66,23 +57,6 @@ class DatabaseLoaderTests {
             .withMessageStartingWith("Unable to find template 'someTemplateId'");
 
         verify(mockDbIntegration, times(1)).getTemplate(any(String.class));
-    }
-
-    @Test
-    void test_getReader_whenTemplateFlavorDoesNotExist() {
-        var templateId = "someTemplateId:TEXT";
-
-        when(mockVariants.containsKey(any(TemplateFlavor.class))).thenReturn(false);
-        when(mockTemplateEntity.getVariants()).thenReturn(mockVariants);
-        when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.of(mockTemplateEntity));
-
-        assertThatExceptionOfType(LoaderException.class)
-            .isThrownBy(() -> loader.getReader(templateId))
-            .withMessageStartingWith("Unable to find template variant 'TEXT' for template 'someTemplateId'");
-
-        verify(mockDbIntegration, times(1)).getTemplate(any(String.class));
-        verify(mockTemplateEntity, times(1)).getVariants();
-        verify(mockVariants, times(1)).containsKey(any(TemplateFlavor.class));
     }
 
     @Test
@@ -123,17 +97,17 @@ class DatabaseLoaderTests {
 
     @Test
     void test_resourceExists() {
-        when(mockDbIntegration.templateExists(any(String.class))).thenReturn(true);
+        when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.of(TemplateEntity.builder().build()));
         assertThat(loader.resourceExists("someTemplateId")).isTrue();
 
-        verify(mockDbIntegration, times(1)).templateExists(any(String.class));
+        verify(mockDbIntegration, times(1)).getTemplate(any(String.class));
     }
 
     @Test
     void test_resourceExists_whenResourceDoesNotExist() {
-        when(mockDbIntegration.templateExists(any(String.class))).thenReturn(false);
+        when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.empty());
         assertThat(loader.resourceExists("someTemplateId")).isFalse();
 
-        verify(mockDbIntegration, times(1)).templateExists(any(String.class));
+        verify(mockDbIntegration, times(1)).getTemplate(any(String.class));
     }
 }

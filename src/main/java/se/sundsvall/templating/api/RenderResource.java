@@ -1,9 +1,6 @@
 package se.sundsvall.templating.api;
 
-import java.util.AbstractMap;
 import java.util.Base64;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -85,25 +82,20 @@ class RenderResource {
     ResponseEntity<RenderResponse> renderPdf(@Valid @RequestBody final RenderRequest request) {
         var output = templatingService.renderTemplate(request);
 
-        output = output.entrySet().stream()
-            .map(entry -> {
-                var document = Jsoup.parse(entry.getValue(), "UTF-8");
-                document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
+        var document = Jsoup.parse(output, "UTF-8");
+        document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
 
-                var os = new ByteArrayOutputStream();
-                var renderer = new ITextRenderer();
-                var sharedContext = renderer.getSharedContext();
-                sharedContext.setPrint(true);
-                sharedContext.setInteractive(false);
-                renderer.setDocumentFromString(document.html());
-                renderer.layout();
-                renderer.createPDF(os);
+        var os = new ByteArrayOutputStream();
+        var renderer = new ITextRenderer();
+        var sharedContext = renderer.getSharedContext();
+        sharedContext.setPrint(true);
+        sharedContext.setInteractive(false);
+        renderer.setDocumentFromString(document.html());
+        renderer.layout();
+        renderer.createPDF(os);
 
-                var renderedPdf = os.toByteArray();
-
-                return new AbstractMap.SimpleEntry<>(entry.getKey(), Base64.getEncoder().encodeToString(renderedPdf));
-            })
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        var renderedPdf = os.toByteArray();
+        output = Base64.getEncoder().encodeToString(renderedPdf);
 
         var response = RenderResponse.builder()
             .withOutput(output)

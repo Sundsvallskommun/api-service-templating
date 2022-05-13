@@ -18,18 +18,10 @@ public class DatabaseLoader implements Loader<String> {
     }
 
     @Override
-    public Reader getReader(final String templateIdAndFlavor) {
-        var key = new TemplateKey(templateIdAndFlavor);
-
-        return dbIntegration.getTemplateByIdentifier(key.getTemplateIdentifier())
-            .map(template -> {
-                if (!template.getVariants().containsKey(key.getFlavor())) {
-                    throw new LoaderException(null, "Unable to find template variant '" + key.getFlavor() + "' for template '" + key.getTemplateIdentifier() + "'");
-                }
-
-                return new BufferedReader(new StringReader(template.getVariants().get(key.getFlavor())));
-            })
-            .orElseThrow(() -> new LoaderException(null, "Unable to find template '" + key.getTemplateIdentifier() + "'"));
+    public Reader getReader(final String templateIdentifier) {
+        return dbIntegration.getTemplate(templateIdentifier)
+            .map(template -> new BufferedReader(new StringReader(template.getContent())))
+            .orElseThrow(() -> new LoaderException(null, "Unable to find template '" + templateIdentifier + "'"));
     }
 
     @Override
@@ -58,12 +50,12 @@ public class DatabaseLoader implements Loader<String> {
     }
 
     @Override
-    public String createCacheKey(final String templateId) {
-        return templateId;
+    public String createCacheKey(final String templateIdentifier) {
+        return templateIdentifier;
     }
 
     @Override
-    public boolean resourceExists(final String templateId) {
-        return dbIntegration.templateExists(templateId);
+    public boolean resourceExists(final String templateIdentifier) {
+        return dbIntegration.getTemplate(templateIdentifier).isPresent();
     }
 }

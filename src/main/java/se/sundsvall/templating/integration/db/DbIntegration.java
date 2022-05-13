@@ -28,18 +28,8 @@ public class DbIntegration {
     }
 
     @Transactional(readOnly = true)
-    public boolean templateExists(final String templateId) {
-        return templateRepository.existsById(templateId);
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<TemplateEntity> getTemplate(final String templateId) {
-        return templateRepository.findById(templateId);
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<TemplateEntity> getTemplateByIdentifier(final String identifier) {
-        return templateRepository.findTemplateEntityByIdentifierEquals(identifier);
+    public Optional<TemplateEntity> getTemplate(final String templateIdentifier) {
+        return templateRepository.findByIdentifier(templateIdentifier);
     }
 
     @Transactional(readOnly = true)
@@ -64,12 +54,12 @@ public class DbIntegration {
         return templateRepository.save(templateEntity);
     }
 
-    public void deleteTemplate(final String templateId) {
-        if (!templateRepository.existsById(templateId)) {
-            throw Problem.valueOf(Status.NOT_FOUND, "Unable to find template with id '" + templateId + "'");
+    public void deleteTemplate(final String templateIdentifier) {
+        if (!templateRepository.existsByIdentifier(templateIdentifier)) {
+            throw Problem.valueOf(Status.NOT_FOUND, "Unable to find template with identifier '" + templateIdentifier + "'");
         }
 
-        templateRepository.deleteById(templateId);
+        templateRepository.deleteByIdentifier(templateIdentifier);
     }
 
     public static class KeyValue {

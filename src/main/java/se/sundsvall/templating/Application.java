@@ -3,19 +3,16 @@ package se.sundsvall.templating;
 import static se.sundsvall.dept44.util.ResourceUtils.asString;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 
 import se.sundsvall.templating.integration.db.DbIntegration;
-import se.sundsvall.templating.integration.db.TemplateRepository;
-import se.sundsvall.templating.integration.db.entity.Metadata;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 
 @SpringBootApplication
@@ -26,100 +23,38 @@ public class Application {
     }
 
     @Bean
-    CommandLineRunner testStuff(final DbIntegration dbIntegration,
-            final TemplateRepository templateRepository,
-            @Value("classpath:/templates/template1.peb") final Resource templateResource1,
-            @Value("classpath:/templates/template2.peb") final Resource templateResource2,
-            @Value("classpath:/templates/template3.peb") final Resource templateResource3,
-            @Value("classpath:/templates/menu.peb") final Resource menuExampleTemplateResource,
-            @Value("classpath:/templates/squirrel.peb") final Resource squirrelTemplateResource,
-            @Value("classpath:/templates/citizenChanges.peb") final Resource citizenChangesExampleTemplateResource,
+    CommandLineRunner testStuff1(final DbIntegration dbIntegration,
             @Value("classpath:/templates/logo.peb") final Resource logoTemplateResource,
             @Value("classpath:/templates/avslag.peb") final Resource avslagTemplateResource,
             @Value("classpath:/templates/bifall.peb") final Resource bifallTemplateResource) {
         return args -> {
-            var template1 = TemplateEntity.builder()
-                .withIdentifier("test.template1")
-                .withName("Template 1")
-                .withVariants(Map.of(
-                    TemplateFlavor.TEXT, asString(templateResource1, StandardCharsets.UTF_8)
-                ))
-                .build();
-System.err.println("TEMPLATE 1 ID: " + template1.getId());
-            var template2 = TemplateEntity.builder()
-                .withIdentifier("test.template2")
-                .withName("Template 2")
-                .withVariants(Map.of(
-                    TemplateFlavor.TEXT, asString(templateResource2, StandardCharsets.UTF_8)
-                ))
-                .build();
-            var template3 = TemplateEntity.builder()
-                .withIdentifier("test.template3")
-                .withName("Template 3")
-                .withVariants(Map.of(
-                    TemplateFlavor.TEXT, asString(templateResource3, StandardCharsets.UTF_8)
-                ))
-                .build();
-            dbIntegration.saveTemplate(template1);
-            dbIntegration.saveTemplate(template2);
-            dbIntegration.saveTemplate(template3);
-
-            var menuExampleTemplate = TemplateEntity.builder()
-                .withIdentifier("example.menu")
-                .withName("Menu (dummy)")
-                .withVariants(Map.of(
-                    TemplateFlavor.HTML, asString(menuExampleTemplateResource, StandardCharsets.UTF_8)
-                ))
-                .build();
-            var squirrel = TemplateEntity.builder()
-                .withIdentifier("resource.squirrel")
-                .withName("Squirrel")
-                .withVariants(Map.of(
-                    TemplateFlavor.HTML, asString(squirrelTemplateResource, StandardCharsets.UTF_8)
-                ))
-                .build();
-            var citizenChangesExampleTemplate = TemplateEntity.builder()
-                .withIdentifier("example.citizen-changes")
-                .withName("CitizenChanges e-mail")
-                .withVariants(Map.of(
-                    TemplateFlavor.HTML, asString(citizenChangesExampleTemplateResource, StandardCharsets.UTF_8)
-                ))
-                .build();
-
-            dbIntegration.saveTemplate(menuExampleTemplate);
-            dbIntegration.saveTemplate(squirrel);
-            dbIntegration.saveTemplate(citizenChangesExampleTemplate);
-
-            var logo = TemplateEntity.builder()
-                .withIdentifier("resource.logo")
-                .withName("Sundsvalls Kommun Logo")
-                .withVariants(Map.of(
-                    TemplateFlavor.HTML, asString(logoTemplateResource, StandardCharsets.UTF_8)
-                ))
-                .build();
             var bifallTemplate = TemplateEntity.builder()
                 .withIdentifier("example.bifall")
                 .withName("P-tillstånd Bifall")
-                .withVariants(Map.of(
-                    TemplateFlavor.HTML, asString(bifallTemplateResource, StandardCharsets.UTF_8)
-                ))
+                .withContent(asString(bifallTemplateResource, StandardCharsets.UTF_8))
                 .build();
+            dbIntegration.saveTemplate(bifallTemplate);
+
             var avslagTemplate = TemplateEntity.builder()
                 .withIdentifier("example.avslag")
                 .withName("P-tillstånd Avslag")
-                .withVariants(Map.of(
-                    TemplateFlavor.HTML, asString(avslagTemplateResource, StandardCharsets.UTF_8)
-                ))
+                .withContent(asString(avslagTemplateResource, StandardCharsets.UTF_8))
                 .build();
-
-            dbIntegration.saveTemplate(logo);
-            dbIntegration.saveTemplate(bifallTemplate);
             dbIntegration.saveTemplate(avslagTemplate);
 
+            var logo = TemplateEntity.builder()
+                .withIdentifier("common.resources.sundsvalls-kommun-logo")
+                .withName("Sundsvalls Kommun Logo")
+                .withContent(asString(logoTemplateResource, StandardCharsets.UTF_8))
+                .build();
+            dbIntegration.saveTemplate(logo);
+
+            /*
             var tmpl = TemplateEntity.builder()
                 .withIdentifier("Some random identifier goes here...")
                 .withName("Some template")
                 .withDescription("Template description goes here...")
+                .withContent("someContent...")
                 .withMetadata(List.of(
                     Metadata.builder()
                         .withKey("verksamhet")
@@ -153,6 +88,60 @@ System.err.println("TEMPLATE 1 ID: " + template1.getId());
                     System.err.println("  " + metadata.getKey() + " => " + metadata.getValue());
                 });
             });
+            */
+        };
+    }
+
+    @Bean
+    @Profile("test")
+    CommandLineRunner testStuff2(final DbIntegration dbIntegration,
+            @Value("classpath:/templates/test/template1.peb") final Resource templateResource1,
+            @Value("classpath:/templates/test/template2.peb") final Resource templateResource2,
+            @Value("classpath:/templates/test/template3.peb") final Resource templateResource3,
+            @Value("classpath:/templates/test/menu.peb") final Resource menuExampleTemplateResource,
+            @Value("classpath:/templates/test/squirrel.peb") final Resource squirrelTemplateResource,
+            @Value("classpath:/templates/test/citizenChanges.peb") final Resource citizenChangesExampleTemplateResource) {
+        return args -> {
+            var template1 = TemplateEntity.builder()
+                    .withIdentifier("test.template1")
+                    .withName("Template 1")
+                    .withContent(asString(templateResource1, StandardCharsets.UTF_8))
+                    .build();
+            dbIntegration.saveTemplate(template1);
+
+            var template2 = TemplateEntity.builder()
+                    .withIdentifier("test.template2")
+                    .withName("Template 2")
+                    .withContent(asString(templateResource2, StandardCharsets.UTF_8))
+                    .build();
+            dbIntegration.saveTemplate(template2);
+
+            var template3 = TemplateEntity.builder()
+                    .withIdentifier("test.template3")
+                    .withName("Template 3")
+                    .withContent(asString(templateResource3, StandardCharsets.UTF_8))
+                    .build();
+            dbIntegration.saveTemplate(template3);
+
+            var citizenChangesExampleTemplate = TemplateEntity.builder()
+                    .withIdentifier("example.citizen-changes")
+                    .withName("CitizenChanges e-mail")
+                    .withContent(asString(citizenChangesExampleTemplateResource, StandardCharsets.UTF_8))
+                    .build();
+            var menuExampleTemplate = TemplateEntity.builder()
+                    .withIdentifier("example.menu")
+                    .withName("Menu (dummy)")
+                    .withContent(asString(menuExampleTemplateResource, StandardCharsets.UTF_8))
+                    .build();
+            var squirrel = TemplateEntity.builder()
+                    .withIdentifier("resource.squirrel")
+                    .withName("Squirrel")
+                    .withContent(asString(squirrelTemplateResource, StandardCharsets.UTF_8))
+                    .build();
+
+            dbIntegration.saveTemplate(citizenChangesExampleTemplate);
+            dbIntegration.saveTemplate(menuExampleTemplate);
+            dbIntegration.saveTemplate(squirrel);
         };
     }
 }

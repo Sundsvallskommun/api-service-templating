@@ -18,11 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.zalando.problem.Problem;
 
-import se.sundsvall.templating.TemplateFlavor;
+import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
 import se.sundsvall.templating.api.domain.TemplateRequest;
 import se.sundsvall.templating.api.domain.TemplateResponse;
-import se.sundsvall.templating.api.domain.TemplateVariantResponse;
-import se.sundsvall.templating.api.domain.TemplatesResponse;
 import se.sundsvall.templating.service.TemplatingService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,29 +55,21 @@ class TemplateResource {
             responseCode = "200",
             description = "Successful operation",
             content = @Content(
-                array = @ArraySchema(schema = @Schema(implementation = TemplatesResponse.class))
+                array = @ArraySchema(schema = @Schema(implementation = TemplateResponse.class))
             )
         )
     })
     @GetMapping
-    List<TemplatesResponse> getAllTemplates() {
-        return templatingService.getAllTemplates().stream()
-            .map(templateResponse -> TemplatesResponse.builder()
-                .withId(templateResponse.getId())
-                .withIdentifier(templateResponse.getIdentifier())
-                .withName(templateResponse.getName())
-                .withDescription(templateResponse.getDescription())
-                .withVariants(List.copyOf(templateResponse.getVariants().keySet()))
-                .build())
-            .toList();
+    List<TemplateResponse> getAllTemplates() {
+        return templatingService.getAllTemplates();
     }
 
-    @Operation(summary = "Get a template by id, including all variants")
+    @Operation(summary = "Get a template by identifier, including content")
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",
             description = "Successful operation",
-            content = @Content(schema = @Schema(implementation = TemplateResponse.class))
+            content = @Content(schema = @Schema(implementation = DetailedTemplateResponse.class))
         ),
         @ApiResponse(
             responseCode = "404",
@@ -87,34 +77,9 @@ class TemplateResource {
             content = @Content(schema = @Schema(implementation = Problem.class))
         )
     })
-    @GetMapping("/{id}")
-    ResponseEntity<TemplateResponse> getTemplate(@PathVariable("id") final String id) {
-        return templatingService.getTemplate(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
-    }
-
-    @Operation(summary = "Get a template variant")
-    @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "Successful operation",
-            content = @Content(schema = @Schema(implementation = TemplateVariantResponse.class))
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Not Found",
-            content = @Content(schema = @Schema(implementation = Problem.class))
-        )
-    })
-    @GetMapping("/{id}/{flavor}")
-    ResponseEntity<TemplateVariantResponse> getTemplateVariant(@PathVariable("id") final String id,
-            @PathVariable("flavor") final TemplateFlavor flavor) {
-        return templatingService.getTemplate(id)
-            .map(templateResponse -> templateResponse.getVariants().get(flavor))
-            .map(templateVariantContent -> TemplateVariantResponse.builder()
-                .withContent(templateVariantContent)
-                .build())
+    @GetMapping("/{identifier}")
+    ResponseEntity<DetailedTemplateResponse> getTemplate(@PathVariable("identifier") final String identifier) {
+        return templatingService.getTemplate(identifier)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
@@ -137,7 +102,7 @@ class TemplateResource {
         var template = templatingService.saveTemplate(request);
 
         var uri = UriComponentsBuilder.fromPath("/template")
-            .pathSegment(template.getId())
+            .pathSegment(template.getIdentifier())
             .build()
             .toUri();
 
@@ -157,12 +122,12 @@ class TemplateResource {
             content = @Content(schema = @Schema(implementation = Problem.class))
         )
     })
-    @PatchMapping(value = "/{id}", consumes = "application/json-patch+json")
-    ResponseEntity<TemplateResponse> updateTemplate(@PathVariable("id") final String id,
+    @PatchMapping(value = "/{identifier}", consumes = "application/json-patch+json")
+    ResponseEntity<TemplateResponse> updateTemplate(@PathVariable("identifier") final String identifier,
             @RequestBody
             @Schema(example = "[{\"op\":\"add|remove|replace\",\"path\": \"/some/attribute/path\",\"value\": \"...\"}]")
             final JsonPatch jsonPatch) {
-        var template = templatingService.updateTemplate(id, jsonPatch);
+        var template = templatingService.updateTemplate(identifier, jsonPatch);
 
         return ResponseEntity.ok(template);
     }
@@ -180,9 +145,9 @@ class TemplateResource {
             content = @Content(schema = @Schema(implementation = Problem.class))
         )
     })
-    @DeleteMapping("/{id}")
-    ResponseEntity<Void> deleteTemplate(@PathVariable("id") final String id) {
-        templatingService.deleteTemplate(id);
+    @DeleteMapping("/{identifier}")
+    ResponseEntity<Void> deleteTemplate(@PathVariable("identifier") final String identifier) {
+        templatingService.deleteTemplate(identifier);
 
         return ResponseEntity.ok().build();
     }

@@ -2,11 +2,8 @@ package se.sundsvall.templating.service;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.AbstractMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
-import se.sundsvall.templating.TemplateFlavor;
+import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
 import se.sundsvall.templating.api.domain.DirectRenderRequest;
 import se.sundsvall.templating.api.domain.RenderRequest;
 import se.sundsvall.templating.api.domain.TemplateRequest;
@@ -28,7 +25,6 @@ import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.service.mapper.TemplatingServiceMapper;
 import se.sundsvall.templating.service.pebble.DelegatingLoader;
-import se.sundsvall.templating.service.pebble.TemplateKey;
 
 @Service
 public class TemplatingService {
@@ -47,20 +43,17 @@ public class TemplatingService {
         this.templatingServiceMapper = templatingServiceMapper;
     }
 
-    public Map<TemplateFlavor, String> renderTemplate(final RenderRequest request) {
-        return dbIntegration.getTemplateByIdentifier(request.getTemplateIdentifier())
-            .map(template -> template.getVariants().keySet().stream()
-                .map(templateFlavor -> {
-                    try (var writer = new StringWriter()) {
-                        pebbleEngine.getTemplate(new TemplateKey(request.getTemplateIdentifier(), templateFlavor).toString())
-                            .evaluate(writer, request.getParameters());
+    public String renderTemplate(final RenderRequest request) {
+        return dbIntegration.getTemplate(request.getTemplateIdentifier())
+            .map(template -> {
+                try (var writer = new StringWriter()) {
+                    pebbleEngine.getTemplate(template.getId()).evaluate(writer, request.getParameters());
 
-                        return new AbstractMap.SimpleEntry<>(templateFlavor, writer.toString());
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
+                    return writer.toString();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            })
             .orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "Unable to find template with identifier '" + request.getTemplateIdentifier() + "'"));
     }
 
@@ -83,9 +76,9 @@ public class TemplatingService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<TemplateResponse> getTemplate(final String id) {
-        return dbIntegration.getTemplate(id)
-            .map(templatingServiceMapper::toTemplateResponse);
+    public Optional<DetailedTemplateResponse> getTemplate(final String identifier) {
+        return dbIntegration.getTemplate(identifier)
+            .map(templatingServiceMapper::toDetailedTemplateResponse);
     }
 
     public TemplateResponse saveTemplate(final TemplateRequest templateRequest) {
@@ -94,16 +87,16 @@ public class TemplatingService {
                 templatingServiceMapper.toTemplateEntity(templateRequest)));
     }
 
-    public TemplateResponse updateTemplate(final String id, final JsonPatch jsonPatch) {
-        return dbIntegration.getTemplate(id)
+    public TemplateResponse updateTemplate(final String identifier, final JsonPatch jsonPatch) {
+        return dbIntegration.getTemplate(identifier)
             .map(templateEntity -> applyPatch(jsonPatch, TemplateEntity.class, templateEntity))
             .map(dbIntegration::saveTemplate)
             .map(templatingServiceMapper::toTemplateResponse)
-            .orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "Unable to find template with id '" + id + "'"));
+            .orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "Unable to find template with identifier '" + identifier + "'"));
     }
 
-    public void deleteTemplate(final String id) {
-        dbIntegration.deleteTemplate(id);
+    public void deleteTemplate(final String identifier) {
+        dbIntegration.deleteTemplate(identifier);
     }
 
     <T> T applyPatch(final JsonPatch patch, final Class<T> targetClass, final T target) {

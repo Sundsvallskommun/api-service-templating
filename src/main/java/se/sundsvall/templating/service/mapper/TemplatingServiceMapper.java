@@ -2,6 +2,7 @@ package se.sundsvall.templating.service.mapper;
 
 import org.springframework.stereotype.Component;
 
+import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
 import se.sundsvall.templating.api.domain.TemplateRequest;
 import se.sundsvall.templating.api.domain.TemplateResponse;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
@@ -15,10 +16,9 @@ public class TemplatingServiceMapper {
         }
 
         return TemplateEntity.builder()
-            .withIdentifier(templateRequest.getIdentifier())
             .withName(templateRequest.getName())
             .withDescription(templateRequest.getDescription())
-            .withVariants(templateRequest.getVariants())
+            .withContent(templateRequest.getContent())
             .build();
     }
 
@@ -28,11 +28,22 @@ public class TemplatingServiceMapper {
         }
 
         return TemplateResponse.builder()
-            .withId(templateEntity.getId())
             .withIdentifier(templateEntity.getIdentifier())
             .withName(templateEntity.getName())
             .withDescription(templateEntity.getDescription())
-            .withVariants(templateEntity.getVariants())
+            .build();
+    }
+
+    public DetailedTemplateResponse toDetailedTemplateResponse(final TemplateEntity templateEntity) {
+        if (templateEntity == null) {
+            return null;
+        }
+
+        return DetailedTemplateResponse.builder()
+            .withIdentifier(templateEntity.getId())
+            .withName(templateEntity.getName())
+            .withDescription(templateEntity.getDescription())
+            .withContent(templateEntity.getContent())
             .build();
     }
 }

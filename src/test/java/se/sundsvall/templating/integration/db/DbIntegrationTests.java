@@ -45,26 +45,15 @@ class DbIntegrationTests {
     }
 
     @Test
-    void test_templateExists() {
-        when(mockTemplateRepository.existsById(any(String.class))).thenReturn(false);
-
-        var result = dbIntegration.templateExists("someTemplateId");
-
-        assertThat(result).isFalse();
-
-        verify(mockTemplateRepository, times(1)).existsById(any(String.class));
-    }
-
-    @Test
     void test_getTemplate() {
-        when(mockTemplateRepository.findById(any(String.class)))
+        when(mockTemplateRepository.findByIdentifier(any(String.class)))
             .thenReturn(Optional.of(TemplateEntity.builder().build()));
 
         var optionalTemplate = dbIntegration.getTemplate("someTemplateId");
 
         assertThat(optionalTemplate).isPresent();
 
-        verify(mockTemplateRepository, times(1)).findById(any(String.class));
+        verify(mockTemplateRepository, times(1)).findByIdentifier(any(String.class));
     }
 
     @Test
@@ -81,17 +70,17 @@ class DbIntegrationTests {
 
     @Test
     void test_deleteTemplate() {
-        when(mockTemplateRepository.existsById(any(String.class))).thenReturn(true);
+        when(mockTemplateRepository.existsByIdentifier(any(String.class))).thenReturn(true);
 
         dbIntegration.deleteTemplate("someTemplateId");
 
-        verify(mockTemplateRepository, times(1)).existsById(any(String.class));
-        verify(mockTemplateRepository, times(1)).deleteById(any(String.class));
+        verify(mockTemplateRepository, times(1)).existsByIdentifier(any(String.class));
+        verify(mockTemplateRepository, times(1)).deleteByIdentifier(any(String.class));
     }
 
     @Test
     void test_deleteTemplate_whenTemplateDoesNotExist() {
-        when(mockTemplateRepository.existsById(any(String.class))).thenReturn(false);
+        when(mockTemplateRepository.existsByIdentifier(any(String.class))).thenReturn(false);
 
         assertThatExceptionOfType(ThrowableProblem.class)
             .isThrownBy(() -> dbIntegration.deleteTemplate("someTemplateId"));

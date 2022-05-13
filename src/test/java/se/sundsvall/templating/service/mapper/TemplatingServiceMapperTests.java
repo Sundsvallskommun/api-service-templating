@@ -2,11 +2,8 @@ package se.sundsvall.templating.service.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Map;
-
 import org.junit.jupiter.api.Test;
 
-import se.sundsvall.templating.TemplateFlavor;
 import se.sundsvall.templating.api.domain.TemplateRequest;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 
@@ -19,15 +16,14 @@ class TemplatingServiceMapperTests {
         var request = new TemplateRequest();
         request.setName("someName");
         request.setDescription("someDescription");
-        request.setVariants(Map.of(TemplateFlavor.TEXT, "someContent"));
+        request.setContent("someContent");
 
         var templateEntity = mapper.toTemplateEntity(request);
 
         assertThat(templateEntity).isNotNull();
         assertThat(templateEntity.getName()).isEqualTo("someName");
         assertThat(templateEntity.getDescription()).isEqualTo("someDescription");
-        assertThat(templateEntity.getVariants().keySet()).containsExactly(TemplateFlavor.TEXT);
-        assertThat(templateEntity.getVariants().values()).containsExactly("someContent");
+        assertThat(templateEntity.getContent()).isEqualTo("someContent");
     }
 
     @Test
@@ -38,24 +34,44 @@ class TemplatingServiceMapperTests {
     @Test
     void test_toTemplateResponse() {
         var templateEntity = TemplateEntity.builder()
-            .withId("someId")
+            .withIdentifier("someIdentifier")
             .withName("someName")
             .withDescription("someDescription")
-            .withVariants(Map.of(TemplateFlavor.TEXT, "someContent"))
+            .withContent("someContent")
             .build();
 
         var templateResponse = mapper.toTemplateResponse(templateEntity);
 
         assertThat(templateResponse).isNotNull();
-        assertThat(templateResponse.getId()).isEqualTo(templateEntity.getId());
+        assertThat(templateResponse.getIdentifier()).isNotBlank();
         assertThat(templateResponse.getName()).isEqualTo(templateEntity.getName());
         assertThat(templateResponse.getDescription()).isEqualTo(templateEntity.getDescription());
-        assertThat(templateResponse.getVariants().keySet()).containsExactly(TemplateFlavor.TEXT);
-        assertThat(templateResponse.getVariants().values()).containsExactly("someContent");
     }
 
     @Test
     void test_toTemplateResponse_whenTemplateEntityIsNull() {
         assertThat(mapper.toTemplateResponse(null)).isNull();
+    }
+
+    @Test
+    void test_toDetailedTemplateResponse() {
+        var templateEntity = TemplateEntity.builder()
+            .withName("someName")
+            .withDescription("someDescription")
+            .withContent("someContent")
+            .build();
+
+        var detailedTemplateResponse = mapper.toDetailedTemplateResponse(templateEntity);
+
+        assertThat(detailedTemplateResponse).isNotNull();
+        assertThat(detailedTemplateResponse.getIdentifier()).isNotBlank();
+        assertThat(detailedTemplateResponse.getName()).isEqualTo(templateEntity.getName());
+        assertThat(detailedTemplateResponse.getDescription()).isEqualTo(templateEntity.getDescription());
+        assertThat(detailedTemplateResponse.getContent()).isEqualTo("someContent");
+    }
+
+    @Test
+    void test_toDetailedTemplateResponse_whenTemplateEntityIsNull() {
+        assertThat(mapper.toDetailedTemplateResponse(null)).isNull();
     }
 }

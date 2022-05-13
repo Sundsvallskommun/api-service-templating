@@ -1,25 +1,17 @@
 package se.sundsvall.templating.integration.db.entity;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.MapKeyEnumerated;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import se.sundsvall.templating.TemplateFlavor;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -38,7 +30,7 @@ import lombok.Setter;
 public class TemplateEntity {
 
     @Id
-    @Column(name = "id", length = 36, nullable = false, unique = true)
+    @Column(name = "id", nullable = false, unique = true)
     private final String id = UUID.randomUUID().toString();
 
     @Column(name = "identifier", nullable = false, unique = true)
@@ -54,14 +46,7 @@ public class TemplateEntity {
     @JoinColumn(name = "template_id", referencedColumnName = "id")
     private List<Metadata> metadata;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(
-        name = "template_variants",
-        joinColumns = @JoinColumn(name = "template_id", referencedColumnName = "id")
-    )
-    @MapKeyEnumerated(EnumType.STRING)
-    @MapKeyColumn(name = "flavor")
-    @Column(name = "content")
+    @Column(name = "content", nullable = false)
     @Lob
-    private Map<TemplateFlavor, String> variants;
+    private String content;
 }

@@ -2,20 +2,18 @@ package se.sundsvall.templating.api.domain;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 /**
- * A template variant response.
+ * A templates response.
  */
 @Getter
-@Setter
-@Builder(setterPrefix = "with")
+@SuperBuilder(setterPrefix = "with")
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class TemplateVariantResponse {
+public class DetailedTemplateResponse extends TemplateResponse {
 
     private String content;
 }
