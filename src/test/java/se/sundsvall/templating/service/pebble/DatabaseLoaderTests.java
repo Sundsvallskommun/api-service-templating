@@ -78,16 +78,7 @@ class DatabaseLoaderTests {
     void test_resolveRelativePath() {
         var relativePath = "someTemplateId";
 
-        assertThat(loader.resolveRelativePath(relativePath, "someOtherTemplateId:SOME_FLAVOR"))
-            .isEqualTo(relativePath + ":SOME_FLAVOR");
-    }
-
-    @Test
-    void test_resolveRelativePath_withFlavor() {
-        var relativePath = "someTemplateId:SOME_FLAVOR";
-
-        assertThat(loader.resolveRelativePath(relativePath, "someOtherTemplateId"))
-            .isEqualTo(relativePath);
+        assertThat(loader.resolveRelativePath(relativePath, relativePath)).isEqualTo(relativePath);
     }
 
     @Test

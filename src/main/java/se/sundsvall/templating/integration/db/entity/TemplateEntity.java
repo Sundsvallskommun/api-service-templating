@@ -1,6 +1,7 @@
 package se.sundsvall.templating.integration.db.entity;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -42,11 +43,15 @@ public class TemplateEntity {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "template_id", referencedColumnName = "id")
-    private List<Metadata> metadata;
+    private List<MetadataEntity> metadata;
 
-    @Column(name = "content", nullable = false)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "template_id", referencedColumnName = "id")
+    private Set<DefaultValueEntity> defaultValues;
+
     @Lob
+    @Column(name = "content", nullable = false)
     private String content;
 }

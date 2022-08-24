@@ -21,15 +21,15 @@ import lombok.Setter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "templates_metadata")
-public class Metadata {
+public class MetadataEntity {
 
     @Id
-    @Column(name = "id", nullable = false, unique = true)
+    @Column(name = "id", length = 36, nullable = false, unique = true)
     private final String id = UUID.randomUUID().toString();
 
-    @Column(length = 32, nullable = false)
+    @Column(name = "metadata_key", length = 32, nullable = false)
     private String key;
 
-    @Column(nullable = false)
+    @Column(name = "`value`", nullable = false)
     private String value;
 }

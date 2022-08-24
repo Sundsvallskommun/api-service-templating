@@ -30,12 +30,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.zalando.problem.ThrowableProblem;
 
 import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
 import se.sundsvall.templating.api.domain.RenderRequest;
 import se.sundsvall.templating.api.domain.TemplateRequest;
 import se.sundsvall.templating.api.domain.TemplateResponse;
+import se.sundsvall.templating.configuration.properties.TemplateProperties;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.service.mapper.TemplatingServiceMapper;
@@ -44,11 +46,15 @@ import se.sundsvall.templating.service.mapper.TemplatingServiceMapper;
 class TemplatingServiceTests {
 
     @Mock
-    private DbIntegration mockDbIntegration;
+    private ObjectMapper mockObjectMapper;
     @Mock
     private PebbleEngine mockPebbleEngine;
     @Mock
-    private ObjectMapper mockObjectMapper;
+    private ITextRenderer mockITextRenderer;
+    @Mock
+    private TemplateProperties mockTemplateProperties;
+    @Mock
+    private DbIntegration mockDbIntegration;
     @Mock
     private TemplatingServiceMapper mockTemplatingServiceMapper;
 
@@ -66,21 +72,21 @@ class TemplatingServiceTests {
 
     @BeforeEach
     void setUp() {
-        service = new TemplatingService(mockDbIntegration, mockPebbleEngine, mockObjectMapper,
-            mockTemplatingServiceMapper);
+        service = new TemplatingService(mockObjectMapper, mockPebbleEngine, mockITextRenderer,
+            mockTemplateProperties, mockTemplatingServiceMapper, mockDbIntegration);
     }
 
     @Test
     void test_renderTemplate() {
-        when(mockRenderRequest.getTemplateIdentifier()).thenReturn("someTemplateId");
-        when(mockTemplateEntity.getId()).thenReturn("someTemplateId");
+        when(mockRenderRequest.getIdentifier()).thenReturn("someTemplateId");
+        when(mockTemplateEntity.getIdentifier()).thenReturn("someTemplateId");
         when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.of(mockTemplateEntity));
         when(mockPebbleEngine.getTemplate(any(String.class))).thenReturn(mockPebbleTemplate);
 
         var result = service.renderTemplate(mockRenderRequest);
         assertThat(result).isNotNull();
 
-        verify(mockRenderRequest, times(1)).getTemplateIdentifier();
+        verify(mockRenderRequest, times(1)).getIdentifier();
         verify(mockRenderRequest, times(1)).getParameters();
         verify(mockDbIntegration, times(1)).getTemplate(any(String.class));
         verify(mockPebbleEngine, times(1)).getTemplate(any(String.class));
@@ -89,7 +95,7 @@ class TemplatingServiceTests {
     @Test
     void test_renderTemplate_whenRenderingFails() throws IOException {
         when(mockTemplateEntity.getId()).thenReturn("someTemplateId");
-        when(mockRenderRequest.getTemplateIdentifier()).thenReturn("someTemplateId");
+        when(mockRenderRequest.getIdentifier()).thenReturn("someTemplateId");
         when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.of(mockTemplateEntity));
         when(mockPebbleEngine.getTemplate(any(String.class))).thenReturn(mockPebbleTemplate);
         doThrow(new IOException()).when(mockPebbleTemplate).evaluate(any(Writer.class), anyMap());
@@ -100,14 +106,14 @@ class TemplatingServiceTests {
 
     @Test
     void test_renderTemplate_whenTemplateDoesNotExist() {
-        when(mockRenderRequest.getTemplateIdentifier()).thenReturn("someTemplateId");
+        when(mockRenderRequest.getIdentifier()).thenReturn("someTemplateId");
         when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(ThrowableProblem.class)
             .isThrownBy(() -> service.renderTemplate(mockRenderRequest));
 
         verify(mockDbIntegration, times(1)).getTemplate(any(String.class));
-        verify(mockRenderRequest, times(2)).getTemplateIdentifier();
+        verify(mockRenderRequest, times(3)).getIdentifier();
     }
 
     @Test
@@ -119,7 +125,7 @@ class TemplatingServiceTests {
         when(mockTemplatingServiceMapper.toTemplateResponse(any(TemplateEntity.class)))
             .thenReturn(TemplateResponse.builder().build());
 
-        var templates = service.getAllTemplates();
+        var templates = service.getAllTemplates(List.of());
         assertThat(templates).hasSize(templateEntities.size());
 
         verify(mockDbIntegration, times(1)).getAllTemplates();

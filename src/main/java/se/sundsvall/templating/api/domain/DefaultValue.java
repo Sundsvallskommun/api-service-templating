@@ -11,8 +11,12 @@ import lombok.NoArgsConstructor;
 @Builder(setterPrefix = "with")
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class RenderResponse {
+@Schema(description = "Template default value")
+public class DefaultValue {
 
-    @Schema(description = "Output, as a BASE64-encoded string")
-    private String output;
+    @Schema(description = "Field name")
+    private String fieldName;
+
+    @Schema(description = "Value")
+    private String value;
 }

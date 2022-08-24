@@ -1,12 +1,14 @@
 package se.sundsvall.templating.api;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
 import com.github.fge.jsonpatch.JsonPatch;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.zalando.problem.Problem;
@@ -21,9 +24,12 @@ import org.zalando.problem.Problem;
 import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
 import se.sundsvall.templating.api.domain.TemplateRequest;
 import se.sundsvall.templating.api.domain.TemplateResponse;
+import se.sundsvall.templating.api.domain.validation.ValidTemplateId;
+import se.sundsvall.templating.domain.KeyValue;
 import se.sundsvall.templating.service.TemplatingService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,8 +37,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Validated
 @RestController
-@RequestMapping(value = "/template", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/templates", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Template resources")
 @ApiResponses({
     @ApiResponse(
@@ -60,8 +67,14 @@ class TemplateResource {
         )
     })
     @GetMapping
-    List<TemplateResponse> getAllTemplates() {
-        return templatingService.getAllTemplates();
+    List<TemplateResponse> getAllTemplates(
+            @RequestParam(defaultValue = "{}")
+            @Parameter(description = "Metadata filters") final Map<String, String> filters) {
+        var metadata = filters.entrySet().stream()
+            .map(filter -> KeyValue.of(filter.getKey(), filter.getValue()))
+            .toList();
+
+        return templatingService.getAllTemplates(metadata);
     }
 
     @Operation(summary = "Get a template by identifier, including content")
@@ -78,7 +91,8 @@ class TemplateResource {
         )
     })
     @GetMapping("/{identifier}")
-    ResponseEntity<DetailedTemplateResponse> getTemplate(@PathVariable("identifier") final String identifier) {
+    ResponseEntity<DetailedTemplateResponse> getTemplate(
+            @PathVariable("identifier") @ValidTemplateId final String identifier) {
         return templatingService.getTemplate(identifier)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
@@ -123,7 +137,8 @@ class TemplateResource {
         )
     })
     @PatchMapping(value = "/{identifier}", consumes = "application/json-patch+json")
-    ResponseEntity<TemplateResponse> updateTemplate(@PathVariable("identifier") final String identifier,
+    ResponseEntity<TemplateResponse> updateTemplate(
+            @PathVariable("identifier") @ValidTemplateId final String identifier,
             @RequestBody
             @Schema(example = "[{\"op\":\"add|remove|replace\",\"path\": \"/some/attribute/path\",\"value\": \"...\"}]")
             final JsonPatch jsonPatch) {
@@ -146,7 +161,7 @@ class TemplateResource {
         )
     })
     @DeleteMapping("/{identifier}")
-    ResponseEntity<Void> deleteTemplate(@PathVariable("identifier") final String identifier) {
+    ResponseEntity<Void> deleteTemplate(@PathVariable("identifier") @ValidTemplateId final String identifier) {
         templatingService.deleteTemplate(identifier);
 
         return ResponseEntity.ok().build();

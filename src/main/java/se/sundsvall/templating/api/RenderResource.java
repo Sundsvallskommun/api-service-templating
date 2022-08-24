@@ -1,19 +1,13 @@
 package se.sundsvall.templating.api;
 
-import java.util.Base64;
-
 import javax.validation.Valid;
 
-import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.zalando.problem.Problem;
 
 import se.sundsvall.templating.api.domain.DirectRenderRequest;
@@ -80,22 +74,7 @@ class RenderResource {
     })
     @PostMapping("/pdf")
     ResponseEntity<RenderResponse> renderPdf(@Valid @RequestBody final RenderRequest request) {
-        var output = templatingService.renderTemplate(request);
-
-        var document = Jsoup.parse(output, "UTF-8");
-        document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
-
-        var os = new ByteArrayOutputStream();
-        var renderer = new ITextRenderer();
-        var sharedContext = renderer.getSharedContext();
-        sharedContext.setPrint(true);
-        sharedContext.setInteractive(false);
-        renderer.setDocumentFromString(document.html());
-        renderer.layout();
-        renderer.createPDF(os);
-
-        var renderedPdf = os.toByteArray();
-        output = Base64.getEncoder().encodeToString(renderedPdf);
+        var output = templatingService.renderTemplateAsPdf(request);
 
         var response = RenderResponse.builder()
             .withOutput(output)

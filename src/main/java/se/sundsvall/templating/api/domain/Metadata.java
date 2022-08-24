@@ -1,6 +1,5 @@
 package se.sundsvall.templating.api.domain;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder(setterPrefix = "with")
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class RenderResponse {
+public class Metadata {
 
-    @Schema(description = "Output, as a BASE64-encoded string")
-    private String output;
+    private String key;
+    private String value;
 }

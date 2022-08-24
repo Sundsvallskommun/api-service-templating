@@ -1,25 +1,39 @@
 openapi: 3.0.1
 info:
   title: Templating
+  description: Uses <a href="https://pebbletemplates.io/" target="_blank">Pebble Templates</a>
   contact: {}
   license:
     name: MIT License
     url: https://opensource.org/licenses/MIT
-  version: 0.1-SNAPSHOT
+  version: "1.0"
 servers:
 - url: http://localhost:8080
   description: Generated server url
-tags:
-- name: Template resources
-- name: Rendering resources
 paths:
-  /template:
+  /templates:
     get:
       tags:
       - Template resources
       summary: Get all available templates
       operationId: getAllTemplates
+      parameters:
+      - name: filters
+        in: query
+        description: Metadata filters
+        required: false
+        schema:
+          type: object
+          additionalProperties:
+            type: string
+          default: "{}"
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
@@ -27,13 +41,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TemplatesResponse'
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
+                  $ref: '#/components/schemas/TemplateResponse'
     post:
       tags:
       - Template resources
@@ -46,12 +54,6 @@ paths:
               $ref: '#/components/schemas/TemplateRequest'
         required: true
       responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TemplateResponse'
         "400":
           description: Bad Request
           content:
@@ -64,6 +66,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
   /render:
     post:
       tags:
@@ -77,18 +85,43 @@ paths:
               $ref: '#/components/schemas/RenderRequest'
         required: true
       responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RenderResponse'
         "500":
           description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenderResponse'
+  /render/pdf:
+    post:
+      tags:
+      - Rendering resources
+      summary: "Render a stored template as a PDF, optionally with parameters"
+      operationId: renderPdf
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenderRequest'
+        required: true
+      responses:
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenderResponse'
   /render/direct:
     post:
       tags:
@@ -102,45 +135,45 @@ paths:
               $ref: '#/components/schemas/DirectRenderRequest'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DirectRenderResponse'
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-  /template/{id}:
+  /templates/{identifier}:
     get:
       tags:
       - Template resources
-      summary: "Get a template by id, including all variants"
+      summary: "Get a template by identifier, including content"
       operationId: getTemplate
       parameters:
-      - name: id
+      - name: identifier
         in: path
         required: true
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TemplateResponse'
+                $ref: '#/components/schemas/DetailedTemplateResponse'
         "404":
           description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-        "500":
-          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -151,12 +184,18 @@ paths:
       summary: Delete a template
       operationId: deleteTemplate
       parameters:
-      - name: id
+      - name: identifier
         in: path
         required: true
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
@@ -169,19 +208,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
     patch:
       tags:
       - Template resources
       summary: Update a template
       operationId: updateTemplate
       parameters:
-      - name: id
+      - name: identifier
         in: path
         required: true
         schema:
@@ -190,15 +223,13 @@ paths:
         content:
           application/json-patch+json:
             schema:
-              $ref: '#/components/schemas/JsonPatch'
+              type: string
+              example:
+              - op: add|remove|replace
+                path: /some/attribute/path
+                value: '...'
         required: true
       responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TemplateResponse'
         "400":
           description: Bad Request
           content:
@@ -211,45 +242,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /template/{id}/{flavor}:
-    get:
-      tags:
-      - Template resources
-      summary: Get a template variant
-      operationId: getTemplateVariant
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-      - name: flavor
-        in: path
-        required: true
-        schema:
-          type: string
-          enum:
-          - TEXT
-          - HTML
-      responses:
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TemplateVariantResponse'
+                $ref: '#/components/schemas/TemplateResponse'
   /api-docs:
     get:
       tags:
@@ -263,42 +261,56 @@ paths:
             application/yaml:
               schema:
                 type: string
-    x-auth-type: None
-    x-throttling-tier: Unlimited
+      x-auth-type: None
+      x-throttling-tier: Unlimited
+      x-wso2-mutual-ssl: Optional
 components:
   schemas:
+    DefaultValue:
+      type: object
+      properties:
+        fieldName:
+          type: string
+          description: Field name
+        value:
+          type: string
+          description: Value
+      description: Template default value
+    Metadata:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+      description: Metadata
     TemplateRequest:
       type: object
       properties:
+        identifier:
+          type: string
+          description: "Identifier. May contain letters, digits, dashes and dots"
         name:
           type: string
+          description: Name
         description:
           type: string
-        variants:
-          type: object
-          additionalProperties:
-            type: string
-            example: "{\"HTML\":\"...content...\",\"TEXT\":\"...content...\"}"
-          example:
-            HTML: '...content...'
-            TEXT: '...content...'
-    TemplateResponse:
-      type: object
-      properties:
-        id:
+          description: Description
+          nullable: true
+        content:
           type: string
-        name:
-          type: string
-        description:
-          type: string
-        variants:
-          type: object
-          additionalProperties:
-            type: string
-            example: "{\"HTML\":\"...content...\",\"TEXT\":\"...content...\"}"
-          example:
-            HTML: '...content...'
-            TEXT: '...content...'
+          description: "Content, as a BASE64-encoded string"
+        metadata:
+          type: array
+          description: Metadata
+          items:
+            $ref: '#/components/schemas/Metadata'
+        defaultValues:
+          type: array
+          description: Default values
+          items:
+            $ref: '#/components/schemas/DefaultValue'
+      description: Template request
     Problem:
       type: object
       properties:
@@ -312,85 +324,130 @@ components:
           type: object
           additionalProperties:
             type: object
-        status:
-          $ref: '#/components/schemas/StatusType'
         title:
           type: string
         detail:
           type: string
+        status:
+          $ref: '#/components/schemas/StatusType'
     StatusType:
       type: object
       properties:
+        reasonPhrase:
+          type: string
         statusCode:
           type: integer
           format: int32
-        reasonPhrase:
-          type: string
-    RenderRequest:
-      required:
-      - templateId
+    TemplateResponse:
       type: object
       properties:
-        templateId:
+        identifier:
           type: string
+          description: Identifier
+        name:
+          type: string
+          description: Name
+        description:
+          type: string
+          description: Description
+        metadata:
+          type: array
+          description: Metadata
+          items:
+            $ref: '#/components/schemas/Metadata'
+        defaultValues:
+          type: array
+          description: Default values
+          items:
+            $ref: '#/components/schemas/DefaultValue'
+      description: Template
+    KeyValue:
+      required:
+      - key
+      - value
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+      description: Template metadata
+      nullable: true
+    RenderRequest:
+      type: object
+      properties:
+        identifier:
+          type: string
+          description: Template identifier
+          nullable: true
+        metadata:
+          type: array
+          description: Template metadata
+          nullable: true
+          items:
+            $ref: '#/components/schemas/KeyValue'
         parameters:
           type: object
           additionalProperties:
             type: object
-            example: "{ <JSON data> }"
-          example: "{ <JSON data> }"
+            description: Parameters
+            nullable: true
+          description: Parameters
+          nullable: true
+      description: Request to render a template
     RenderResponse:
       type: object
       properties:
         output:
-          type: object
-          additionalProperties:
-            type: string
-            example: "{\"TEXT\":\"...\",\"HTML\":\"...\"}"
-          example:
-            TEXT: '...'
-            HTML: '...'
+          type: string
+          description: "Output, as a BASE64-encoded string"
     DirectRenderRequest:
       required:
-      - template
+      - content
       type: object
       properties:
-        template:
+        content:
           type: string
+          description: The template content
         parameters:
           type: object
           additionalProperties:
             type: object
+            description: Parameters
+            nullable: true
+          description: Parameters
+          nullable: true
+      description: Request to render a template directly
     DirectRenderResponse:
       type: object
       properties:
         output:
           type: string
-    JsonPatch:
-      type: object
-      example:
-      - op: add|remove|replace
-        path: /some/attribute/path
-        value: '...'
-    TemplatesResponse:
+          description: "Output, as a BASE64-encoded string"
+    DetailedTemplateResponse:
       type: object
       properties:
-        id:
+        identifier:
           type: string
+          description: Identifier
         name:
           type: string
+          description: Name
         description:
           type: string
-        variants:
+          description: Description
+        metadata:
           type: array
+          description: Metadata
           items:
-            type: string
-            enum:
-            - TEXT
-            - HTML
-    TemplateVariantResponse:
-      type: object
-      properties:
+            $ref: '#/components/schemas/Metadata'
+        defaultValues:
+          type: array
+          description: Default values
+          items:
+            $ref: '#/components/schemas/DefaultValue'
         content:
           type: string
+          description: "Content, as a BASE64-encoded string"
+      description: Detailed template
   securitySchemes: {}

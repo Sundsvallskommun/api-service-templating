@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -38,12 +39,12 @@ class TemplateResourceTests {
 
     @Test
     void test_getAll() {
-        when(mockTemplatingService.getAllTemplates()).thenReturn(List.of(mockTemplateResponse));
+        when(mockTemplatingService.getAllTemplates(List.of())).thenReturn(List.of(mockTemplateResponse));
 
-        var result = resource.getAllTemplates();
+        var result = resource.getAllTemplates(Map.of());
         assertThat(result).hasSize(1);
 
-        verify(mockTemplatingService, times(1)).getAllTemplates();
+        verify(mockTemplatingService, times(1)).getAllTemplates(List.of());
     }
 
     @Test

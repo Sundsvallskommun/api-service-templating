@@ -19,12 +19,12 @@ public class DelegatingLoader implements Loader<String> {
     }
 
     @Override
-    public Reader getReader(final String templateIdentifier) {
-        if (templateIdentifier.startsWith(DIRECT_PREFIX)) {
-            return stringLoader.getReader(templateIdentifier);
+    public Reader getReader(final String identifier) {
+        if (identifier.startsWith(DIRECT_PREFIX)) {
+            return stringLoader.getReader(identifier);
         }
 
-        return databaseLoader.getReader(templateIdentifier);
+        return databaseLoader.getReader(identifier);
     }
 
     @Override
@@ -52,16 +52,16 @@ public class DelegatingLoader implements Loader<String> {
     }
 
     @Override
-    public String createCacheKey(final String templateIdentifier) {
-        return templateIdentifier;
+    public String createCacheKey(final String identifier) {
+        return identifier;
     }
 
     @Override
-    public boolean resourceExists(final String templateIdentifier) {
-        if (templateIdentifier.startsWith(DIRECT_PREFIX)) {
-            return stringLoader.resourceExists(templateIdentifier);
+    public boolean resourceExists(final String identifier) {
+        if (identifier.startsWith(DIRECT_PREFIX)) {
+            return stringLoader.resourceExists(identifier);
         }
 
-        return databaseLoader.resourceExists(templateIdentifier);
+        return databaseLoader.resourceExists(identifier);
     }
 }

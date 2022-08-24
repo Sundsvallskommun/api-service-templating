@@ -6,24 +6,25 @@
     <parent>
         <groupId>se.sundsvall.dept44</groupId>
         <artifactId>dept44-service-parent</artifactId>
-        <version>1.0</version>
+        <version>1.16</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>se.sundsvall</groupId>
     <artifactId>api-service-templating</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.0</version>
     <name>api-service-templating</name>
 
     <properties>
         <docker.image.name>ms-templating</docker.image.name>
 
-        <json-patch.version>1.13</json-patch.version>
-        <pebble.version>3.1.5</pebble.version>
-        <jsoup.version>1.14.3</jsoup.version>
-        <openpdf.version>9.1.22</openpdf.version>
+        <published.container.port.test>7551</published.container.port.test>
+        <published.container.port.production>7551</published.container.port.production>
+        <published.container.port.sandbox>7552</published.container.port.sandbox>
 
-        <generated-sources-path>${project.build.directory}/generated-sources</generated-sources-path>
-        <generated-sources-java-path>src/main/java</generated-sources-java-path>
+        <json-patch.version>1.13</json-patch.version>
+        <pebble.version>3.1.6</pebble.version>
+        <jsoup.version>1.15.3</jsoup.version>
+        <openpdf.version>9.1.22</openpdf.version>
     </properties>
 
     <dependencies>
@@ -87,4 +88,26 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/se/sundsvall/templating/Application*</exclude>
+                        <exclude>**/se/sundsvall/templating/configuration/**/**</exclude>
+                        <exclude>**/se/sundsvall/templating/exception/**/**</exclude>
+                        <exclude>**/se/sundsvall/templating/integration/**/**IntegrationConfiguration**</exclude>
+                        <!-- Exclude JPA specifications and metamodels -->
+                        <exclude>**/se/sundsvall/templating/integration/db/spec/**/**</exclude>
+                        <exclude>**/se/sundsvall/templating/integration/db/entity/*Entity_*</exclude>
+                        <!-- Figure out how to mock the PebbleTemplate#evaluate stuff and re-enable this... -->
+                        <exclude>**/se/sundsvall/templating/service/TemplatingService*</exclude>
+                        <exclude>**/se/sundsvall/templating/util/**/*</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
