@@ -3,7 +3,6 @@ package se.sundsvall.templating.service;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 
-import java.io.FileOutputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -110,13 +109,6 @@ public class TemplatingService {
         iTextRenderer.setDocumentFromString(document.html());
         iTextRenderer.layout();
         iTextRenderer.createPDF(os);
-
-        try {
-            iTextRenderer.createPDF(new FileOutputStream("/tmp/tmp/apa.pdf"));
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-        }
-
         iTextRenderer.finishPDF();
 
         // Encode the output as BASE64
