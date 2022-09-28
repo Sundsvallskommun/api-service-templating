@@ -20,7 +20,7 @@ paths:
       parameters:
       - name: filters
         in: query
-        description: Metadata filters
+        description: Metadata filters (dictionary/map/key-value)
         required: false
         schema:
           type: object
@@ -28,6 +28,12 @@ paths:
             type: string
           default: "{}"
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
@@ -36,12 +42,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TemplateResponse'
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
     post:
       tags:
       - Template resources
@@ -54,18 +54,18 @@ paths:
               $ref: '#/components/schemas/TemplateRequest'
         required: true
       responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TemplateResponse'
         "400":
           description: Bad Request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
         "500":
           description: Internal Server Error
           content:
@@ -190,18 +190,18 @@ paths:
         schema:
           type: string
       responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TemplateResponse'
         "404":
           description: Not Found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
         "500":
           description: Internal Server Error
           content:
@@ -230,18 +230,18 @@ paths:
                 value: '...'
         required: true
       responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TemplateResponse'
         "400":
           description: Bad Request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
         "500":
           description: Internal Server Error
           content:
@@ -309,6 +309,33 @@ components:
           items:
             $ref: '#/components/schemas/DefaultValue'
       description: Template request
+    Problem:
+      type: object
+      properties:
+        instance:
+          type: string
+          format: uri
+        type:
+          type: string
+          format: uri
+        parameters:
+          type: object
+          additionalProperties:
+            type: object
+        status:
+          $ref: '#/components/schemas/StatusType'
+        title:
+          type: string
+        detail:
+          type: string
+    StatusType:
+      type: object
+      properties:
+        reasonPhrase:
+          type: string
+        statusCode:
+          type: integer
+          format: int32
     TemplateResponse:
       type: object
       properties:
@@ -330,33 +357,6 @@ components:
           items:
             $ref: '#/components/schemas/DefaultValue'
       description: Template
-    Problem:
-      type: object
-      properties:
-        instance:
-          type: string
-          format: uri
-        type:
-          type: string
-          format: uri
-        parameters:
-          type: object
-          additionalProperties:
-            type: object
-        title:
-          type: string
-        detail:
-          type: string
-        status:
-          $ref: '#/components/schemas/StatusType'
-    StatusType:
-      type: object
-      properties:
-        statusCode:
-          type: integer
-          format: int32
-        reasonPhrase:
-          type: string
     KeyValue:
       required:
       - key

@@ -69,7 +69,7 @@ class TemplateResource {
     @GetMapping
     List<TemplateResponse> getAllTemplates(
             @RequestParam(defaultValue = "{}")
-            @Parameter(description = "Metadata filters (dictionary/map/key-value") final Map<String, String> filters) {
+            @Parameter(description = "Metadata filters (dictionary/map/key-value)") final Map<String, String> filters) {
         var metadata = filters.entrySet().stream()
             .map(filter -> KeyValue.of(filter.getKey(), filter.getValue()))
             .toList();
