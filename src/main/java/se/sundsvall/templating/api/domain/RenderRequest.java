@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import se.sundsvall.templating.api.domain.validation.ValidRenderRequest;
 import se.sundsvall.templating.domain.KeyValue;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -28,7 +29,7 @@ public class RenderRequest {
     @Schema(description = "Template identifier", nullable = true)
     private String identifier;
 
-    @Schema(description = "Template metadata", nullable = true)
+    @ArraySchema(schema = @Schema(description = "Template metadata"))
     private List<@Valid KeyValue> metadata;
 
     @Schema(description = "Parameters", nullable = true)

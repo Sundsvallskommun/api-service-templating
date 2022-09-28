@@ -2,6 +2,7 @@ package se.sundsvall.templating.api.domain;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -25,9 +26,9 @@ public class TemplateResponse {
     @Schema(description = "Description")
     private String description;
 
-    @Schema(description = "Metadata")
+    @ArraySchema(schema = @Schema(description = "Metadata"))
     private List<Metadata> metadata;
 
-    @Schema(description = "Default values")
+    @ArraySchema(schema = @Schema(description = "Default values"))
     private List<DefaultValue> defaultValues;
 }

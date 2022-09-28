@@ -4,6 +4,7 @@ import java.util.List;
 
 import se.sundsvall.templating.api.domain.validation.ValidTemplateId;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,9 +27,9 @@ public class TemplateRequest {
     @Schema(description = "Content, as a BASE64-encoded string")
     private String content;
 
-    @Schema(description = "Metadata")
+    @ArraySchema(schema = @Schema(description = "Metadata"))
     private List<Metadata> metadata;
 
-    @Schema(description = "Default values")
+    @ArraySchema(schema = @Schema(description = "Default values"))
     private List<DefaultValue> defaultValues;
 }
