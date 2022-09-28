@@ -12,10 +12,10 @@ class DirectRenderRequestTests {
     void testGettersAndSetters() {
         var request = new DirectRenderRequest();
 
-        request.setTemplate("someTemplateContents");
+        request.setContent("someTemplateContents");
         request.setParameters(Map.of("someParameter", "someValue"));
 
-        assertThat(request.getTemplate()).isEqualTo("someTemplateContents");
+        assertThat(request.getContent()).isEqualTo("someTemplateContents");
         assertThat(request.getParameters()).hasSize(1);
     }
 }

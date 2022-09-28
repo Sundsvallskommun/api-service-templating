@@ -55,8 +55,29 @@ class RenderResource {
     })
     @PostMapping
     ResponseEntity<RenderResponse> render(@Valid @RequestBody final RenderRequest request) {
+        var output = templatingService.renderTemplate(request);
+
         var response = RenderResponse.builder()
-            .withOutput(templatingService.renderTemplate(request))
+            .withOutput(output)
+            .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Render a stored template as a PDF, optionally with parameters")
+    @ApiResponses({
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successful operation",
+            content = @Content(schema = @Schema(implementation = RenderResponse.class))
+        )
+    })
+    @PostMapping("/pdf")
+    ResponseEntity<RenderResponse> renderPdf(@Valid @RequestBody final RenderRequest request) {
+        var output = templatingService.renderTemplateAsPdf(request);
+
+        var response = RenderResponse.builder()
+            .withOutput(output)
             .build();
 
         return ResponseEntity.ok(response);

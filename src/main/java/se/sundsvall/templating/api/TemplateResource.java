@@ -1,12 +1,14 @@
 package se.sundsvall.templating.api;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
 import com.github.fge.jsonpatch.JsonPatch;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -14,18 +16,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.zalando.problem.Problem;
 
-import se.sundsvall.templating.TemplateFlavor;
+import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
 import se.sundsvall.templating.api.domain.TemplateRequest;
 import se.sundsvall.templating.api.domain.TemplateResponse;
-import se.sundsvall.templating.api.domain.TemplateVariantResponse;
-import se.sundsvall.templating.api.domain.TemplatesResponse;
+import se.sundsvall.templating.api.domain.validation.ValidTemplateId;
+import se.sundsvall.templating.domain.KeyValue;
 import se.sundsvall.templating.service.TemplatingService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -33,8 +37,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Validated
 @RestController
-@RequestMapping(value = "/template", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/templates", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Template resources")
 @ApiResponses({
     @ApiResponse(
@@ -57,28 +62,27 @@ class TemplateResource {
             responseCode = "200",
             description = "Successful operation",
             content = @Content(
-                array = @ArraySchema(schema = @Schema(implementation = TemplatesResponse.class))
+                array = @ArraySchema(schema = @Schema(implementation = TemplateResponse.class))
             )
         )
     })
     @GetMapping
-    List<TemplatesResponse> getAllTemplates() {
-        return templatingService.getAllTemplates().stream()
-            .map(templateResponse -> TemplatesResponse.builder()
-                .withId(templateResponse.getId())
-                .withName(templateResponse.getName())
-                .withDescription(templateResponse.getDescription())
-                .withVariants(List.copyOf(templateResponse.getVariants().keySet()))
-                .build())
+    List<TemplateResponse> getAllTemplates(
+            @RequestParam(defaultValue = "{}")
+            @Parameter(description = "Metadata filters") final Map<String, String> filters) {
+        var metadata = filters.entrySet().stream()
+            .map(filter -> KeyValue.of(filter.getKey(), filter.getValue()))
             .toList();
+
+        return templatingService.getAllTemplates(metadata);
     }
 
-    @Operation(summary = "Get a template by id, including all variants")
+    @Operation(summary = "Get a template by identifier, including content")
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",
             description = "Successful operation",
-            content = @Content(schema = @Schema(implementation = TemplateResponse.class))
+            content = @Content(schema = @Schema(implementation = DetailedTemplateResponse.class))
         ),
         @ApiResponse(
             responseCode = "404",
@@ -86,34 +90,10 @@ class TemplateResource {
             content = @Content(schema = @Schema(implementation = Problem.class))
         )
     })
-    @GetMapping("/{id}")
-    ResponseEntity<TemplateResponse> getTemplate(@PathVariable("id") final String id) {
-        return templatingService.getTemplate(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
-    }
-
-    @Operation(summary = "Get a template variant")
-    @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "Successful operation",
-            content = @Content(schema = @Schema(implementation = TemplateVariantResponse.class))
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Not Found",
-            content = @Content(schema = @Schema(implementation = Problem.class))
-        )
-    })
-    @GetMapping("/{id}/{flavor}")
-    ResponseEntity<TemplateVariantResponse> getTemplateVariant(@PathVariable("id") final String id,
-            @PathVariable("flavor") final TemplateFlavor flavor) {
-        return templatingService.getTemplate(id)
-            .map(templateResponse -> templateResponse.getVariants().get(flavor))
-            .map(templateVariantContent -> TemplateVariantResponse.builder()
-                .withContent(templateVariantContent)
-                .build())
+    @GetMapping("/{identifier}")
+    ResponseEntity<DetailedTemplateResponse> getTemplate(
+            @PathVariable("identifier") @ValidTemplateId final String identifier) {
+        return templatingService.getTemplate(identifier)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
@@ -136,7 +116,7 @@ class TemplateResource {
         var template = templatingService.saveTemplate(request);
 
         var uri = UriComponentsBuilder.fromPath("/template")
-            .pathSegment(template.getId())
+            .pathSegment(template.getIdentifier())
             .build()
             .toUri();
 
@@ -156,12 +136,13 @@ class TemplateResource {
             content = @Content(schema = @Schema(implementation = Problem.class))
         )
     })
-    @PatchMapping(value = "/{id}", consumes = "application/json-patch+json")
-    ResponseEntity<TemplateResponse> updateTemplate(@PathVariable("id") final String id,
+    @PatchMapping(value = "/{identifier}", consumes = "application/json-patch+json")
+    ResponseEntity<TemplateResponse> updateTemplate(
+            @PathVariable("identifier") @ValidTemplateId final String identifier,
             @RequestBody
             @Schema(example = "[{\"op\":\"add|remove|replace\",\"path\": \"/some/attribute/path\",\"value\": \"...\"}]")
             final JsonPatch jsonPatch) {
-        var template = templatingService.updateTemplate(id, jsonPatch);
+        var template = templatingService.updateTemplate(identifier, jsonPatch);
 
         return ResponseEntity.ok(template);
     }
@@ -179,9 +160,9 @@ class TemplateResource {
             content = @Content(schema = @Schema(implementation = Problem.class))
         )
     })
-    @DeleteMapping("/{id}")
-    ResponseEntity<Void> deleteTemplate(@PathVariable("id") final String id) {
-        templatingService.deleteTemplate(id);
+    @DeleteMapping("/{identifier}")
+    ResponseEntity<Void> deleteTemplate(@PathVariable("identifier") @ValidTemplateId final String identifier) {
+        templatingService.deleteTemplate(identifier);
 
         return ResponseEntity.ok().build();
     }

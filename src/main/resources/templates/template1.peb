@@ -1,5 +1,0 @@
-This is the first template
-
-Hello, {{name}} !!
-
-{% include 'test.template2' %}

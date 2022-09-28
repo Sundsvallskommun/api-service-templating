@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.Resource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import se.sundsvall.dept44.util.ResourceUtils;
@@ -20,6 +21,7 @@ import se.sundsvall.templating.Application;
 import net.javacrumbs.jsonunit.core.Option;
 import net.javacrumbs.jsonunit.core.internal.Options;
 
+@ActiveProfiles("it")
 @SpringBootTest(
     webEnvironment = WebEnvironment.RANDOM_PORT,
     classes = Application.class,
@@ -28,7 +30,7 @@ import net.javacrumbs.jsonunit.core.internal.Options;
         "logging.level.se.sundsvall.dept44.payload=OFF"
     }
 )
-class GenerateOpenApiIT {
+class OpenApiSpecificationIT {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
@@ -37,7 +39,7 @@ class GenerateOpenApiIT {
     @Value("${openapi.version}")
     private String openApiVersion;
 
-    @Value("classpath:/openapi.yaml")
+    @Value("classpath:/openapi.yml")
     private Resource openApiResource;
 
     @Autowired

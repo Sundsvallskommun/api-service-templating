@@ -1,21 +1,18 @@
 package se.sundsvall.templating.integration.db.entity;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
-import javax.persistence.CollectionTable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.MapKeyEnumerated;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import se.sundsvall.templating.TemplateFlavor;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -35,7 +32,10 @@ public class TemplateEntity {
 
     @Id
     @Column(name = "id", nullable = false, unique = true)
-    private String id;
+    private final String id = UUID.randomUUID().toString();
+
+    @Column(name = "identifier", nullable = false, unique = true)
+    private String identifier;
 
     @Column(name = "name", length = 64, nullable = false, unique = true)
     private String name;
@@ -43,14 +43,15 @@ public class TemplateEntity {
     @Column(name = "description")
     private String description;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(
-        name = "template_variants",
-        joinColumns = @JoinColumn(name = "template_id", referencedColumnName = "id")
-    )
-    @MapKeyEnumerated(EnumType.STRING)
-    @MapKeyColumn(name = "flavor")
-    @Column(name = "content")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "template_id", referencedColumnName = "id")
+    private List<MetadataEntity> metadata;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "template_id", referencedColumnName = "id")
+    private Set<DefaultValueEntity> defaultValues;
+
     @Lob
-    private Map<TemplateFlavor, String> variants;
+    @Column(name = "content", nullable = false)
+    private String content;
 }

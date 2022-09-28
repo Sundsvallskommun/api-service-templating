@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<html>
+<meta charset="utf-8" />
+<head>
+    <title></title>
+</head>
+<body>
+<p>
+    [% include 'common.resources.sundsvalls-kommun-logo' %]
+</p>
+
+<strong>BESLUT, Avslag</strong>
+<p>
+    Av de uppgifter som framkommer i ärendet kan inte ditt behov av parkeringstillstånd för
+    rörelsehindrad gällande passagerare styrkas.
+</p>
+<p>
+    [[BESLUTSTEXT]]
+</p>
+<p>
+    <i><strong>Bedömningen är att avslå din ansökan om parkeringstillstånd.</strong></i>
+</p>
+
+<strong>Så här överklagar du</strong>
+<p>
+    Om du inte är nöjd med kommunens beslut kan du överklaga till Länsstyrelsen. Du ska skriva
+    vilket beslut du vill överklaga samt vilken ändring du vill ha och varför. Behöver du hjälp
+    kan du kontakta en trafikutredare. Ditt överklagande ska komma in till Trafiksektionen inom
+    tre (3) veckor från den dag du fått ta del av beslutet.
+</p>
+<p>
+    Skicka ditt överklagande till:
+    <br />
+    Sundsvalls kommun<br />
+    Gatuavdelningen, Trafiksektionen<br />
+    Parkeringstillstånd<br />
+    851 85 Sundsvall<br />
+</p>
+
+<p>
+    [[BESLUTSDATUM]]
+</p>
+
+<p>
+    [[HANDLÄGGARE]]<br />
+    Trafikutredare
+</p>
+
+<p>
+    <strong>Delgivningskvittot ska återsändas så snart du tagit del av beslutet.</strong>
+</p>
+
+<p>
+    Grundregeln för parkeringstillstånd för rörelsehindrade återfinns i Trafikförordningen
+    (TrF) 13 kap 8§.
+</p>
+<p>
+    Enligt Trafikförordningen (TrF) 11 kap 9 § är det möjligt att stanna och parkera ett fordon
+    som används för att skjutsa en person som är sjuk eller rörelsehindrad, där det enligt lokala
+    trafikföreskrifter finns förbud mot att stanna eller mot parkering. Denna regel möjliggör
+    således av- och påstigning mycket nära en målpunkt.
+</p>
+</body>
+</html>

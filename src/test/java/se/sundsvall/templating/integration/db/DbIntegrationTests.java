@@ -13,10 +13,14 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.data.jpa.domain.Specification;
 import org.zalando.problem.ThrowableProblem;
 
+import se.sundsvall.templating.domain.KeyValue;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,33 +42,52 @@ class DbIntegrationTests {
             .thenReturn(List.of(TemplateEntity.builder().build(), TemplateEntity.builder().build()));
 
         var templates = dbIntegration.getAllTemplates();
-
         assertThat(templates).hasSize(2);
 
         verify(mockTemplateRepository, times(1)).findAll();
     }
 
     @Test
-    void test_templateExists() {
-        when(mockTemplateRepository.existsById(any(String.class))).thenReturn(false);
-
-        var result = dbIntegration.templateExists("someTemplateId");
-
-        assertThat(result).isFalse();
-
-        verify(mockTemplateRepository, times(1)).existsById(any(String.class));
-    }
-
-    @Test
     void test_getTemplate() {
-        when(mockTemplateRepository.findById(any(String.class)))
+        when(mockTemplateRepository.findByIdentifier(any(String.class)))
             .thenReturn(Optional.of(TemplateEntity.builder().build()));
 
         var optionalTemplate = dbIntegration.getTemplate("someTemplateId");
-
         assertThat(optionalTemplate).isPresent();
 
-        verify(mockTemplateRepository, times(1)).findById(any(String.class));
+        verify(mockTemplateRepository, times(1)).findByIdentifier(any(String.class));
+    }
+
+    @Test
+    void test_findTemplate() {
+        when(mockTemplateRepository.findOne(ArgumentMatchers.<Specification<TemplateEntity>>any()))
+            .thenReturn(Optional.of(TemplateEntity.builder().build()));
+
+        var optionalTemplate = dbIntegration.findTemplate(List.of(KeyValue.of("someKey", "someValue")));
+        assertThat(optionalTemplate).isPresent();
+
+        verify(mockTemplateRepository, times(1)).findOne(ArgumentMatchers.<Specification<TemplateEntity>>any());
+    }
+
+    @Test
+    void test_findTemplate_exceptionThrownWhenMultipleResultsAreFound() {
+        when(mockTemplateRepository.findOne(ArgumentMatchers.<Specification<TemplateEntity>>any()))
+            .thenThrow(new IncorrectResultSizeDataAccessException(2));
+
+        assertThatExceptionOfType(ThrowableProblem.class)
+            .isThrownBy(() -> dbIntegration.findTemplate(List.of(KeyValue.of("someKey", "someValue"))));
+    }
+
+    @Test
+    void test_findTemplates() {
+        when(mockTemplateRepository.findAll(ArgumentMatchers.<Specification<TemplateEntity>>any()))
+            .thenReturn(List.of(TemplateEntity.builder().build()));
+
+        var result = dbIntegration.findTemplates(List.of(KeyValue.of("someKey", "someValue")));
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(1);
+
+        verify(mockTemplateRepository, times(1)).findAll(ArgumentMatchers.<Specification<TemplateEntity>>any());
     }
 
     @Test
@@ -73,7 +96,6 @@ class DbIntegrationTests {
             .thenReturn(TemplateEntity.builder().build());
 
         var templateEntity = dbIntegration.saveTemplate(TemplateEntity.builder().build());
-
         assertThat(templateEntity).isNotNull();
 
         verify(mockTemplateRepository, times(1)).save(any(TemplateEntity.class));
@@ -81,19 +103,34 @@ class DbIntegrationTests {
 
     @Test
     void test_deleteTemplate() {
-        when(mockTemplateRepository.existsById(any(String.class))).thenReturn(true);
+        when(mockTemplateRepository.existsByIdentifier(any(String.class))).thenReturn(true);
 
         dbIntegration.deleteTemplate("someTemplateId");
 
-        verify(mockTemplateRepository, times(1)).existsById(any(String.class));
-        verify(mockTemplateRepository, times(1)).deleteById(any(String.class));
+        verify(mockTemplateRepository, times(1)).existsByIdentifier(any(String.class));
+        verify(mockTemplateRepository, times(1)).deleteByIdentifier(any(String.class));
     }
 
     @Test
     void test_deleteTemplate_whenTemplateDoesNotExist() {
-        when(mockTemplateRepository.existsById(any(String.class))).thenReturn(false);
+        when(mockTemplateRepository.existsByIdentifier(any(String.class))).thenReturn(false);
 
         assertThatExceptionOfType(ThrowableProblem.class)
             .isThrownBy(() -> dbIntegration.deleteTemplate("someTemplateId"));
+    }
+
+    @Test
+    void test_toTemplateEntitySpecification() {
+        var metadata = List.of(
+            KeyValue.of("someKey", "someValue"), KeyValue.of("otherKey", "otherValue"));
+
+        var result = dbIntegration.toTemplateEntitySpecification(metadata);
+        assertThat(result).isNotNull();
+    }
+
+
+    @Test
+    void test_toTemplateEntitySpecification_throwsExceptionWhenNoMetadataIsProvided() {
+        assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> dbIntegration.toTemplateEntitySpecification(List.of()));
     }
 }

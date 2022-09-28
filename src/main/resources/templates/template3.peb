@@ -1,8 +1,0 @@
-==>
-  This is the third template
-
-  {% for i in range(1, 3) %}
-  Guten tag, {{name}}!!
-  {% endfor %}
-
-  {% if name == 'Jim-Bob' %}Howdy, fellow redneck!!{% endif %}

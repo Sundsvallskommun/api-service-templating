@@ -18,18 +18,10 @@ public class DatabaseLoader implements Loader<String> {
     }
 
     @Override
-    public Reader getReader(final String templateIdAndFlavor) {
-        var key = new TemplateKey(templateIdAndFlavor);
-
-        return dbIntegration.getTemplate(key.getTemplateId())
-            .map(template -> {
-                if (!template.getVariants().containsKey(key.getFlavor())) {
-                    throw new LoaderException(null, "Unable to find template variant '" + key.getFlavor() + "' for template '" + key.getTemplateId() + "'");
-                }
-
-                return new BufferedReader(new StringReader(template.getVariants().get(key.getFlavor())));
-            })
-            .orElseThrow(() -> new LoaderException(null, "Unable to find template '" + key.getTemplateId() + "'"));
+    public Reader getReader(final String identifier) {
+        return dbIntegration.getTemplate(identifier)
+            .map(template -> new BufferedReader(new StringReader(template.getContent())))
+            .orElseThrow(() -> new LoaderException(null, "Unable to find template '" + identifier + "'"));
     }
 
     @Override
@@ -49,21 +41,21 @@ public class DatabaseLoader implements Loader<String> {
 
     @Override
     public String resolveRelativePath(final String relativePath, final String anchorPath) {
-        // Calculate
+        /*// Calculate
         if (relativePath.indexOf(':') == -1) {
-            return relativePath + ":" + anchorPath.split(":")[1];
-        }
+            return relativePath + ":" + (anchorPath.indexOf(':') != -1 ? anchorPath.split(":")[1] : anchorPath);
+        }*/
 
         return relativePath;
     }
 
     @Override
-    public String createCacheKey(final String templateId) {
-        return templateId;
+    public String createCacheKey(final String identifier) {
+        return identifier;
     }
 
     @Override
-    public boolean resourceExists(final String templateId) {
-        return dbIntegration.templateExists(templateId);
+    public boolean resourceExists(final String identifier) {
+        return dbIntegration.getTemplate(identifier).isPresent();
     }
 }

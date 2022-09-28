@@ -1,21 +1,22 @@
 package se.sundsvall.templating.api.domain;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-/**
- * A template variant response.
- */
 @Getter
-@Setter
 @Builder(setterPrefix = "with")
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class TemplateVariantResponse {
+@Schema(description = "Template default value")
+public class DefaultValue {
 
-    private String content;
+    @Schema(description = "Field name")
+    private String fieldName;
+
+    @Schema(description = "Value")
+    private String value;
 }
