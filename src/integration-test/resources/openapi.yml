@@ -28,12 +28,6 @@ paths:
             type: string
           default: "{}"
       responses:
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
@@ -42,6 +36,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TemplateResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
     post:
       tags:
       - Template resources
@@ -54,6 +54,12 @@ paths:
               $ref: '#/components/schemas/TemplateRequest'
         required: true
       responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
         "400":
           description: Bad Request
           content:
@@ -66,12 +72,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TemplateResponse'
   /render:
     post:
       tags:
@@ -85,18 +85,18 @@ paths:
               $ref: '#/components/schemas/RenderRequest'
         required: true
       responses:
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RenderResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
   /render/pdf:
     post:
       tags:
@@ -110,18 +110,18 @@ paths:
               $ref: '#/components/schemas/RenderRequest'
         required: true
       responses:
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RenderResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
   /render/direct:
     post:
       tags:
@@ -135,18 +135,18 @@ paths:
               $ref: '#/components/schemas/DirectRenderRequest'
         required: true
       responses:
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DirectRenderResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
   /templates/{identifier}:
     get:
       tags:
@@ -160,12 +160,6 @@ paths:
         schema:
           type: string
       responses:
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
@@ -174,6 +168,12 @@ paths:
                 $ref: '#/components/schemas/DetailedTemplateResponse'
         "404":
           description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "500":
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -190,12 +190,6 @@ paths:
         schema:
           type: string
       responses:
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
@@ -204,6 +198,12 @@ paths:
                 $ref: '#/components/schemas/TemplateResponse'
         "404":
           description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "500":
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -230,6 +230,12 @@ paths:
                 value: '...'
         required: true
       responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
         "400":
           description: Bad Request
           content:
@@ -242,12 +248,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TemplateResponse'
   /api-docs:
     get:
       tags:
@@ -302,15 +302,34 @@ components:
           description: "Content, as a BASE64-encoded string"
         metadata:
           type: array
-          description: Metadata
           items:
             $ref: '#/components/schemas/Metadata'
         defaultValues:
           type: array
-          description: Default values
           items:
             $ref: '#/components/schemas/DefaultValue'
       description: Template request
+    TemplateResponse:
+      type: object
+      properties:
+        identifier:
+          type: string
+          description: Identifier
+        name:
+          type: string
+          description: Name
+        description:
+          type: string
+          description: Description
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metadata'
+        defaultValues:
+          type: array
+          items:
+            $ref: '#/components/schemas/DefaultValue'
+      description: Template
     Problem:
       type: object
       properties:
@@ -333,34 +352,11 @@ components:
     StatusType:
       type: object
       properties:
-        reasonPhrase:
-          type: string
         statusCode:
           type: integer
           format: int32
-    TemplateResponse:
-      type: object
-      properties:
-        identifier:
+        reasonPhrase:
           type: string
-          description: Identifier
-        name:
-          type: string
-          description: Name
-        description:
-          type: string
-          description: Description
-        metadata:
-          type: array
-          description: Metadata
-          items:
-            $ref: '#/components/schemas/Metadata'
-        defaultValues:
-          type: array
-          description: Default values
-          items:
-            $ref: '#/components/schemas/DefaultValue'
-      description: Template
     KeyValue:
       required:
       - key
@@ -372,7 +368,6 @@ components:
         value:
           type: string
       description: Template metadata
-      nullable: true
     RenderRequest:
       type: object
       properties:
@@ -382,8 +377,6 @@ components:
           nullable: true
         metadata:
           type: array
-          description: Template metadata
-          nullable: true
           items:
             $ref: '#/components/schemas/KeyValue'
         parameters:
@@ -438,12 +431,10 @@ components:
           description: Description
         metadata:
           type: array
-          description: Metadata
           items:
             $ref: '#/components/schemas/Metadata'
         defaultValues:
           type: array
-          description: Default values
           items:
             $ref: '#/components/schemas/DefaultValue'
         content:
