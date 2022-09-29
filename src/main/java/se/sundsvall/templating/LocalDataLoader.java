@@ -3,7 +3,6 @@ package se.sundsvall.templating;
 import static se.sundsvall.dept44.util.ResourceUtils.asString;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -13,8 +12,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 
 import se.sundsvall.templating.integration.db.DbIntegration;
-import se.sundsvall.templating.integration.db.entity.DefaultValueEntity;
+import se.sundsvall.templating.integration.db.TemplateRepository;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
+
 /*
  * To be removed - atm only exists for simplifying local development, populating initial data and stuff...
  */
@@ -23,24 +23,13 @@ class LocalDataLoader {
 
     @Bean
     @Profile("default")
-    CommandLineRunner testStuff1(final DbIntegration dbIntegration,
+    CommandLineRunner testStuff1(final TemplateRepository templateRepository,
+            final DbIntegration dbIntegration,
             @Value("classpath:/templates/logo.peb") final Resource logoTemplateResource,
             @Value("classpath:/templates/avslag.peb") final Resource avslagTemplateResource,
             @Value("classpath:/templates/bifall.peb") final Resource bifallTemplateResource) {
         return args -> {
-            var bifallTemplate = TemplateEntity.builder()
-                .withIdentifier("example.bifall")
-                .withName("P-tillstånd Bifall")
-                .withContent(asString(bifallTemplateResource, StandardCharsets.UTF_8))
-                .build();
-            dbIntegration.saveTemplate(bifallTemplate);
-
-            var avslagTemplate = TemplateEntity.builder()
-                .withIdentifier("example.avslag")
-                .withName("P-tillstånd Avslag")
-                .withContent(asString(avslagTemplateResource, StandardCharsets.UTF_8))
-                .build();
-            dbIntegration.saveTemplate(avslagTemplate);
+            templateRepository.deleteAll();
 
             var logo = TemplateEntity.builder()
                 .withIdentifier("common.resources.sundsvalls-kommun-logo")
@@ -48,6 +37,21 @@ class LocalDataLoader {
                 .withContent(asString(logoTemplateResource, StandardCharsets.UTF_8))
                 .build();
             dbIntegration.saveTemplate(logo);
+
+            var bifallTemplate = TemplateEntity.builder()
+                .withIdentifier("example.bifall")
+                .withName("P-tillstånd Bifall")
+                .withContent(asString(bifallTemplateResource, StandardCharsets.UTF_8))
+                .build();
+            dbIntegration.saveTemplate(bifallTemplate);
+
+/*
+            var avslagTemplate = TemplateEntity.builder()
+                .withIdentifier("example.avslag")
+                .withName("P-tillstånd Avslag")
+                .withContent(asString(avslagTemplateResource, StandardCharsets.UTF_8))
+                .build();
+            dbIntegration.saveTemplate(avslagTemplate);
 
             var test = TemplateEntity.builder()
                 .withIdentifier("test.default-values")
@@ -61,7 +65,7 @@ class LocalDataLoader {
                 ))
                 .build();
             dbIntegration.saveTemplate(test);
-
+*/
 
             /*
             var tmpl = TemplateEntity.builder()
@@ -144,7 +148,7 @@ class LocalDataLoader {
     }
 
     @Bean
-    @Profile("default")
+    @Profile("default2")
     CommandLineRunner testStuff2(final DbIntegration dbIntegration,
             @Value("classpath:/templates/test/template1.peb") final Resource templateResource1,
             @Value("classpath:/templates/test/template2.peb") final Resource templateResource2,

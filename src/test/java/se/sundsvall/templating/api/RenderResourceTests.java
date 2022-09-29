@@ -43,7 +43,7 @@ class RenderResourceTests {
     }
 
     @Test
-    void test_renderPdf() {
+    void test_renderAsPdf() {
         when(mockTemplatingService.renderTemplateAsPdf(any(RenderRequest.class))).thenReturn("someText");
 
         var result = resource.renderPdf(new RenderRequest());
@@ -65,5 +65,18 @@ class RenderResourceTests {
         assertThat(result.getBody().getOutput()).isEqualTo("someText");
 
         verify(mockTemplatingService, times(1)).renderDirect(any(DirectRenderRequest.class));
+    }
+    
+    @Test
+    void test_renderDirectAsPdf() {
+        when(mockTemplatingService.renderDirectAsPdf(any(DirectRenderRequest.class)))
+            .thenReturn("someText");
+
+        var result = resource.renderDirectPdf(new DirectRenderRequest());
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getBody()).isNotNull();
+        assertThat(result.getBody().getOutput()).isEqualTo("someText");
+
+        verify(mockTemplatingService, times(1)).renderDirectAsPdf(any(DirectRenderRequest.class));
     }
 }

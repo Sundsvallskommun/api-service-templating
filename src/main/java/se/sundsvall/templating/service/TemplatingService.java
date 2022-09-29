@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toMap;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
@@ -64,6 +65,25 @@ public class TemplatingService {
         return renderTemplateInternal(request, true);
     }
 
+    public String renderTemplateAsPdf(final RenderRequest request) {
+        var renderedTemplate = renderTemplateInternal(request, false);
+        var renderedPdf = renderHtmlAsPdf(renderedTemplate);
+
+        // Encode the output as BASE64
+        return BASE64.encode(renderedPdf);
+    }
+
+    public String renderDirect(final DirectRenderRequest request) {
+        return renderDirectInternal(request, true);
+    }
+
+    public String renderDirectAsPdf(final DirectRenderRequest request) {
+        var renderedTemplate = renderDirectInternal(request, false);
+        var renderedPdf = renderHtmlAsPdf(renderedTemplate);
+
+        return BASE64.encode(renderedPdf);
+    }
+
     String renderTemplateInternal(final RenderRequest request, final boolean base64EncodeOutput) {
         var template = Optional.ofNullable(request.getIdentifier())
             .map(dbIntegration::getTemplate)
@@ -86,7 +106,7 @@ public class TemplatingService {
         var mergedParametersAndDefaultValues = new TreeMap<>(
             templateProperties.isUseCaseInsensitiveKeys() ? String.CASE_INSENSITIVE_ORDER : null);
         mergedParametersAndDefaultValues.putAll(defaultValues);
-        mergedParametersAndDefaultValues.putAll(request.getParameters());
+        mergedParametersAndDefaultValues.putAll(Optional.ofNullable(request.getParameters()).orElse(Map.of()));
 
         try (var writer = new StringWriter()) {
             pebbleEngine.getTemplate(template.getIdentifier()).evaluate(writer, mergedParametersAndDefaultValues);
@@ -98,12 +118,24 @@ public class TemplatingService {
         }
     }
 
-    public String renderTemplateAsPdf(final RenderRequest request) {
-        var renderedTemplate = renderTemplateInternal(request, false);
+    String renderDirectInternal(final DirectRenderRequest request, final boolean base64EncodeOutput) {
+        try (var writer = new StringWriter()) {
+            pebbleEngine.getTemplate(DelegatingLoader.DIRECT_PREFIX + request.getContent())
+                .evaluate(writer, request.getParameters());
 
+            var output = writer.toString().substring(DelegatingLoader.DIRECT_PREFIX.length());
+
+            // Optionally encode the output as BASE64
+            return base64EncodeOutput ? BASE64.encode(output) : output;
+        } catch (Exception e) {
+            throw new TemplateException(e);
+        }
+    }
+
+    byte[] renderHtmlAsPdf(final String html) {
         var os = new ByteArrayOutputStream();
 
-        var document = Jsoup.parse(renderedTemplate, StandardCharsets.UTF_8.name());
+        var document = Jsoup.parse(html, StandardCharsets.UTF_8.name());
         document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
 
         iTextRenderer.setDocumentFromString(document.html());
@@ -111,22 +143,7 @@ public class TemplatingService {
         iTextRenderer.createPDF(os);
         iTextRenderer.finishPDF();
 
-        // Encode the output as BASE64
-        return BASE64.encode(os.toByteArray());
-    }
-
-    public String renderDirect(final DirectRenderRequest request) {
-        try (var writer = new StringWriter()) {
-            pebbleEngine.getTemplate(DelegatingLoader.DIRECT_PREFIX + request.getContent())
-                .evaluate(writer, request.getParameters());
-
-            var output = writer.toString().substring(DelegatingLoader.DIRECT_PREFIX.length());
-
-            // Encode the output as BASE64
-            return BASE64.encode(output);
-        } catch (Exception e) {
-            throw new TemplateException(e);
-        }
+        return os.toByteArray();
     }
 
     @Transactional(readOnly = true)

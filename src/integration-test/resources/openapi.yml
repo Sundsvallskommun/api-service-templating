@@ -54,8 +54,8 @@ paths:
               $ref: '#/components/schemas/TemplateRequest'
         required: true
       responses:
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -66,8 +66,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TemplateResponse'
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -85,18 +85,18 @@ paths:
               $ref: '#/components/schemas/RenderRequest'
         required: true
       responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RenderResponse'
         "500":
           description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenderResponse'
   /render/pdf:
     post:
       tags:
@@ -110,18 +110,18 @@ paths:
               $ref: '#/components/schemas/RenderRequest'
         required: true
       responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RenderResponse'
         "500":
           description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenderResponse'
   /render/direct:
     post:
       tags:
@@ -135,18 +135,43 @@ paths:
               $ref: '#/components/schemas/DirectRenderRequest'
         required: true
       responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DirectRenderResponse'
         "500":
           description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirectRenderResponse'
+  /render/direct/pdf:
+    post:
+      tags:
+      - Rendering resources
+      summary: "Render provided template contents as a PDF, optionally with parameters"
+      operationId: renderDirectPdf
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DirectRenderRequest'
+        required: true
+      responses:
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirectRenderResponse'
   /templates/{identifier}:
     get:
       tags:
@@ -160,6 +185,12 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
@@ -168,12 +199,6 @@ paths:
                 $ref: '#/components/schemas/DetailedTemplateResponse'
         "404":
           description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-        "500":
-          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -190,8 +215,8 @@ paths:
         schema:
           type: string
       responses:
-        "404":
-          description: Not Found
+        "500":
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -202,8 +227,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TemplateResponse'
-        "500":
-          description: Internal Server Error
+        "404":
+          description: Not Found
           content:
             application/json:
               schema:
@@ -230,8 +255,8 @@ paths:
                 value: '...'
         required: true
       responses:
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -242,8 +267,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TemplateResponse'
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -331,11 +356,11 @@ components:
     StatusType:
       type: object
       properties:
-        reasonPhrase:
-          type: string
         statusCode:
           type: integer
           format: int32
+        reasonPhrase:
+          type: string
     TemplateResponse:
       type: object
       properties:
