@@ -99,4 +99,22 @@ class RenderResource {
 
         return ResponseEntity.ok(response);
     }
+
+
+    @Operation(summary = "Render provided template contents as a PDF, optionally with parameters")
+    @ApiResponses({
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successful operation",
+            content = @Content(schema = @Schema(implementation = DirectRenderResponse.class))
+        )
+    })
+    @PostMapping("/direct/pdf")
+    ResponseEntity<DirectRenderResponse> renderDirectPdf(@Valid @RequestBody final DirectRenderRequest request) {
+        var response = DirectRenderResponse.builder()
+            .withOutput(templatingService.renderDirectAsPdf(request))
+            .build();
+
+        return ResponseEntity.ok(response);
+    }
 }

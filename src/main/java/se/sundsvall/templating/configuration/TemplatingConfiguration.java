@@ -43,6 +43,22 @@ class TemplatingConfiguration {
 
     @Bean
     PebbleEngine pebbleEngine(@Qualifier("pebble.delegating-loader") final DelegatingLoader loader) {
+        return new PebbleEngine.Builder()
+                .loader(loader)
+                .syntax(syntax())
+                .build();
+    }
+
+    @Bean("debug-pebble-engine")
+    PebbleEngine debugPebbleEngine(@Qualifier("pebble.delegating-loader") final DelegatingLoader loader) {
+        return new PebbleEngine.Builder()
+            .loader(loader)
+            .syntax(syntax())
+            .strictVariables(true)
+            .build();
+    }
+
+    Syntax syntax() {
         var syntaxBuilder = new Syntax.Builder()
             .setPrintOpenDelimiter(templateProperties.getDelimiters().getPrint().getOpen())
             .setPrintCloseDelimiter(templateProperties.getDelimiters().getPrint().getClose())
@@ -55,9 +71,6 @@ class TemplatingConfiguration {
         syntaxBuilder.setInterpolationOpenDelimiter(
             templateProperties.getDelimiters().getInterpolation().getOpen());
 
-        return new PebbleEngine.Builder()
-                .loader(loader)
-                .syntax(syntaxBuilder.build())
-                .build();
+        return syntaxBuilder.build();
     }
 }
