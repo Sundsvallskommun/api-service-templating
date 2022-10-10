@@ -22,6 +22,7 @@ import org.zalando.problem.ThrowableProblem;
 
 import se.sundsvall.templating.domain.KeyValue;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
+import se.sundsvall.templating.integration.db.entity.Version;
 
 @ExtendWith(MockitoExtension.class)
 class DbIntegrationTests {
@@ -49,13 +50,25 @@ class DbIntegrationTests {
 
     @Test
     void test_getTemplate() {
-        when(mockTemplateRepository.findByIdentifier(any(String.class)))
+        when(mockTemplateRepository.findLatestByIdentifier(any(String.class)))
             .thenReturn(Optional.of(TemplateEntity.builder().build()));
 
-        var optionalTemplate = dbIntegration.getTemplate("someTemplateId");
+        var optionalTemplate = dbIntegration.getTemplate("someTemplateId", null);
         assertThat(optionalTemplate).isPresent();
 
-        verify(mockTemplateRepository, times(1)).findByIdentifier(any(String.class));
+        verify(mockTemplateRepository, times(1)).findLatestByIdentifier(any(String.class));
+    }
+
+
+    @Test
+    void test_getTemplateForProvidedVersion() {
+        when(mockTemplateRepository.findByIdentifierAndVersion(any(String.class), any(Version.class)))
+            .thenReturn(Optional.of(TemplateEntity.builder().build()));
+
+        var optionalTemplate = dbIntegration.getTemplate("someTemplateId", "1.0");
+        assertThat(optionalTemplate).isPresent();
+
+        verify(mockTemplateRepository, times(1)).findByIdentifierAndVersion(any(String.class), any(Version.class));
     }
 
     @Test
@@ -105,10 +118,21 @@ class DbIntegrationTests {
     void test_deleteTemplate() {
         when(mockTemplateRepository.existsByIdentifier(any(String.class))).thenReturn(true);
 
-        dbIntegration.deleteTemplate("someTemplateId");
+        dbIntegration.deleteTemplate("someTemplateId", null);
 
         verify(mockTemplateRepository, times(1)).existsByIdentifier(any(String.class));
         verify(mockTemplateRepository, times(1)).deleteByIdentifier(any(String.class));
+    }
+
+
+    @Test
+    void test_deleteTemplateForProvidedVersion() {
+        when(mockTemplateRepository.existsByIdentifierAndVersion(any(String.class), any(Version.class))).thenReturn(true);
+
+        dbIntegration.deleteTemplate("someTemplateId", "1.0");
+
+        verify(mockTemplateRepository, times(1)).existsByIdentifierAndVersion(any(String.class), any(Version.class));
+        verify(mockTemplateRepository, times(1)).deleteByIdentifierAndVersion(any(String.class), any(Version.class));
     }
 
     @Test
@@ -116,7 +140,16 @@ class DbIntegrationTests {
         when(mockTemplateRepository.existsByIdentifier(any(String.class))).thenReturn(false);
 
         assertThatExceptionOfType(ThrowableProblem.class)
-            .isThrownBy(() -> dbIntegration.deleteTemplate("someTemplateId"));
+            .isThrownBy(() -> dbIntegration.deleteTemplate("someTemplateId", null));
+    }
+
+
+    @Test
+    void test_deleteTemplate_whenTemplateDoesNotExistForProvidedVersion() {
+        when(mockTemplateRepository.existsByIdentifierAndVersion(any(String.class), any(Version.class))).thenReturn(false);
+
+        assertThatExceptionOfType(ThrowableProblem.class)
+            .isThrownBy(() -> dbIntegration.deleteTemplate("someTemplateId", "1.0"));
     }
 
     @Test

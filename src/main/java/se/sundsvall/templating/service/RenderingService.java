@@ -5,59 +5,41 @@ import static java.util.stream.Collectors.toMap;
 
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jsonpatch.JsonPatch;
-import com.github.fge.jsonpatch.JsonPatchException;
 import com.mitchellbosecke.pebble.PebbleEngine;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
-import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
 import se.sundsvall.templating.api.domain.DirectRenderRequest;
 import se.sundsvall.templating.api.domain.RenderRequest;
-import se.sundsvall.templating.api.domain.TemplateRequest;
-import se.sundsvall.templating.api.domain.TemplateResponse;
 import se.sundsvall.templating.configuration.properties.TemplateProperties;
-import se.sundsvall.templating.domain.KeyValue;
 import se.sundsvall.templating.exception.TemplateException;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.entity.DefaultValueEntity;
-import se.sundsvall.templating.integration.db.entity.TemplateEntity;
-import se.sundsvall.templating.service.mapper.TemplatingServiceMapper;
-import se.sundsvall.templating.service.pebble.DelegatingLoader;
+import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
 import se.sundsvall.templating.util.BASE64;
 
 @Service
-public class TemplatingService {
+public class RenderingService {
 
-    private final ObjectMapper objectMapper;
     private final PebbleEngine pebbleEngine;
     private final ITextRenderer iTextRenderer;
     private final TemplateProperties templateProperties;
-    private final TemplatingServiceMapper templatingServiceMapper;
     private final DbIntegration dbIntegration;
 
-    public TemplatingService(final ObjectMapper objectMapper, final PebbleEngine pebbleEngine,
-            final ITextRenderer iTextRenderer, final TemplateProperties templateProperties,
-            final TemplatingServiceMapper templatingServiceMapper, final DbIntegration dbIntegration) {
-        this.objectMapper = objectMapper;
+    public RenderingService(final PebbleEngine pebbleEngine, final ITextRenderer iTextRenderer,
+            final TemplateProperties templateProperties, final DbIntegration dbIntegration) {
         this.pebbleEngine = pebbleEngine;
         this.iTextRenderer = iTextRenderer;
         this.templateProperties = templateProperties;
-        this.templatingServiceMapper = templatingServiceMapper;
         this.dbIntegration = dbIntegration;
     }
 
@@ -86,7 +68,7 @@ public class TemplatingService {
 
     String renderTemplateInternal(final RenderRequest request, final boolean base64EncodeOutput) {
         var template = Optional.ofNullable(request.getIdentifier())
-            .map(dbIntegration::getTemplate)
+            .map(identifier -> dbIntegration.getTemplate(identifier, request.getVersion()))
             .orElseGet(() -> dbIntegration.findTemplate(request.getMetadata()))
             .orElseThrow(() -> {
                 var message = Optional.ofNullable(request.getIdentifier())
@@ -144,52 +126,5 @@ public class TemplatingService {
         iTextRenderer.finishPDF();
 
         return os.toByteArray();
-    }
-
-    @Transactional(readOnly = true)
-    public List<TemplateResponse> getAllTemplates(final List<KeyValue> metadata) {
-        if (metadata == null || metadata.isEmpty()) {
-            return dbIntegration.getAllTemplates().stream()
-                .map(templatingServiceMapper::toTemplateResponse)
-                .toList();
-        } else {
-            return dbIntegration.findTemplates(metadata).stream()
-                .map(templatingServiceMapper::toTemplateResponse)
-                .toList();
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<DetailedTemplateResponse> getTemplate(final String identifier) {
-        return dbIntegration.getTemplate(identifier)
-            .map(templatingServiceMapper::toDetailedTemplateResponse);
-    }
-
-    public TemplateResponse saveTemplate(final TemplateRequest templateRequest) {
-        return templatingServiceMapper.toTemplateResponse(
-            dbIntegration.saveTemplate(
-                templatingServiceMapper.toTemplateEntity(templateRequest)));
-    }
-
-    public TemplateResponse updateTemplate(final String identifier, final JsonPatch jsonPatch) {
-        return dbIntegration.getTemplate(identifier)
-            .map(templateEntity -> applyPatch(jsonPatch, TemplateEntity.class, templateEntity))
-            .map(dbIntegration::saveTemplate)
-            .map(templatingServiceMapper::toTemplateResponse)
-            .orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "Unable to find template with identifier '" + identifier + "'"));
-    }
-
-    public void deleteTemplate(final String identifier) {
-        dbIntegration.deleteTemplate(identifier);
-    }
-
-    <T> T applyPatch(final JsonPatch patch, final Class<T> targetClass, final T target) {
-        try {
-            var patched = patch.apply(objectMapper.convertValue(target, JsonNode.class));
-
-            return objectMapper.treeToValue(patched, targetClass);
-        } catch (JsonPatchException | JsonProcessingException e) {
-            throw new IllegalStateException("Unable to patch template entity", e);
-        }
     }
 }

@@ -7,20 +7,16 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
-@Builder(setterPrefix = "with")
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "templates_default_values")
+@Getter
+@Setter
+@NoArgsConstructor
 public class DefaultValueEntity {
 
     @Id
@@ -32,4 +28,13 @@ public class DefaultValueEntity {
 
     @Column(name = "`value`", nullable = false)
     private String value;
+
+    /*
+     * Custom @Builder-annotated constructor to exclude id from builder.
+     */
+    @Builder(setterPrefix = "with")
+    DefaultValueEntity(final String fieldName, final String value) {
+        this.fieldName = fieldName;
+        this.value = value;
+    }
 }

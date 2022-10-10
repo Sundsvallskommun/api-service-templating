@@ -1,0 +1,2 @@
+GET http://localhost:8080/api-docs.yaml
+Accept: application/vnd.oai.openapi;charset=UTF-8
