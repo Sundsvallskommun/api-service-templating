@@ -5,6 +5,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
+import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
+
 import lombok.Getter;
 
 @Getter
@@ -16,13 +18,18 @@ public class IdentifierAndVersion {
     private final String version;
 
     public IdentifierAndVersion(final String identiferAndVersion) {
-        var matcher = PATTERN.matcher(identiferAndVersion);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("Unable to parse identifier and/or version");
-        }
+        if (identiferAndVersion.startsWith(DelegatingLoader.DIRECT_PREFIX)) {
+            identifier = identiferAndVersion;
+            version = DelegatingLoader.DIRECT_PREFIX + "NOVERSION";
+        } else {
+            var matcher = PATTERN.matcher(identiferAndVersion);
+            if (!matcher.matches()) {
+                throw new IllegalArgumentException("Unable to parse identifier and/or version");
+            }
 
-        identifier = matcher.group(1);
-        version = matcher.group(4);
+            identifier = matcher.group(1);
+            version = matcher.group(4);
+        }
     }
 
     @Override
