@@ -18,6 +18,7 @@ import se.sundsvall.templating.integration.db.TemplateRepository;
 import se.sundsvall.templating.integration.db.entity.DefaultValueEntity;
 import se.sundsvall.templating.integration.db.entity.MetadataEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
+import se.sundsvall.templating.util.BASE64;
 
 /*
  * To be removed - atm only exists for simplifying local development, populating initial data and stuff...
@@ -38,14 +39,14 @@ class LocalDataLoader {
             var logo = TemplateEntity.builder()
                 .withIdentifier("common.resources.sundsvalls-kommun-logo")
                 .withName("Sundsvalls Kommun Logo")
-                .withContent(asString(logoTemplateResource, StandardCharsets.UTF_8))
+                .withContent(BASE64.encode(asString(logoTemplateResource, StandardCharsets.UTF_8)))
                 .build();
             dbIntegration.saveTemplate(logo);
 
             var bifallTemplate = TemplateEntity.builder()
                 .withIdentifier("example.bifall")
                 .withName("P-tillstånd Bifall")
-                .withContent(asString(bifallTemplateResource, StandardCharsets.UTF_8))
+                .withContent(BASE64.encode(asString(bifallTemplateResource, StandardCharsets.UTF_8)))
                 .build();
             dbIntegration.saveTemplate(bifallTemplate);
 
@@ -75,7 +76,7 @@ class LocalDataLoader {
                 .withIdentifier("some.random.identifier")
                 .withName("Some template")
                 .withDescription("Template description goes here...")
-                .withContent("someContent...")
+                .withContent(BASE64.encode("someContent..."))
                 .withMetadata(List.of(
                     MetadataEntity.builder()
                         .withKey("verksamhet")
