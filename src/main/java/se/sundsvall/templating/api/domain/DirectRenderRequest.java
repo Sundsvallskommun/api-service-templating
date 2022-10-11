@@ -14,7 +14,7 @@ import lombok.Setter;
 public class DirectRenderRequest {
 
     @NotBlank
-    @Schema(description = "The template content")
+    @Schema(description = "The template content, as a BASE64-encoded string")
     private String content;
 
     @Schema(description = "Parameters", nullable = true, example = OpenApiExamples.PARAMETERS)

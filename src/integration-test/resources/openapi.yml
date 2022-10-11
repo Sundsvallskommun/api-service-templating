@@ -602,7 +602,7 @@ components:
       properties:
         content:
           type: string
-          description: The template content
+          description: The template content, as a BASE64-encoded string
         parameters:
           type: object
           additionalProperties:
