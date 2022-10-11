@@ -11,6 +11,7 @@ import lombok.Setter;
 public class TemplateProperties {
 
     private boolean useCaseInsensitiveKeys = true;
+    private boolean autoEscape = false;
     private Delimiters delimiters = new Delimiters();
 
     @Getter

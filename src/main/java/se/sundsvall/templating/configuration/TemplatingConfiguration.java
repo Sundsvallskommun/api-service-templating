@@ -44,9 +44,10 @@ class TemplatingConfiguration {
     @Bean
     PebbleEngine pebbleEngine(@Qualifier("pebble.delegating-loader") final DelegatingLoader loader) {
         return new PebbleEngine.Builder()
-                .loader(loader)
-                .syntax(syntax())
-                .build();
+            .loader(loader)
+            .syntax(syntax())
+            .autoEscaping(templateProperties.isAutoEscape())
+            .build();
     }
 
     @Bean("debug-pebble-engine")
@@ -54,6 +55,7 @@ class TemplatingConfiguration {
         return new PebbleEngine.Builder()
             .loader(loader)
             .syntax(syntax())
+            .autoEscaping(templateProperties.isAutoEscape())
             .strictVariables(true)
             .build();
     }
