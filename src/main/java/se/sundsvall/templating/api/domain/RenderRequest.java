@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import se.sundsvall.templating.api.domain.validation.ValidRenderRequest;
+import se.sundsvall.templating.api.domain.validation.ValidTemplateVersion;
 import se.sundsvall.templating.domain.KeyValue;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -29,9 +30,13 @@ public class RenderRequest {
     @Schema(description = "Template identifier", nullable = true)
     private String identifier;
 
+    @ValidTemplateVersion
+    @Schema(description = "Template version", nullable = true)
+    private String version;
+
     @ArraySchema(schema = @Schema(description = "Template metadata"))
     private List<@Valid KeyValue> metadata;
 
-    @Schema(description = "Parameters", nullable = true)
+    @Schema(description = "Parameters", nullable = true, example = OpenApiExamples.PARAMETERS)
     private Map<String, Object> parameters;
 }

@@ -1,11 +1,13 @@
-package se.sundsvall.templating.service.pebble;
+package se.sundsvall.templating.service.pebble.loader;
 
 import java.io.Reader;
 
 import com.mitchellbosecke.pebble.loader.Loader;
 import com.mitchellbosecke.pebble.loader.StringLoader;
 
-public class DelegatingLoader implements Loader<String> {
+import se.sundsvall.templating.service.pebble.IdentifierAndVersion;
+
+public class DelegatingLoader implements Loader<IdentifierAndVersion> {
 
     public static final String DIRECT_PREFIX = "DIRECT:";
 
@@ -19,9 +21,9 @@ public class DelegatingLoader implements Loader<String> {
     }
 
     @Override
-    public Reader getReader(final String identifier) {
-        if (identifier.startsWith(DIRECT_PREFIX)) {
-            return stringLoader.getReader(identifier);
+    public Reader getReader(final IdentifierAndVersion identifier) {
+        if (identifier.getIdentifier().startsWith(DIRECT_PREFIX)) {
+            return stringLoader.getReader(identifier.getIdentifier());
         }
 
         return databaseLoader.getReader(identifier);
@@ -52,8 +54,8 @@ public class DelegatingLoader implements Loader<String> {
     }
 
     @Override
-    public String createCacheKey(final String identifier) {
-        return identifier;
+    public IdentifierAndVersion createCacheKey(final String identifier) {
+        return new IdentifierAndVersion(identifier);
     }
 
     @Override

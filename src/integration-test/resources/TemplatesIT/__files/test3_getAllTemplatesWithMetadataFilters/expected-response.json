@@ -1,0 +1,30 @@
+[
+  {
+    "identifier": "second.template",
+    "version": "1.0",
+    "name": "Second template",
+    "description": "Some description",
+    "metadata": [
+      {
+        "key": "process",
+        "value": "PRH"
+      },
+      {
+        "key": "verksamhet",
+        "value": "SBK"
+      }
+    ],
+    "defaultValues": [
+      {
+        "fieldName": "first_name",
+        "value": "Bobby"
+      },
+      {
+        "fieldName": "last_name",
+        "value": "Brun"
+      }
+    ],
+    "changeLog": "Initial version",
+    "lastModifiedAt": "${json-unit.ignore}"
+  }
+]

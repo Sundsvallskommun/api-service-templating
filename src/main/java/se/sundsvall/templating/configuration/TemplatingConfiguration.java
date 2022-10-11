@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import se.sundsvall.templating.configuration.properties.RenderingProperties;
 import se.sundsvall.templating.configuration.properties.TemplateProperties;
 import se.sundsvall.templating.integration.db.DbIntegration;
-import se.sundsvall.templating.service.pebble.DatabaseLoader;
-import se.sundsvall.templating.service.pebble.DelegatingLoader;
+import se.sundsvall.templating.service.pebble.loader.DatabaseLoader;
+import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
 
 @Configuration
 @EnableConfigurationProperties({TemplateProperties.class, RenderingProperties.class})

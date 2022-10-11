@@ -17,7 +17,7 @@ import se.sundsvall.templating.integration.db.entity.MetadataEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 
 @Component
-public class TemplatingServiceMapper {
+public class TemplateMapper {
 
     public TemplateEntity toTemplateEntity(final TemplateRequest templateRequest) {
         if (templateRequest == null) {
@@ -29,6 +29,7 @@ public class TemplatingServiceMapper {
             .withName(templateRequest.getName())
             .withDescription(templateRequest.getDescription())
             .withContent(templateRequest.getContent())
+            .withChangeLog(templateRequest.getChangeLog())
             .withMetadata(Optional.ofNullable(templateRequest.getMetadata()).orElse(List.of()).stream()
                 .map(metadata -> MetadataEntity.builder()
                     .withKey(metadata.getKey())
@@ -51,6 +52,7 @@ public class TemplatingServiceMapper {
 
         return TemplateResponse.builder()
             .withIdentifier(templateEntity.getIdentifier())
+            .withVersion(templateEntity.getVersion().toString())
             .withName(templateEntity.getName())
             .withDescription(templateEntity.getDescription())
             .withMetadata(templateEntity.getMetadata().stream()
@@ -65,6 +67,8 @@ public class TemplatingServiceMapper {
                     .withValue(templateEntityDefaultValue.getValue())
                     .build())
                 .toList())
+            .withChangeLog(templateEntity.getChangeLog())
+            .withLastModifiedAt(templateEntity.getLastModifiedAt())
             .build();
     }
 
@@ -75,6 +79,7 @@ public class TemplatingServiceMapper {
 
         return DetailedTemplateResponse.builder()
             .withIdentifier(templateEntity.getIdentifier())
+            .withVersion(templateEntity.getVersion().toString())
             .withName(templateEntity.getName())
             .withDescription(templateEntity.getDescription())
             .withMetadata(templateEntity.getMetadata().stream()
@@ -90,6 +95,8 @@ public class TemplatingServiceMapper {
                     .build())
                 .toList())
             .withContent(templateEntity.getContent())
+            .withChangeLog(templateEntity.getChangeLog())
+            .withLastModifiedAt(templateEntity.getLastModifiedAt())
             .build();
     }
 }
