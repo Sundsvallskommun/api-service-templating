@@ -9,6 +9,7 @@ import com.mitchellbosecke.pebble.loader.Loader;
 
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.service.pebble.IdentifierAndVersion;
+import se.sundsvall.templating.util.BASE64;
 
 public class DatabaseLoader implements Loader<IdentifierAndVersion> {
 
@@ -21,7 +22,7 @@ public class DatabaseLoader implements Loader<IdentifierAndVersion> {
     @Override
     public Reader getReader(final IdentifierAndVersion identifierAndVersion) {
         return dbIntegration.getTemplate(identifierAndVersion.getIdentifier(), identifierAndVersion.getVersion())
-            .map(template -> new BufferedReader(new StringReader(template.getContent())))
+            .map(template -> new BufferedReader(new StringReader(BASE64.decode(template.getContent()))))
             .orElseThrow(() -> new LoaderException(null, "Unable to find template '" + identifierAndVersion + "'"));
     }
 
