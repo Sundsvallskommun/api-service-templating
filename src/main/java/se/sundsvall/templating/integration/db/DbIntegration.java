@@ -13,6 +13,7 @@ import org.zalando.problem.Status;
 
 import se.sundsvall.templating.domain.KeyValue;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
+import se.sundsvall.templating.integration.db.entity.Version;
 import se.sundsvall.templating.integration.db.spec.Specifications;
 
 @Component
@@ -31,8 +32,11 @@ public class DbIntegration {
     }
 
     @Transactional(readOnly = true)
-    public Optional<TemplateEntity> getTemplate(final String identifier) {
-        return templateRepository.findByIdentifier(identifier);
+    public Optional<TemplateEntity> getTemplate(final String identifier, final String version) {
+        return Optional.ofNullable(version)
+            .map(Version::parse)
+            .map(parsedVersion -> templateRepository.findByIdentifierAndVersion(identifier, parsedVersion))
+            .orElseGet(() -> templateRepository.findLatestByIdentifier(identifier));
     }
 
     @Transactional(readOnly = true)
@@ -42,6 +46,12 @@ public class DbIntegration {
         } catch (IncorrectResultSizeDataAccessException e) {
             throw Problem.valueOf(Status.NOT_FOUND, "Metadata query resulted in multiple matching templates");
         }
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<TemplateEntity> findTemplates(final Specification<TemplateEntity> filter) {
+        return templateRepository.findAll(filter);
     }
 
     @Transactional(readOnly = true)
@@ -69,11 +79,26 @@ public class DbIntegration {
         return templateRepository.save(templateEntity);
     }
 
-    public void deleteTemplate(final String identifier) {
-        if (!templateRepository.existsByIdentifier(identifier)) {
-            throw Problem.valueOf(Status.NOT_FOUND, "Unable to find template with identifier '" + identifier + "'");
-        }
+    public boolean existsByIdentifier(final String identifier) {
+        return templateRepository.existsByIdentifier(identifier);
+    }
 
-        templateRepository.deleteByIdentifier(identifier);
+
+    public void deleteTemplate(final String identifier, final String version) {
+        Optional.ofNullable(version)
+            .map(Version::parse)
+            .ifPresentOrElse(parsedVersion -> {
+                if (!templateRepository.existsByIdentifierAndVersion(identifier, parsedVersion)) {
+                    throw Problem.valueOf(Status.NOT_FOUND, "Unable to find template '" + identifier + ":" + parsedVersion + "'");
+                }
+
+                templateRepository.deleteByIdentifierAndVersion(identifier, parsedVersion);
+            }, () -> {
+                if (!templateRepository.existsByIdentifier(identifier)) {
+                    throw Problem.valueOf(Status.NOT_FOUND, "Unable to find template '" + identifier + "'");
+                }
+
+                templateRepository.deleteByIdentifier(identifier);
+            });
     }
 }

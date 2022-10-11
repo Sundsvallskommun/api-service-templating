@@ -15,12 +15,13 @@ paths:
     get:
       tags:
       - Template resources
-      summary: Get all available templates
+      summary: "Get all available templates, content excluded"
       operationId: getAllTemplates
       parameters:
       - name: filters
         in: query
-        description: Metadata filters (dictionary/map/key-value)
+        description: "Metadata filters (dictionary/map: <code>{ \"key\": \"value\"\
+          , ... }</code> ). Not required"
         required: false
         schema:
           type: object
@@ -28,12 +29,6 @@ paths:
             type: string
           default: "{}"
       responses:
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
@@ -42,6 +37,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TemplateResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
     post:
       tags:
       - Template resources
@@ -54,8 +55,8 @@ paths:
               $ref: '#/components/schemas/TemplateRequest'
         required: true
       responses:
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -66,8 +67,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TemplateResponse'
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /templates/search:
+    post:
+      tags:
+      - Template resources
+      summary: "Search available templates by metadata, content excluded"
+      operationId: searchTemplates
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Expression'
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TemplateResponse'
+        "500":
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -77,6 +105,8 @@ paths:
       tags:
       - Rendering resources
       summary: "Render a stored template, optionally with parameters"
+      description: Either 'identifier' or 'metadata' is required to identify the template
+        to render
       operationId: render
       requestBody:
         content:
@@ -85,18 +115,24 @@ paths:
               $ref: '#/components/schemas/RenderRequest'
         required: true
       responses:
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RenderResponse'
+        "404":
+          description: Not Found - the template could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenderResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
   /render/pdf:
     post:
       tags:
@@ -110,18 +146,24 @@ paths:
               $ref: '#/components/schemas/RenderRequest'
         required: true
       responses:
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RenderResponse'
+        "404":
+          description: Not Found - the template could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenderResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
   /render/direct:
     post:
       tags:
@@ -135,18 +177,18 @@ paths:
               $ref: '#/components/schemas/DirectRenderRequest'
         required: true
       responses:
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DirectRenderResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
   /render/direct/pdf:
     post:
       tags:
@@ -160,31 +202,42 @@ paths:
               $ref: '#/components/schemas/DirectRenderRequest'
         required: true
       responses:
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DirectRenderResponse'
-  /templates/{identifier}:
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /templates/{identifier}/{version}:
     get:
       tags:
       - Template resources
-      summary: "Get a template by identifier, including content"
-      operationId: getTemplate
+      summary: "Get a specific version of a template by identifier, including content"
+      operationId: getTemplate_1
       parameters:
       - name: identifier
         in: path
         required: true
         schema:
           type: string
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         "500":
           description: Internal Server Error
           content:
@@ -197,26 +250,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DetailedTemplateResponse'
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Problem'
     delete:
       tags:
       - Template resources
-      summary: Delete a template
-      operationId: deleteTemplate
+      summary: Delete a specific version of a template
+      operationId: deleteTemplate_1
       parameters:
       - name: identifier
         in: path
         required: true
         schema:
           type: string
+      - name: version
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "500":
-          description: Internal Server Error
+        "404":
+          description: Not Found
           content:
             application/json:
               schema:
@@ -227,8 +279,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TemplateResponse'
-        "404":
-          description: Not Found
+        "500":
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -236,10 +288,15 @@ paths:
     patch:
       tags:
       - Template resources
-      summary: Update a template
+      summary: Update (specific version of) a template
       operationId: updateTemplate
       parameters:
       - name: identifier
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: version
         in: path
         required: true
         schema:
@@ -255,6 +312,49 @@ paths:
                 value: '...'
         required: true
       responses:
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /templates/{identifier}:
+    get:
+      tags:
+      - Template resources
+      summary: "Get the latest version of a template by identifier, including content"
+      operationId: getTemplate
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         "500":
           description: Internal Server Error
           content:
@@ -266,9 +366,33 @@ paths:
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/DetailedTemplateResponse'
+    delete:
+      tags:
+      - Template resources
+      summary: "Delete a template, including all its versions"
+      operationId: deleteTemplate
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
                 $ref: '#/components/schemas/TemplateResponse'
-        "400":
-          description: Bad Request
+        "500":
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -301,6 +425,12 @@ components:
           type: string
           description: Value
       description: Template default value
+    IncrementMode:
+      type: string
+      description: Version increment mode
+      enum:
+      - MAJOR
+      - MINOR
     Metadata:
       type: object
       properties:
@@ -310,11 +440,17 @@ components:
           type: string
       description: Metadata
     TemplateRequest:
+      required:
+      - content
+      - identifier
+      - name
       type: object
       properties:
         identifier:
           type: string
           description: "Identifier. May contain letters, digits, dashes and dots"
+        versionIncrement:
+          $ref: '#/components/schemas/IncrementMode'
         name:
           type: string
           description: Name
@@ -333,6 +469,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DefaultValue'
+        changeLog:
+          type: string
+          description: A changelog
       description: Template request
     Problem:
       type: object
@@ -347,26 +486,29 @@ components:
           type: object
           additionalProperties:
             type: object
-        status:
-          $ref: '#/components/schemas/StatusType'
         title:
           type: string
         detail:
           type: string
+        status:
+          $ref: '#/components/schemas/StatusType'
     StatusType:
       type: object
       properties:
+        reasonPhrase:
+          type: string
         statusCode:
           type: integer
           format: int32
-        reasonPhrase:
-          type: string
     TemplateResponse:
       type: object
       properties:
         identifier:
           type: string
           description: Identifier
+        version:
+          type: string
+          description: Version
         name:
           type: string
           description: Name
@@ -381,7 +523,23 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DefaultValue'
+        changeLog:
+          type: string
+          description: Changelog
+        lastModifiedAt:
+          type: string
+          description: Last modification timestamp
+          format: date-time
       description: Template
+    Expression:
+      type: object
+      description: Search filter expression
+      example:
+        or:
+        - eq:
+            process: PRH
+        - eq:
+            verksamhet: SBK
     KeyValue:
       required:
       - key
@@ -400,6 +558,10 @@ components:
           type: string
           description: Template identifier
           nullable: true
+        version:
+          type: string
+          description: Template version
+          nullable: true
         metadata:
           type: array
           items:
@@ -410,8 +572,22 @@ components:
             type: object
             description: Parameters
             nullable: true
+            example:
+              someKey: someValue
+              otherKey:
+              - otherValue1
+              - otherValue2
+              anotherKey:
+                someKey: someValue
           description: Parameters
           nullable: true
+          example:
+            someKey: someValue
+            otherKey:
+            - otherValue1
+            - otherValue2
+            anotherKey:
+              someKey: someValue
       description: Request to render a template
     RenderResponse:
       type: object
@@ -433,8 +609,22 @@ components:
             type: object
             description: Parameters
             nullable: true
+            example:
+              someKey: someValue
+              otherKey:
+              - otherValue1
+              - otherValue2
+              anotherKey:
+                someKey: someValue
           description: Parameters
           nullable: true
+          example:
+            someKey: someValue
+            otherKey:
+            - otherValue1
+            - otherValue2
+            anotherKey:
+              someKey: someValue
       description: Request to render a template directly
     DirectRenderResponse:
       type: object
@@ -448,6 +638,9 @@ components:
         identifier:
           type: string
           description: Identifier
+        version:
+          type: string
+          description: Version
         name:
           type: string
           description: Name
@@ -462,6 +655,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DefaultValue'
+        changeLog:
+          type: string
+          description: Changelog
+        lastModifiedAt:
+          type: string
+          description: Last modification timestamp
+          format: date-time
         content:
           type: string
           description: "Content, as a BASE64-encoded string"

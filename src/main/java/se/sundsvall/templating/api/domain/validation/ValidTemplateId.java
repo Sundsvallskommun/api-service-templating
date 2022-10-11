@@ -17,7 +17,7 @@ public @interface ValidTemplateId {
 
     String PATTERN = "[A-Za-z\\d\\-\\.]+$";
 
-    String message() default "may only contain letters, digits, dashes and dots";
+    String message() default "must be set and may only contain letters, digits, dashes and dots";
 
     Class<?>[] groups() default { };
 

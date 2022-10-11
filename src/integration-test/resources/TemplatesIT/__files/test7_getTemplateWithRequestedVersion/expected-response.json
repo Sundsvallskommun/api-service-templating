@@ -1,0 +1,11 @@
+{
+  "identifier": "third.template",
+  "version": "1.0",
+  "name": "Third template",
+  "description": "Some description",
+  "metadata": [],
+  "defaultValues": [],
+  "changeLog": "Initial version",
+  "lastModifiedAt": "${json-unit.ignore}",
+  "content": "amEgamEga8OkcmEgYmFybg=="
+}

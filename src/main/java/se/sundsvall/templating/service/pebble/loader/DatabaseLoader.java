@@ -1,4 +1,4 @@
-package se.sundsvall.templating.service.pebble;
+package se.sundsvall.templating.service.pebble.loader;
 
 import java.io.BufferedReader;
 import java.io.Reader;
@@ -8,8 +8,9 @@ import com.mitchellbosecke.pebble.error.LoaderException;
 import com.mitchellbosecke.pebble.loader.Loader;
 
 import se.sundsvall.templating.integration.db.DbIntegration;
+import se.sundsvall.templating.service.pebble.IdentifierAndVersion;
 
-public class DatabaseLoader implements Loader<String> {
+public class DatabaseLoader implements Loader<IdentifierAndVersion> {
 
     private final DbIntegration dbIntegration;
 
@@ -18,10 +19,10 @@ public class DatabaseLoader implements Loader<String> {
     }
 
     @Override
-    public Reader getReader(final String identifier) {
-        return dbIntegration.getTemplate(identifier)
+    public Reader getReader(final IdentifierAndVersion identifierAndVersion) {
+        return dbIntegration.getTemplate(identifierAndVersion.getIdentifier(), identifierAndVersion.getVersion())
             .map(template -> new BufferedReader(new StringReader(template.getContent())))
-            .orElseThrow(() -> new LoaderException(null, "Unable to find template '" + identifier + "'"));
+            .orElseThrow(() -> new LoaderException(null, "Unable to find template '" + identifierAndVersion + "'"));
     }
 
     @Override
@@ -50,12 +51,14 @@ public class DatabaseLoader implements Loader<String> {
     }
 
     @Override
-    public String createCacheKey(final String identifier) {
-        return identifier;
+    public IdentifierAndVersion createCacheKey(final String identifierAndVersion) {
+        return new IdentifierAndVersion(identifierAndVersion);
     }
 
     @Override
-    public boolean resourceExists(final String identifier) {
-        return dbIntegration.getTemplate(identifier).isPresent();
+    public boolean resourceExists(final String identifierAndVersion) {
+        var parsedIdentifierAndVersion = new IdentifierAndVersion(identifierAndVersion);
+
+        return dbIntegration.getTemplate(parsedIdentifierAndVersion.getIdentifier(), parsedIdentifierAndVersion.getVersion()).isPresent();
     }
 }

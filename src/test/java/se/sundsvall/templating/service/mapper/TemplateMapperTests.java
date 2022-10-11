@@ -15,9 +15,9 @@ import se.sundsvall.templating.integration.db.entity.MetadataEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.util.BASE64;
 
-class TemplatingServiceMapperTests {
+class TemplateMapperTests {
 
-    private final TemplatingServiceMapper mapper = new TemplatingServiceMapper();
+    private final TemplateMapper mapper = new TemplateMapper();
 
     @Test
     void test_toTemplateEntity() {

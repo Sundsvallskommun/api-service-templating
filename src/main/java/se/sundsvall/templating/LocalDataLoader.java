@@ -3,6 +3,8 @@ package se.sundsvall.templating;
 import static se.sundsvall.dept44.util.ResourceUtils.asString;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -13,6 +15,8 @@ import org.springframework.core.io.Resource;
 
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.TemplateRepository;
+import se.sundsvall.templating.integration.db.entity.DefaultValueEntity;
+import se.sundsvall.templating.integration.db.entity.MetadataEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 
 /*
@@ -67,7 +71,6 @@ class LocalDataLoader {
             dbIntegration.saveTemplate(test);
 */
 
-            /*
             var tmpl = TemplateEntity.builder()
                 .withIdentifier("some.random.identifier")
                 .withName("Some template")
@@ -95,6 +98,9 @@ class LocalDataLoader {
                 ))
                 .build();
 
+            dbIntegration.saveTemplate(tmpl);
+
+/*
             var tmpl2 = TemplateEntity.builder()
                 .withIdentifier("some.other.random.identifier")
                 .withName("Some other template")

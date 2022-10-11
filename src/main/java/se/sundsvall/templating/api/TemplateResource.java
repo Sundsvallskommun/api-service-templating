@@ -22,11 +22,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.zalando.problem.Problem;
 
 import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
+import se.sundsvall.templating.api.domain.OpenApiExamples;
 import se.sundsvall.templating.api.domain.TemplateRequest;
 import se.sundsvall.templating.api.domain.TemplateResponse;
+import se.sundsvall.templating.api.domain.filter.MetadataFilterSpecifications;
+import se.sundsvall.templating.api.domain.filter.expression.Expression;
 import se.sundsvall.templating.api.domain.validation.ValidTemplateId;
+import se.sundsvall.templating.api.domain.validation.ValidTemplateVersion;
 import se.sundsvall.templating.domain.KeyValue;
-import se.sundsvall.templating.service.TemplatingService;
+import se.sundsvall.templating.service.TemplateService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -50,13 +54,29 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 })
 class TemplateResource {
 
-    private final TemplatingService templatingService;
+    private final TemplateService templatingService;
 
-    TemplateResource(final TemplatingService templatingService) {
+    TemplateResource(final TemplateService templatingService) {
         this.templatingService = templatingService;
     }
 
-    @Operation(summary = "Get all available templates")
+    @Operation(summary = "Search available templates by metadata, content excluded")
+    @ApiResponses({
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successful operation",
+            content = @Content(
+                array = @ArraySchema(schema = @Schema(implementation = TemplateResponse.class))
+            )
+        )
+    })
+    @PostMapping("/search")
+    List<TemplateResponse> searchTemplates(
+            @RequestBody final Expression expression) {
+        return templatingService.getTemplates(MetadataFilterSpecifications.toSpecification(expression));
+    }
+
+    @Operation(summary = "Get all available templates, content excluded")
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",
@@ -69,15 +89,15 @@ class TemplateResource {
     @GetMapping
     List<TemplateResponse> getAllTemplates(
             @RequestParam(defaultValue = "{}")
-            @Parameter(description = "Metadata filters (dictionary/map/key-value)") final Map<String, String> filters) {
+            @Parameter(description = "Metadata filters (dictionary/map: <code>{ \"key\": \"value\", ... }</code> ). Not required") final Map<String, String> filters) {
         var metadata = filters.entrySet().stream()
             .map(filter -> KeyValue.of(filter.getKey(), filter.getValue()))
             .toList();
 
-        return templatingService.getAllTemplates(metadata);
+        return templatingService.getTemplates(metadata);
     }
 
-    @Operation(summary = "Get a template by identifier, including content")
+    @Operation(summary = "Get the latest version of a template by identifier, including content")
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",
@@ -93,7 +113,27 @@ class TemplateResource {
     @GetMapping("/{identifier}")
     ResponseEntity<DetailedTemplateResponse> getTemplate(
             @PathVariable("identifier") @ValidTemplateId final String identifier) {
-        return templatingService.getTemplate(identifier)
+        return getTemplate(identifier, null);
+    }
+
+    @Operation(summary = "Get a specific version of a template by identifier, including content")
+    @ApiResponses({
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successful operation",
+            content = @Content(schema = @Schema(implementation = DetailedTemplateResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Not Found",
+            content = @Content(schema = @Schema(implementation = Problem.class))
+        )
+    })
+    @GetMapping("/{identifier}/{version}")
+    ResponseEntity<DetailedTemplateResponse> getTemplate(
+            @PathVariable("identifier") @ValidTemplateId final String identifier,
+            @PathVariable("version") @ValidTemplateVersion final String version) {
+        return templatingService.getTemplate(identifier, version)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
@@ -123,7 +163,7 @@ class TemplateResource {
         return ResponseEntity.created(uri).body(template);
     }
 
-    @Operation(summary = "Update a template")
+    @Operation(summary = "Update (specific version of) a template")
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",
@@ -134,20 +174,26 @@ class TemplateResource {
             responseCode = "400",
             description = "Bad Request",
             content = @Content(schema = @Schema(implementation = Problem.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Not Found",
+            content = @Content(schema = @Schema(implementation = Problem.class))
         )
     })
-    @PatchMapping(value = "/{identifier}", consumes = "application/json-patch+json")
+    @PatchMapping(value = "/{identifier}/{version}", consumes = "application/json-patch+json")
     ResponseEntity<TemplateResponse> updateTemplate(
             @PathVariable("identifier") @ValidTemplateId final String identifier,
+            @PathVariable("version") @ValidTemplateVersion final String version,
             @RequestBody
-            @Schema(example = "[{\"op\":\"add|remove|replace\",\"path\": \"/some/attribute/path\",\"value\": \"...\"}]")
+            @Schema(example = OpenApiExamples.UPDATE)
             final JsonPatch jsonPatch) {
-        var template = templatingService.updateTemplate(identifier, jsonPatch);
+        var template = templatingService.updateTemplate(identifier, version, jsonPatch);
 
         return ResponseEntity.ok(template);
     }
 
-    @Operation(summary = "Delete a template")
+    @Operation(summary = "Delete a template, including all its versions")
     @ApiResponses({
         @ApiResponse(
             responseCode = "200",
@@ -162,7 +208,29 @@ class TemplateResource {
     })
     @DeleteMapping("/{identifier}")
     ResponseEntity<Void> deleteTemplate(@PathVariable("identifier") @ValidTemplateId final String identifier) {
-        templatingService.deleteTemplate(identifier);
+        templatingService.deleteTemplate(identifier, null);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Delete a specific version of a template")
+    @ApiResponses({
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successful operation",
+            content = @Content(schema = @Schema(implementation = TemplateResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Not Found",
+            content = @Content(schema = @Schema(implementation = Problem.class))
+        )
+    })
+    @DeleteMapping("/{identifier}/{version}")
+    ResponseEntity<Void> deleteTemplate(
+            @PathVariable("identifier") @ValidTemplateId final String identifier,
+            @PathVariable("version") @ValidTemplateVersion final String version) {
+        templatingService.deleteTemplate(identifier, version);
 
         return ResponseEntity.ok().build();
     }

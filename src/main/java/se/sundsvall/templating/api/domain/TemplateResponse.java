@@ -1,5 +1,6 @@
 package se.sundsvall.templating.api.domain;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -20,6 +21,9 @@ public class TemplateResponse {
     @Schema(description = "Identifier")
     private String identifier;
 
+    @Schema(description = "Version")
+    private String version;
+
     @Schema(description = "Name")
     private String name;
 
@@ -31,4 +35,10 @@ public class TemplateResponse {
 
     @ArraySchema(schema = @Schema(description = "Default values"))
     private List<DefaultValue> defaultValues;
+
+    @Schema(description = "Changelog")
+    private String changeLog;
+
+    @Schema(description = "Last modification timestamp")
+    private LocalDateTime lastModifiedAt;
 }

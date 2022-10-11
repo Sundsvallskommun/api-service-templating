@@ -1,9 +1,11 @@
-package se.sundsvall.templating.service.pebble;
+package se.sundsvall.templating.service.pebble.loader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
+import se.sundsvall.templating.service.pebble.IdentifierAndVersion;
 
 @ExtendWith(MockitoExtension.class)
 class DatabaseLoaderTests {
@@ -38,25 +41,25 @@ class DatabaseLoaderTests {
     @Test
     void test_getReader() {
         when(mockTemplateEntity.getContent()).thenReturn("someContent");
-        when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.of(mockTemplateEntity));
+        when(mockDbIntegration.getTemplate(any(String.class), any(String.class))).thenReturn(Optional.of(mockTemplateEntity));
 
-        var reader = loader.getReader("someTemplateId");
+        var reader = loader.getReader(new IdentifierAndVersion("someTemplateId:1.0"));
         assertThat(reader).isNotNull();
 
-        verify(mockDbIntegration, times(1)).getTemplate(any(String.class));
+        verify(mockDbIntegration, times(1)).getTemplate(any(String.class), any(String.class));
     }
 
     @Test
     void test_getReader_whenTemplateDoesNotExist() {
-        var templateId = "someTemplateId";
+        var templateId = new IdentifierAndVersion("someTemplateId");
 
-        when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.empty());
+        when(mockDbIntegration.getTemplate(any(String.class), nullable(String.class))).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(LoaderException.class)
             .isThrownBy(() -> loader.getReader(templateId))
             .withMessageStartingWith("Unable to find template 'someTemplateId'");
 
-        verify(mockDbIntegration, times(1)).getTemplate(any(String.class));
+        verify(mockDbIntegration, times(1)).getTemplate(any(String.class), nullable(String.class));
     }
 
     @Test
@@ -83,22 +86,29 @@ class DatabaseLoaderTests {
 
     @Test
     void test_createCacheKey() {
-        assertThat(loader.createCacheKey("someTemplateId")).isEqualTo("someTemplateId");
+        assertThat(loader.createCacheKey("someTemplateId")).satisfies(identifierAndVersion -> {
+            assertThat(identifierAndVersion.getIdentifier()).isEqualTo("someTemplateId");
+            assertThat(identifierAndVersion.getVersion()).isNull();
+        });
     }
 
     @Test
     void test_resourceExists() {
-        when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.of(TemplateEntity.builder().build()));
+        when(mockDbIntegration.getTemplate(any(String.class), eq(null)))
+            .thenReturn(Optional.of(TemplateEntity.builder().build()));
+
         assertThat(loader.resourceExists("someTemplateId")).isTrue();
 
-        verify(mockDbIntegration, times(1)).getTemplate(any(String.class));
+        verify(mockDbIntegration, times(1)).getTemplate(any(String.class), eq(null));
     }
 
     @Test
     void test_resourceExists_whenResourceDoesNotExist() {
-        when(mockDbIntegration.getTemplate(any(String.class))).thenReturn(Optional.empty());
-        assertThat(loader.resourceExists("someTemplateId")).isFalse();
+        when(mockDbIntegration.getTemplate(any(String.class), any(String.class)))
+            .thenReturn(Optional.empty());
 
-        verify(mockDbIntegration, times(1)).getTemplate(any(String.class));
+        assertThat(loader.resourceExists("someTemplateId:1.2")).isFalse();
+
+        verify(mockDbIntegration, times(1)).getTemplate(any(String.class), any(String.class));
     }
 }

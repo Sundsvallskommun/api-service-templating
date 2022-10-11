@@ -1,0 +1,79 @@
+[
+  {
+    "identifier": "third.template",
+    "version": "1.1",
+    "name": "Third template",
+    "description": "Some description",
+    "metadata": [],
+    "defaultValues": [],
+    "changeLog": "Updated version",
+    "lastModifiedAt": "${json-unit.ignore}"
+  },
+  {
+    "identifier": "first.template",
+    "version": "1.0",
+    "name": "First template",
+    "description": "Some description",
+    "metadata": [],
+    "defaultValues": [],
+    "changeLog": "Initial version",
+    "lastModifiedAt": "${json-unit.ignore}"
+  },
+  {
+    "identifier": "third.template",
+    "version": "1.0",
+    "name": "Third template",
+    "description": "Some description",
+    "metadata": [],
+    "defaultValues": [],
+    "changeLog": "Initial version",
+    "lastModifiedAt": "${json-unit.ignore}"
+  },
+  {
+    "identifier": "fourth.template",
+    "version": "1.0",
+    "name": "Fourth template",
+    "description": "Some description",
+    "metadata": [
+      {
+        "key": "verksamhet",
+        "value": "SBK"
+      },
+      {
+        "key": "process",
+        "value": "MMU"
+      }
+    ],
+    "defaultValues": [],
+    "changeLog": "Initial version",
+    "lastModifiedAt": "${json-unit.ignore}"
+  },
+  {
+    "identifier": "second.template",
+    "version": "1.0",
+    "name": "Second template",
+    "description": "Some description",
+    "metadata": [
+      {
+        "key": "process",
+        "value": "PRH"
+      },
+      {
+        "key": "verksamhet",
+        "value": "SBK"
+      }
+    ],
+    "defaultValues": [
+      {
+        "fieldName": "last_name",
+        "value": "Brun"
+      },
+      {
+        "fieldName": "first_name",
+        "value": "Bobby"
+      }
+    ],
+    "changeLog": "Initial version",
+    "lastModifiedAt": "${json-unit.ignore}"
+  }
+]

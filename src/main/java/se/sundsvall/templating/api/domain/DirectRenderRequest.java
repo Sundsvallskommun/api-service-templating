@@ -17,6 +17,6 @@ public class DirectRenderRequest {
     @Schema(description = "The template content")
     private String content;
 
-    @Schema(description = "Parameters", nullable = true)
+    @Schema(description = "Parameters", nullable = true, example = OpenApiExamples.PARAMETERS)
     private Map<String, Object> parameters;
 }
