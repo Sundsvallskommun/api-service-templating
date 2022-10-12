@@ -7,8 +7,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "templates")
-public class TemplateProperties {
+@ConfigurationProperties(prefix = "pebble")
+public class PebbleProperties {
 
     private boolean useCaseInsensitiveKeys = true;
     private boolean autoEscape = false;

@@ -8,20 +8,20 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import se.sundsvall.templating.configuration.properties.PebbleProperties;
 import se.sundsvall.templating.configuration.properties.RenderingProperties;
-import se.sundsvall.templating.configuration.properties.TemplateProperties;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.service.pebble.loader.DatabaseLoader;
 import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
 
 @Configuration
-@EnableConfigurationProperties({TemplateProperties.class, RenderingProperties.class})
-class TemplatingConfiguration {
+@EnableConfigurationProperties({PebbleProperties.class, RenderingProperties.class})
+class PebbleConfiguration {
 
-    private final TemplateProperties templateProperties;
+    private final PebbleProperties pebbleProperties;
 
-    TemplatingConfiguration(final TemplateProperties templateProperties) {
-        this.templateProperties = templateProperties;
+    PebbleConfiguration(final PebbleProperties pebbleProperties) {
+        this.pebbleProperties = pebbleProperties;
     }
 
     @Bean("pebble.database-loader")
@@ -46,7 +46,7 @@ class TemplatingConfiguration {
         return new PebbleEngine.Builder()
             .loader(loader)
             .syntax(syntax())
-            .autoEscaping(templateProperties.isAutoEscape())
+            .autoEscaping(pebbleProperties.isAutoEscape())
             .build();
     }
 
@@ -55,23 +55,23 @@ class TemplatingConfiguration {
         return new PebbleEngine.Builder()
             .loader(loader)
             .syntax(syntax())
-            .autoEscaping(templateProperties.isAutoEscape())
+            .autoEscaping(pebbleProperties.isAutoEscape())
             .strictVariables(true)
             .build();
     }
 
     Syntax syntax() {
         var syntaxBuilder = new Syntax.Builder()
-            .setPrintOpenDelimiter(templateProperties.getDelimiters().getPrint().getOpen())
-            .setPrintCloseDelimiter(templateProperties.getDelimiters().getPrint().getClose())
-            .setExecuteOpenDelimiter(templateProperties.getDelimiters().getExecute().getOpen())
-            .setExecuteCloseDelimiter(templateProperties.getDelimiters().getExecute().getClose())
-            .setCommentOpenDelimiter(templateProperties.getDelimiters().getComment().getOpen())
-            .setCommentCloseDelimiter(templateProperties.getDelimiters().getComment().getOpen());
+            .setPrintOpenDelimiter(pebbleProperties.getDelimiters().getPrint().getOpen())
+            .setPrintCloseDelimiter(pebbleProperties.getDelimiters().getPrint().getClose())
+            .setExecuteOpenDelimiter(pebbleProperties.getDelimiters().getExecute().getOpen())
+            .setExecuteCloseDelimiter(pebbleProperties.getDelimiters().getExecute().getClose())
+            .setCommentOpenDelimiter(pebbleProperties.getDelimiters().getComment().getOpen())
+            .setCommentCloseDelimiter(pebbleProperties.getDelimiters().getComment().getOpen());
         syntaxBuilder.setInterpolationOpenDelimiter(
-            templateProperties.getDelimiters().getInterpolation().getOpen());
+            pebbleProperties.getDelimiters().getInterpolation().getOpen());
         syntaxBuilder.setInterpolationOpenDelimiter(
-            templateProperties.getDelimiters().getInterpolation().getOpen());
+            pebbleProperties.getDelimiters().getInterpolation().getOpen());
 
         return syntaxBuilder.build();
     }

@@ -31,7 +31,7 @@ import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.zalando.problem.ThrowableProblem;
 
 import se.sundsvall.templating.api.domain.RenderRequest;
-import se.sundsvall.templating.configuration.properties.TemplateProperties;
+import se.sundsvall.templating.configuration.properties.PebbleProperties;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 
@@ -43,7 +43,7 @@ class RenderingServiceTests {
     @Mock
     private ITextRenderer mockITextRenderer;
     @Mock
-    private TemplateProperties mockTemplateProperties;
+    private PebbleProperties mockPebbleProperties;
     @Mock
     private DbIntegration mockDbIntegration;
 
@@ -59,7 +59,7 @@ class RenderingServiceTests {
 
     @BeforeEach
     void setUp() {
-        service = new RenderingService(mockPebbleEngine, mockITextRenderer, mockTemplateProperties, mockDbIntegration);
+        service = new RenderingService(mockPebbleEngine, mockITextRenderer, mockPebbleProperties, mockDbIntegration);
     }
 
     @Test
