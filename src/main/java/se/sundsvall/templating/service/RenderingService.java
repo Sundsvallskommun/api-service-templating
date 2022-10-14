@@ -20,7 +20,7 @@ import org.zalando.problem.Status;
 
 import se.sundsvall.templating.api.domain.DirectRenderRequest;
 import se.sundsvall.templating.api.domain.RenderRequest;
-import se.sundsvall.templating.configuration.properties.TemplateProperties;
+import se.sundsvall.templating.configuration.properties.PebbleProperties;
 import se.sundsvall.templating.exception.TemplateException;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.entity.DefaultValueEntity;
@@ -32,14 +32,14 @@ public class RenderingService {
 
     private final PebbleEngine pebbleEngine;
     private final ITextRenderer iTextRenderer;
-    private final TemplateProperties templateProperties;
+    private final PebbleProperties pebbleProperties;
     private final DbIntegration dbIntegration;
 
     public RenderingService(final PebbleEngine pebbleEngine, final ITextRenderer iTextRenderer,
-            final TemplateProperties templateProperties, final DbIntegration dbIntegration) {
+            final PebbleProperties pebbleProperties, final DbIntegration dbIntegration) {
         this.pebbleEngine = pebbleEngine;
         this.iTextRenderer = iTextRenderer;
-        this.templateProperties = templateProperties;
+        this.pebbleProperties = pebbleProperties;
         this.dbIntegration = dbIntegration;
     }
 
@@ -86,7 +86,7 @@ public class RenderingService {
         // parameters to override any matching default value. Also, (configurable) use a TreeMap
         // with a case-insensitive comparator, to allow the use of case-insensitive keys
         var mergedParametersAndDefaultValues = new TreeMap<>(
-            templateProperties.isUseCaseInsensitiveKeys() ? String.CASE_INSENSITIVE_ORDER : null);
+            pebbleProperties.isUseCaseInsensitiveKeys() ? String.CASE_INSENSITIVE_ORDER : null);
         mergedParametersAndDefaultValues.putAll(defaultValues);
         mergedParametersAndDefaultValues.putAll(Optional.ofNullable(request.getParameters()).orElse(Map.of()));
 
