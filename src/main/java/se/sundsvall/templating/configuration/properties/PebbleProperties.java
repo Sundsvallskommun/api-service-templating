@@ -28,31 +28,31 @@ public class PebbleProperties {
     @Setter
     public static class Print {
 
-        private String open = "[[";
-        private String close = "]]";
+        private String open = "{{";
+        private String close = "}}";
     }
 
     @Getter
     @Setter
     public static final class Comment {
 
-        private String open = "[#";
-        private String close = "#]";
+        private String open = "{#";
+        private String close = "#}";
     }
 
     @Getter
     @Setter
     public static final class Execute {
 
-        private String open = "[%";
-        private String close = "%]";
+        private String open = "{%";
+        private String close = "%}";
     }
 
     @Getter
     @Setter
     public static final class Interpolation {
 
-        private String open = "#[";
-        private String close = "]";
+        private String open = "#{";
+        private String close = "}";
     }
 }

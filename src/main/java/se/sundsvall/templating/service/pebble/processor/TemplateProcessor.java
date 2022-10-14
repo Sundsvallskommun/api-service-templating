@@ -13,7 +13,9 @@ import com.mitchellbosecke.pebble.error.PebbleException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import se.sundsvall.templating.configuration.properties.PebbleProperties;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
+import se.sundsvall.templating.util.BASE64;
 
 import lombok.Generated;
 import lombok.Getter;
@@ -25,9 +27,19 @@ public class TemplateProcessor {
     private static final Pattern FOR_PATTERN = Pattern.compile("\\[% for \\w+ in (\\w+) %\\]");
 
     private final PebbleEngine pebbleEngine;
+    private final PebbleProperties pebbleProperties;
 
-    public TemplateProcessor(@Qualifier("debug-pebble-engine") final PebbleEngine pebbleEngine) {
+    public TemplateProcessor(@Qualifier("debug-pebble-engine") final PebbleEngine pebbleEngine,
+            final PebbleProperties pebbleProperties) {
         this.pebbleEngine = pebbleEngine;
+        this.pebbleProperties = pebbleProperties;
+    }
+
+    public void processTemplate(final TemplateEntity templateEntity) {
+        var content = BASE64.decode(templateEntity.getContent());
+
+        var print = pebbleProperties.getDelimiters().getPrint();
+
     }
 
     public Set<TemplateVariable> getTemplateVars(final TemplateEntity templateEntity) {
@@ -63,7 +75,6 @@ public class TemplateProcessor {
 
         return vars;
     }
-
 
     @Getter
     @Generated  // To skip coverage checks, since this class is WIP
