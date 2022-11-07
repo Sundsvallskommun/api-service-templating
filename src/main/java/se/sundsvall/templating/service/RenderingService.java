@@ -87,7 +87,14 @@ public class RenderingService {
         // with a case-insensitive comparator, to allow the use of case-insensitive keys
         var mergedParametersAndDefaultValues = new TreeMap<>(
             pebbleProperties.isUseCaseInsensitiveKeys() ? String.CASE_INSENSITIVE_ORDER : null);
+
+        // Add identifier and version as extra template parameters, prefixed with underscore to
+        // minimize the risk of name clashes
+        mergedParametersAndDefaultValues.put("_identifier", template.getIdentifier());
+        mergedParametersAndDefaultValues.put("_version", template.getVersion());
+        // Add default values
         mergedParametersAndDefaultValues.putAll(defaultValues);
+        // Add provided parameters
         mergedParametersAndDefaultValues.putAll(Optional.ofNullable(request.getParameters()).orElse(Map.of()));
 
         try (var writer = new StringWriter()) {
