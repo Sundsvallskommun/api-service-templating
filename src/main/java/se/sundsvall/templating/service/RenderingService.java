@@ -68,15 +68,16 @@ public class RenderingService {
 
     String renderTemplateInternal(final RenderRequest request, final boolean base64EncodeOutput) {
         var template = Optional.ofNullable(request.getIdentifier())
-            .map(identifier -> dbIntegration.getTemplate(identifier, request.getVersion()))
-            .orElseGet(() -> dbIntegration.findTemplate(request.getMetadata()))
-            .orElseThrow(() -> {
-                var message = Optional.ofNullable(request.getIdentifier())
-                    .map(ignored -> format("Unable to find template using identifier: '%s'", request.getIdentifier()))
-                    .orElseGet(() -> format("Unable to find template using metadata: %s", request.getMetadata()));
+            .flatMap(identifier -> dbIntegration.getTemplate(identifier, request.getVersion()))
+            .orElseGet(() -> Optional.ofNullable(request.getMetadata()).flatMap(dbIntegration::findTemplate).orElse(null));
 
-                return Problem.valueOf(Status.NOT_FOUND, message);
-            });
+        if (null == template) {
+            var message = Optional.ofNullable(request.getIdentifier())
+                .map(ignored -> format("Unable to find template using identifier: '%s'", request.getIdentifier()))
+                .orElseGet(() -> format("Unable to find template using metadata: %s", request.getMetadata()));
+
+            throw Problem.valueOf(Status.NOT_FOUND, message);
+        }
 
         // Extract template default values
         var defaultValues = template.getDefaultValues().stream()
@@ -98,7 +99,8 @@ public class RenderingService {
         mergedParametersAndDefaultValues.putAll(Optional.ofNullable(request.getParameters()).orElse(Map.of()));
 
         try (var writer = new StringWriter()) {
-            pebbleEngine.getTemplate(template.getIdentifier()).evaluate(writer, mergedParametersAndDefaultValues);
+            pebbleEngine.getTemplate(template.getIdentifier() + ":" + template.getVersion())
+                .evaluate(writer, mergedParametersAndDefaultValues);
 
             // Optionally encode the output as BASE64
             return base64EncodeOutput ? BASE64.encode(writer.toString()) : writer.toString();
