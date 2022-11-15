@@ -7,13 +7,13 @@
 </head>
 <body>
 <p>
-    [% include 'common.resources.sundsvalls-kommun-logo' %]
+    {% include 'common.resources.sundsvalls-kommun-logo' %}
 </p>
 
 <strong>BESLUT</strong>
 <p>
-    [[FÖRNAMN]] [[EFTERNAMN]] är beviljad parkeringstillstånd för rörelsehindrad som förare till och
-    med [[GILTIGHETSTID]].
+    {{FÖRNAMN}} {{EFTERNAMN}} är beviljad parkeringstillstånd för rörelsehindrad som förare till och
+    med {{GILTIGHETSTID}}.
 </p>
 <p>
     Parkeringstillståndet är personligt och får endast användas när du själv kör bilen.
@@ -31,11 +31,11 @@
 </p>
 
 <p>
-    [[BESLUTSDATUM]]
+    {{BESLUTSDATUM}}
 </p>
 
 <p>
-    [[HANDLÄGGARE]]<br />
+    {{HANDLÄGGARE}}<br />
     Trafikutredare
 </p>
 

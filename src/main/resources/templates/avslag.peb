@@ -7,7 +7,7 @@
 </head>
 <body>
 <p>
-    [% include 'common.resources.sundsvalls-kommun-logo' %]
+    {% include 'common.resources.sundsvalls-kommun-logo' %}
 </p>
 
 <strong>BESLUT, Avslag</strong>
@@ -16,7 +16,7 @@
     rörelsehindrad gällande passagerare styrkas.
 </p>
 <p>
-    [[BESLUTSTEXT]]
+    {{BESLUTSTEXT}}
 </p>
 <p>
     <i><strong>Bedömningen är att avslå din ansökan om parkeringstillstånd.</strong></i>
@@ -39,11 +39,11 @@
 </p>
 
 <p>
-    [[BESLUTSDATUM]]
+    {{BESLUTSDATUM}}
 </p>
 
 <p>
-    [[HANDLÄGGARE]]<br />
+    {{HANDLÄGGARE}}<br />
     Trafikutredare
 </p>
 

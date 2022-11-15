@@ -18,6 +18,7 @@ import se.sundsvall.templating.integration.db.TemplateRepository;
 import se.sundsvall.templating.integration.db.entity.DefaultValueEntity;
 import se.sundsvall.templating.integration.db.entity.MetadataEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
+import se.sundsvall.templating.integration.db.entity.Version;
 import se.sundsvall.templating.util.BASE64;
 
 /*
@@ -101,6 +102,22 @@ class LocalDataLoader {
 
             dbIntegration.saveTemplate(tmpl);
 
+            var test = TemplateEntity.builder()
+                .withIdentifier("test.template")
+                .withName("Test")
+                .withContent("PGRpdiBzdHlsZT0icG9zaXRpb246IGFic29sdXRlOyByaWdodDogMDsgYm90dG9tOiAyNXB4OyI+e3tjYXNlTnVtYmVyfX08L2Rpdj4=")
+                .build();
+
+            dbIntegration.saveTemplate(test);
+
+            var test2 = TemplateEntity.builder()
+                .withIdentifier("test.template")
+                .withName("Test")
+                .withContent("PGRpdiBzdHlsZT0icG9zaXRpb246IGFic29sdXRlOyB3b3JkLWJyZWFrOiBrZWVwLWFsbDsgcmlnaHQ6IDA7IGJvdHRvbTogMjVweDsiPnt7Y2FzZU51bWJlcn19PC9kaXY+")
+                .build().withVersion(Version.parse("1.1"));
+
+            dbIntegration.saveTemplate(test2);
+
 /*
             var tmpl2 = TemplateEntity.builder()
                 .withIdentifier("some.other.random.identifier")
@@ -157,49 +174,25 @@ class LocalDataLoader {
     @Bean
     @Profile("default2")
     CommandLineRunner testStuff2(final DbIntegration dbIntegration,
-            @Value("classpath:/templates/test/template1.peb") final Resource templateResource1,
-            @Value("classpath:/templates/test/template2.peb") final Resource templateResource2,
-            @Value("classpath:/templates/test/template3.peb") final Resource templateResource3,
             @Value("classpath:/templates/test/menu.peb") final Resource menuExampleTemplateResource,
             @Value("classpath:/templates/test/squirrel.peb") final Resource squirrelTemplateResource,
             @Value("classpath:/templates/test/citizenChanges.peb") final Resource citizenChangesExampleTemplateResource) {
         return args -> {
-            var template1 = TemplateEntity.builder()
-                    .withIdentifier("test.template1")
-                    .withName("Template 1")
-                    .withContent(asString(templateResource1, StandardCharsets.UTF_8))
-                    .build();
-            dbIntegration.saveTemplate(template1);
-
-            var template2 = TemplateEntity.builder()
-                    .withIdentifier("test.template2")
-                    .withName("Template 2")
-                    .withContent(asString(templateResource2, StandardCharsets.UTF_8))
-                    .build();
-            dbIntegration.saveTemplate(template2);
-
-            var template3 = TemplateEntity.builder()
-                    .withIdentifier("test.template3")
-                    .withName("Template 3")
-                    .withContent(asString(templateResource3, StandardCharsets.UTF_8))
-                    .build();
-            dbIntegration.saveTemplate(template3);
-
             var citizenChangesExampleTemplate = TemplateEntity.builder()
-                    .withIdentifier("example.citizen-changes")
-                    .withName("CitizenChanges e-mail")
-                    .withContent(asString(citizenChangesExampleTemplateResource, StandardCharsets.UTF_8))
-                    .build();
+                .withIdentifier("example.citizen-changes")
+                .withName("CitizenChanges e-mail")
+                .withContent(asString(citizenChangesExampleTemplateResource, StandardCharsets.UTF_8))
+                .build();
             var menuExampleTemplate = TemplateEntity.builder()
-                    .withIdentifier("example.menu")
-                    .withName("Menu (dummy)")
-                    .withContent(asString(menuExampleTemplateResource, StandardCharsets.UTF_8))
-                    .build();
+                .withIdentifier("example.menu")
+                .withName("Menu (dummy)")
+                .withContent(asString(menuExampleTemplateResource, StandardCharsets.UTF_8))
+                .build();
             var squirrel = TemplateEntity.builder()
-                    .withIdentifier("resource.squirrel")
-                    .withName("Squirrel")
-                    .withContent(asString(squirrelTemplateResource, StandardCharsets.UTF_8))
-                    .build();
+                .withIdentifier("resource.squirrel")
+                .withName("Squirrel")
+                .withContent(asString(squirrelTemplateResource, StandardCharsets.UTF_8))
+                .build();
 
             dbIntegration.saveTemplate(citizenChangesExampleTemplate);
             dbIntegration.saveTemplate(menuExampleTemplate);

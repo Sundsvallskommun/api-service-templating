@@ -96,37 +96,37 @@
 <div id="sidebar">
   <div id="heading">
     <div style="text-align: center">
-      [% include 'resource.squirrel' %]
+      {% include 'resource.squirrel' %}
     </div>
-    <h1>[[ company.name ]]</h1>
+    <h1>{{ company.name }}</h1>
     <h2>Meny</h2>
   </div>
 
   <div id="company">
-    <div>[[ company.address.street ]]</div>
+    <div>{{ company.address.street }}</div>
     <div>
-      [[ company.address.zipCode ]] [[ company.address.city ]]
+      {{ company.address.zipCode }} {{ company.address.city }}
     </div>
-    <div><a href="mailto:[[company.email]]">[[ company.email ]]</a></div>
+    <div><a href="mailto:{{company.email}}">{{ company.email }}</a></div>
   </div>
 </div>
 
 <div id="menu">
-  [% for section in sections %]
+  {% for section in sections %}
   <div class="section">
-    <h3>[[section.title]]</h3>
+    <h3>{{section.title}}</h3>
 
-    [% for item in section.items %]
+    {% for item in section.items %}
     <div>
       <h4>
-        <span class="price">[[ item.price ]]</span>
-        <span class="title">[[ item.title ]]</span>
+        <span class="price">{{ item.price }}</span>
+        <span class="title">{{ item.title }}</span>
       </h4>
-      <div class="description">[[ item.description ]]</div>
+      <div class="description">{{ item.description }}</div>
     </div>
-    [% endfor %]
+    {% endfor %}
   </div>
-  [% endfor %]
+  {% endfor %}
 </div>
 </body>
 </html>
