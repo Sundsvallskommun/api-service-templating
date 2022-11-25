@@ -10,6 +10,9 @@ import java.util.regex.Pattern;
 import com.mitchellbosecke.pebble.PebbleEngine;
 import com.mitchellbosecke.pebble.error.AttributeNotFoundException;
 import com.mitchellbosecke.pebble.error.PebbleException;
+import com.mitchellbosecke.pebble.loader.StringLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -24,10 +27,22 @@ import lombok.Getter;
 @Generated  // To skip coverage checks, since this class is WIP
 public class TemplateProcessor {
 
-    private static final Pattern FOR_PATTERN = Pattern.compile("\\[% for \\w+ in (\\w+) %\\]");
+    private static final Logger LOG = LoggerFactory.getLogger(TemplateProcessor.class);
+
+    private static final Pattern FOR_PATTERN = Pattern.compile("\\{%\\s+for\\s+\\w+\\s+in\\s+(\\w+)\\s+%}");
+    private static final Pattern IF_PATTERN = Pattern.compile("\\{%\\s+if\\s+(\\w+).*\\s+%}");
 
     private final PebbleEngine pebbleEngine;
     private final PebbleProperties pebbleProperties;
+
+    public TemplateProcessor() {
+        pebbleEngine = new PebbleEngine.Builder()
+            .loader(new StringLoader())
+            .autoEscaping(false)
+            .strictVariables(true)
+            .build();
+        pebbleProperties = null;
+    }
 
     public TemplateProcessor(@Qualifier("debug-pebble-engine") final PebbleEngine pebbleEngine,
             final PebbleProperties pebbleProperties) {
@@ -42,34 +57,59 @@ public class TemplateProcessor {
 
     }
 
+    public Set<TemplateVariable> getTemplateVars(final String template) {
+        return getTemplateVarsInternal(template);
+    }
+
     public Set<TemplateVariable> getTemplateVars(final TemplateEntity templateEntity) {
+        return getTemplateVarsInternal(templateEntity.getIdentifier());
+    }
+
+    private Set<TemplateVariable> getTemplateVarsInternal(final String template) {
         var vars = new HashSet<TemplateVariable>();
         var parameters = new HashMap<String, Object>();
         boolean exceptionCaught;
 
-        var template = pebbleEngine.getTemplate(templateEntity.getIdentifier());
-
+        var pebbleTemplate = pebbleEngine.getTemplate(template);
         do {
             exceptionCaught = false;
             try {
-                template.evaluate(new StringWriter(), parameters);
+                pebbleTemplate.evaluate(new StringWriter(), parameters);
             } catch (AttributeNotFoundException e) {
                 exceptionCaught = true;
 
-                var line = templateEntity.getContent().split("\n")[e.getLineNumber() - 1];
+                var templateVariable = new TemplateVariable(e.getAttributeName());
+                LOG.info("Found simple template variable '{}'", templateVariable);
+                vars.add(templateVariable);
+
+                parameters.put(templateVariable.name, "");
+            } catch (PebbleException e) {
+                exceptionCaught = true;
+
+                var line = template.split("\n")[e.getLineNumber() - 1];
                 var matcher = FOR_PATTERN.matcher(line);
                 if (matcher.matches()) {
-                    vars.add(new TemplateVariable(e.getAttributeName(), true));
-                    parameters.put(e.getAttributeName(), List.of());
-                } else {
+                    var variableName = matcher.group(1);
+                    LOG.info("Replacing simple template variable '{}' with collection", variableName);
 
-                    vars.add(new TemplateVariable(e.getAttributeName()));
-                    parameters.put(e.getAttributeName(), "");
+                    vars.removeIf(templateVariable -> templateVariable.name.equals(variableName));
+                    vars.add(new TemplateVariable(variableName, true));
+
+                    parameters.put(variableName, List.of());
+                } else {
+                    matcher = IF_PATTERN.matcher(line);
+                    if (matcher.matches()) {
+                        var variableName = matcher.group(1);
+                        LOG.info("Replacing simple template variable '{}' with collection", variableName);
+
+                        vars.removeIf(templateVariable -> templateVariable.name.equals(variableName));
+                        vars.add(new TemplateVariable(variableName, true));
+
+                        parameters.put(variableName, List.of());
+                    }
                 }
-            } catch (PebbleException e) {
-                e.printStackTrace(System.err);
             } catch (Exception e) {
-                throw new IllegalStateException("Unable to evaluate template '" + template.getName() + "'", e);
+                throw new IllegalStateException("Unable to evaluate template", e);
             }
         } while (exceptionCaught);
 
