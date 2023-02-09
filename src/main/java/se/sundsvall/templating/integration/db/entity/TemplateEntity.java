@@ -51,7 +51,7 @@ public class TemplateEntity {
     @Embedded
     @Setter(AccessLevel.PRIVATE)
     @With
-    private Version version = Version.INITIAL_VERSION;
+    private Version version = new Version(1, 0);
 
     @Column(name = "name", length = 64, nullable = false)
     private String name;

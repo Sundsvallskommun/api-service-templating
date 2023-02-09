@@ -70,7 +70,7 @@ public class TemplateService {
 
                 return templateEntity.getVersion().apply(templateRequest.getVersionIncrement());
             })
-            .orElse(Version.INITIAL_VERSION);
+            .orElse(new Version(1, 0));
 
         var templateEntity = mapper.toTemplateEntity(templateRequest)
             .withVersion(version);

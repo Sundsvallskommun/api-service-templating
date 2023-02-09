@@ -21,8 +21,6 @@ public class Version implements Comparable<Version> {
 
     private static final Pattern PATTERN = Pattern.compile("^(\\d+)\\.(\\d+)$");
 
-    public static final Version INITIAL_VERSION = new Version(1, 0);
-
     public enum IncrementMode {
         MAJOR,
         MINOR

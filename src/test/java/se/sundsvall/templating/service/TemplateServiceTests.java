@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,6 +37,7 @@ import se.sundsvall.templating.api.domain.filter.FilterSpecifications;
 import se.sundsvall.templating.domain.KeyValue;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
+import se.sundsvall.templating.integration.db.entity.Version;
 import se.sundsvall.templating.service.mapper.TemplateMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -137,7 +139,14 @@ class TemplateServiceTests {
     }
 
     @Test
-    void test_saveTemplate() {
+    void test_saveTemplate_whenTemplateExistsAndIncrementModeIsSet() {
+        var mockVersion = mock(Version.class);
+
+        var mockTemplateEntity = mock(TemplateEntity.class);
+        when(mockTemplateEntity.getVersion()).thenReturn(mockVersion);
+
+        when(mockDbIntegration.getTemplate(any(String.class), eq(null)))
+            .thenReturn(Optional.of(mockTemplateEntity));
         when(mockTemplateMapper.toTemplateEntity(any(TemplateRequest.class)))
             .thenReturn(TemplateEntity.builder().build());
         when(mockTemplateMapper.toTemplateResponse(any(TemplateEntity.class)))
@@ -145,11 +154,38 @@ class TemplateServiceTests {
         when(mockDbIntegration.saveTemplate(any(TemplateEntity.class)))
             .thenReturn(TemplateEntity.builder().build());
 
-        service.saveTemplate(new TemplateRequest());
+        var request = new TemplateRequest();
+        request.setIdentifier("some.identifier");
+        request.setVersionIncrement(Version.IncrementMode.MINOR);
 
+        service.saveTemplate(request);
+
+        verify(mockDbIntegration, times(1)).getTemplate(any(String.class), eq(null));
+        verify(mockTemplateEntity, times(1)).getVersion();
+        verify(mockVersion, times(1)).apply(any(Version.IncrementMode.class));
         verify(mockTemplateMapper, times(1)).toTemplateEntity(any(TemplateRequest.class));
         verify(mockTemplateMapper, times(1)).toTemplateResponse(any(TemplateEntity.class));
         verify(mockDbIntegration, times(1)).saveTemplate(any(TemplateEntity.class));
+    }
+
+    @Test
+    void test_saveTemplate_whenTemplateExistsAndIncrementModeIsNotSet() {
+        var mockTemplateEntity = mock(TemplateEntity.class);
+
+        when(mockDbIntegration.getTemplate(any(String.class), eq(null)))
+            .thenReturn(Optional.of(mockTemplateEntity));
+
+        var request = new TemplateRequest();
+        request.setIdentifier("some.identifier");
+
+        assertThatExceptionOfType(ThrowableProblem.class)
+            .isThrownBy(() -> service.saveTemplate(request));
+
+        verify(mockDbIntegration, times(1)).getTemplate(any(String.class), eq(null));
+        verify(mockTemplateEntity, never()).getVersion();
+        verify(mockTemplateMapper, never()).toTemplateEntity(any(TemplateRequest.class));
+        verify(mockTemplateMapper, never()).toTemplateResponse(any(TemplateEntity.class));
+        verify(mockDbIntegration, never()).saveTemplate(any(TemplateEntity.class));
     }
 
     @Test
