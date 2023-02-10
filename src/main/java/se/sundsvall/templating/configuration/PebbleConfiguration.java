@@ -46,6 +46,7 @@ class PebbleConfiguration {
         return new PebbleEngine.Builder()
             .loader(loader)
             .syntax(syntax())
+            .cacheActive(false)
             .autoEscaping(pebbleProperties.isAutoEscape())
             .build();
     }
@@ -55,6 +56,7 @@ class PebbleConfiguration {
         return new PebbleEngine.Builder()
             .loader(loader)
             .syntax(syntax())
+            .cacheActive(false)
             .autoEscaping(pebbleProperties.isAutoEscape())
             .strictVariables(true)
             .build();
