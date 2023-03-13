@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: api-templating
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    group: true
+
+openapi:
+  name: api-service-templating
+  title: Templating
+  version: '@project.version@'
+  description: Uses <a href="https://pebbletemplates.io/" target="_blank">Pebble Templates</a>
+
+springdoc:
+  swagger-ui:
+    operationsSorter: method
+
+rendering:
+  direct-output-as-base64: true
