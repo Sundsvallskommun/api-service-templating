@@ -6,7 +6,7 @@
     <parent>
         <groupId>se.sundsvall.dept44</groupId>
         <artifactId>dept44-service-parent</artifactId>
-        <version>1.30</version>
+        <version>1.31</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>se.sundsvall</groupId>
@@ -21,10 +21,10 @@
         <published.container.port.production>7551</published.container.port.production>
         <published.container.port.sandbox>7552</published.container.port.sandbox>
 
-        <testcontainers.version>1.17.5</testcontainers.version>
+        <testcontainers.version>1.17.6</testcontainers.version>
         <json-patch.version>1.13</json-patch.version>
-        <pebble.version>3.1.6</pebble.version>
-        <jsoup.version>1.15.3</jsoup.version>
+        <pebble.version>3.2.0</pebble.version>
+        <jsoup.version>1.15.4</jsoup.version>
         <openpdf.version>9.1.22</openpdf.version>
     </properties>
 

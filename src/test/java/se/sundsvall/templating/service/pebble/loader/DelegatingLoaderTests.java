@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
 
-import com.mitchellbosecke.pebble.loader.StringLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +17,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import se.sundsvall.templating.service.pebble.IdentifierAndVersion;
+
+import io.pebbletemplates.pebble.loader.StringLoader;
 
 @ExtendWith(MockitoExtension.class)
 class DelegatingLoaderTests {

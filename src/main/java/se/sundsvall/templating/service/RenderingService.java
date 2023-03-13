@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
-import com.mitchellbosecke.pebble.PebbleEngine;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -26,6 +25,8 @@ import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.entity.DefaultValueEntity;
 import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
 import se.sundsvall.templating.util.BASE64;
+
+import io.pebbletemplates.pebble.PebbleEngine;
 
 @Service
 public class RenderingService {

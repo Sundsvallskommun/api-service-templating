@@ -4,12 +4,12 @@ import java.io.BufferedReader;
 import java.io.Reader;
 import java.io.StringReader;
 
-import com.mitchellbosecke.pebble.error.LoaderException;
-import com.mitchellbosecke.pebble.loader.Loader;
-
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.service.pebble.IdentifierAndVersion;
 import se.sundsvall.templating.util.BASE64;
+
+import io.pebbletemplates.pebble.error.LoaderException;
+import io.pebbletemplates.pebble.loader.Loader;
 
 public class DatabaseLoader implements Loader<IdentifierAndVersion> {
 

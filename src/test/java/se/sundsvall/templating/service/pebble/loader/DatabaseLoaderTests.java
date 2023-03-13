@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import com.mitchellbosecke.pebble.error.LoaderException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +21,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.service.pebble.IdentifierAndVersion;
+
+import io.pebbletemplates.pebble.error.LoaderException;
 
 @ExtendWith(MockitoExtension.class)
 class DatabaseLoaderTests {

@@ -1,8 +1,5 @@
 package se.sundsvall.templating.configuration;
 
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.lexer.Syntax;
-import com.mitchellbosecke.pebble.loader.StringLoader;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +10,10 @@ import se.sundsvall.templating.configuration.properties.RenderingProperties;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.service.pebble.loader.DatabaseLoader;
 import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
+
+import io.pebbletemplates.pebble.PebbleEngine;
+import io.pebbletemplates.pebble.lexer.Syntax;
+import io.pebbletemplates.pebble.loader.StringLoader;
 
 @Configuration
 @EnableConfigurationProperties({PebbleProperties.class, RenderingProperties.class})
