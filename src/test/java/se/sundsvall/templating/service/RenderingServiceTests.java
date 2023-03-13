@@ -17,8 +17,6 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Optional;
 
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +32,9 @@ import se.sundsvall.templating.api.domain.RenderRequest;
 import se.sundsvall.templating.configuration.properties.PebbleProperties;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
+
+import io.pebbletemplates.pebble.PebbleEngine;
+import io.pebbletemplates.pebble.template.PebbleTemplate;
 
 @ExtendWith(MockitoExtension.class)
 class RenderingServiceTests {

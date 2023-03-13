@@ -2,10 +2,10 @@ package se.sundsvall.templating.service.pebble.loader;
 
 import java.io.Reader;
 
-import com.mitchellbosecke.pebble.loader.Loader;
-import com.mitchellbosecke.pebble.loader.StringLoader;
-
 import se.sundsvall.templating.service.pebble.IdentifierAndVersion;
+
+import io.pebbletemplates.pebble.loader.Loader;
+import io.pebbletemplates.pebble.loader.StringLoader;
 
 public class DelegatingLoader implements Loader<IdentifierAndVersion> {
 
