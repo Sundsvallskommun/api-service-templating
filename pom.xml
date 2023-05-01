@@ -24,7 +24,7 @@
         <testcontainers.version>1.17.6</testcontainers.version>
         <json-patch.version>1.13</json-patch.version>
         <pebble.version>3.2.0</pebble.version>
-        <jsoup.version>1.15.4</jsoup.version>
+        <jsoup.version>1.16.1</jsoup.version>
         <openpdf.version>9.1.22</openpdf.version>
     </properties>
 
