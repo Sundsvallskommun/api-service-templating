@@ -1,0 +1,10 @@
+logging:
+  level:
+    se:
+      sundsvall:
+        dept44:
+          payload: OFF
+
+spring:
+  main:
+    banner-mode: off

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>se.sundsvall.dept44</groupId>
+        <artifactId>dept44-service-parent</artifactId>
+        <version>2.1.1</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>se.sundsvall</groupId>
+    <artifactId>api-service-templating</artifactId>
+    <version>1.1</version>
+    <name>api-service-templating</name>
+
+    <properties>
+        <docker.image.name>ms-templating</docker.image.name>
+
+        <published.container.port.test>7551</published.container.port.test>
+        <published.container.port.production>7551</published.container.port.production>
+        <published.container.port.sandbox>7552</published.container.port.sandbox>
+
+        <json-patch.version>1.13</json-patch.version>
+        <pebble.version>3.2.1</pebble.version>
+        <jsoup.version>1.16.1</jsoup.version>
+        <openpdf.version>9.1.22</openpdf.version>
+    </properties>
+
+    <dependencies>
+        <!-- Test -->
+        <dependency>
+            <groupId>se.sundsvall.dept44</groupId>
+            <artifactId>dept44-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mariadb</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JPA/JDBC -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-jpamodelgen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Flyway -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
+
+        <!-- Pebble template engine -->
+        <dependency>
+            <groupId>io.pebbletemplates</groupId>
+            <artifactId>pebble</artifactId>
+            <version>${pebble.version}</version>
+        </dependency>
+
+        <!-- OpenPDF -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>${jsoup.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>flying-saucer-pdf-openpdf</artifactId>
+            <version>${openpdf.version}</version>
+        </dependency>
+
+        <!-- Other -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.github.java-json-tools</groupId>
+            <artifactId>json-patch</artifactId>
+            <version>${json-patch.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/se/sundsvall/templating/Application*</exclude>
+                        <exclude>**/se/sundsvall/templating/LocalDataLoader*</exclude>
+                        <exclude>**/se/sundsvall/templating/configuration/**/**</exclude>
+                        <!-- Ignored, since JPA specifications are a pain to test. Covered by app tests instead -->
+                        <exclude>**/se/sundsvall/templating/api/domain/filter/**/**</exclude>
+                        <exclude>**/se/sundsvall/templating/api/domain/validation/**/**</exclude>
+                        <exclude>**/se/sundsvall/templating/exception/**/**</exclude>
+                        <exclude>**/se/sundsvall/templating/integration/**/**IntegrationConfiguration**</exclude>
+                        <exclude>**/se/sundsvall/templating/integration/db/*Repository*</exclude>
+                        <!-- Exclude JPA specifications and metamodels -->
+                        <exclude>**/se/sundsvall/templating/integration/db/spec/**/**</exclude>
+                        <exclude>**/se/sundsvall/templating/integration/db/entity/*_*</exclude>
+                        <!-- Figure out how to mock the PebbleTemplate#evaluate and writer stuff and re-enable this... -->
+                        <exclude>**/se/sundsvall/templating/service/RenderingService*</exclude>
+                        <exclude>**/se/sundsvall/templating/util/**/*</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,13 @@
+{
+  "or": [
+    {
+      "and": [
+        { "eq": { "verksamhet": "SBK" } },
+        { "eq": { "process":  "PRH" } }
+      ]
+    },
+    {
+      "eq": { "process":  "MMU" }
+    }
+  ]
+}
