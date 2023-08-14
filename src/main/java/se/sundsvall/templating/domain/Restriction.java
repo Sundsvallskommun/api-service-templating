@@ -8,10 +8,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Generated;
 import lombok.Getter;
-/*
- * TODO: should this class even exist ?? will we ever have the need to combine key-values ??
- * TODO: if so, also remove the @Generated annotations below that are only there to exclude from coverage...
- */
+
 @Generated
 public interface Restriction {
 

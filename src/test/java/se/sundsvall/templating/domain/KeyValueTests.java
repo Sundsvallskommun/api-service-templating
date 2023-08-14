@@ -1,13 +1,18 @@
 package se.sundsvall.templating.domain;
 
 import static java.util.List.copyOf;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.stream.Stream;
 
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class KeyValueTests {
 
@@ -27,54 +32,18 @@ class KeyValueTests {
         assertThat(keyValue.getValue()).isEqualTo("someValue");
     }
 
-    @Test
-    void test_validationWithNullKey_fails() {
-        var keyValue = KeyValue.of(null, "someValue");
-
+    @ParameterizedTest
+    @MethodSource("getKeyValuesForValidation")
+    void test_validation(final KeyValue keyValue) {
         var constraints = copyOf(validator.validate(keyValue));
 
         assertThat(constraints).hasSize(1);
         assertThat(constraints.get(0)).satisfies(constraintViolation -> {
-            assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("key");
-            assertThat(constraintViolation.getMessage()).isEqualTo("must not be blank");
-        });
-    }
-
-    @Test
-    void test_validationWithEmptyKey_fails() {
-        var keyValue = KeyValue.of("", "someValue");
-
-        var constraints = copyOf(validator.validate(keyValue));
-
-        assertThat(constraints).hasSize(1);
-        assertThat(constraints.get(0)).satisfies(constraintViolation -> {
-            assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("key");
-            assertThat(constraintViolation.getMessage()).isEqualTo("must not be blank");
-        });
-    }
-
-    @Test
-    void test_validationWithNullValue_fails() {
-        var keyValue = KeyValue.of("someKey", null);
-
-        var constraints = copyOf(validator.validate(keyValue));
-
-        assertThat(constraints).hasSize(1);
-        assertThat(constraints.get(0)).satisfies(constraintViolation -> {
-            assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("value");
-            assertThat(constraintViolation.getMessage()).isEqualTo("must not be blank");
-        });
-    }
-
-    @Test
-    void test_validationWithEmptyValue_fails() {
-        var keyValue = KeyValue.of("someKey", "");
-
-        var constraints = copyOf(validator.validate(keyValue));
-
-        assertThat(constraints).hasSize(1);
-        assertThat(constraints.get(0)).satisfies(constraintViolation -> {
-            assertThat(constraintViolation.getPropertyPath().toString()).isEqualTo("value");
+            if (isBlank(keyValue.getKey())) {
+                assertThat(constraintViolation.getPropertyPath()).hasToString("key");
+            } else {
+                assertThat(constraintViolation.getPropertyPath()).hasToString("value");
+            }
             assertThat(constraintViolation.getMessage()).isEqualTo("must not be blank");
         });
     }
@@ -83,6 +52,15 @@ class KeyValueTests {
     void test_toString() {
         var keyValue = KeyValue.of("someKey", "someValue");
 
-        assertThat(keyValue.toString()).isEqualTo("{someKey=someValue}");
+        assertThat(keyValue).hasToString("{someKey=someValue}");
+    }
+
+    static Stream<KeyValue> getKeyValuesForValidation() {
+        return Stream.of(
+            KeyValue.of(null, "someValue"),
+            KeyValue.of("", "someValue"),
+            KeyValue.of("someKey", null),
+            KeyValue.of("someKey", "")
+        );
     }
 }

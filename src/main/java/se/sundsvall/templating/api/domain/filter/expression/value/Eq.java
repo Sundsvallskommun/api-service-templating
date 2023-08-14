@@ -1,6 +1,6 @@
 package se.sundsvall.templating.api.domain.filter.expression.value;
 
-public final class Eq extends Value<String> {
+public final class Eq extends ValueExpression<String> {
 
     public Eq(final String key, final String value) {
         super(key, value);

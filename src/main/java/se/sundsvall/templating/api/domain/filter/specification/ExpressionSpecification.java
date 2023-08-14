@@ -6,7 +6,7 @@ public abstract class ExpressionSpecification<T> implements Specification<T> {
 
     private final Class<T> entityClass;
 
-    public ExpressionSpecification(final Class<T> entityClass) {
+    protected ExpressionSpecification(final Class<T> entityClass) {
         this.entityClass = entityClass;
     }
 

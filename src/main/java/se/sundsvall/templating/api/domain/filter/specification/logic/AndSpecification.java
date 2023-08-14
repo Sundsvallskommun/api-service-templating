@@ -16,8 +16,8 @@ import se.sundsvall.templating.api.domain.filter.specification.ExpressionSpecifi
 
 public class AndSpecification<T> extends ExpressionSpecification<T> {
 
-    private final And expression;
-    private final BiFunction<Class<T>, Expression, Specification<T>> expressionMapper;
+    private final transient And expression;
+    private final transient BiFunction<Class<T>, Expression, Specification<T>> expressionMapper;
 
     public AndSpecification(final Class<T> entityClass, final And expression) {
         this(entityClass, expression, FilterSpecifications::toSpecification);
@@ -35,7 +35,7 @@ public class AndSpecification<T> extends ExpressionSpecification<T> {
     public Predicate toPredicate(final Root<T> root, final CriteriaQuery<?> query,
             final CriteriaBuilder criteriaBuilder) {
         var clausePredicates = expression.getExpressions().stream()
-            .map(expression -> expressionMapper.apply(getEntityClass(), expression))
+            .map(currentExpression -> expressionMapper.apply(getEntityClass(), currentExpression))
             .map(specification -> specification.toPredicate(root, query, criteriaBuilder))
             .toList();
 
