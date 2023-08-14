@@ -43,11 +43,6 @@ public class DatabaseLoader implements Loader<IdentifierAndVersion> {
 
     @Override
     public String resolveRelativePath(final String relativePath, final String anchorPath) {
-        /*// Calculate
-        if (relativePath.indexOf(':') == -1) {
-            return relativePath + ":" + (anchorPath.indexOf(':') != -1 ? anchorPath.split(":")[1] : anchorPath);
-        }*/
-
         return relativePath;
     }
 

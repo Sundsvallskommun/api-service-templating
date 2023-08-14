@@ -16,26 +16,26 @@ import se.sundsvall.templating.api.domain.filter.specification.ExpressionSpecifi
 
 public class NotSpecification<T> extends ExpressionSpecification<T> {
 
-    private final Not expression;
-    private final BiFunction<Class<T>, Expression, Specification<T>> expressionMmapper;
+    private transient final Not expression;
+    private transient final BiFunction<Class<T>, Expression, Specification<T>> expressionMapper;
 
     public NotSpecification(final Class<T> entityClass, final Not expression) {
         this(entityClass, expression, FilterSpecifications::toSpecification);
     }
 
     public NotSpecification(final Class<T> entityClass, final Not expression,
-            final BiFunction<Class<T>, Expression, Specification<T>> expressionMmapper) {
+            final BiFunction<Class<T>, Expression, Specification<T>> expressionMapper) {
         super(entityClass);
 
         this.expression = expression;
-        this.expressionMmapper = expressionMmapper;
+        this.expressionMapper = expressionMapper;
     }
 
     @Override
     public Predicate toPredicate(final Root<T> root, final CriteriaQuery<?> query,
             final CriteriaBuilder criteriaBuilder) {
         return criteriaBuilder.not(
-            expressionMmapper.apply(getEntityClass(), expression.getExpression())
+            expressionMapper.apply(getEntityClass(), expression.getExpression())
                 .toPredicate(root, query, criteriaBuilder));
     }
 }

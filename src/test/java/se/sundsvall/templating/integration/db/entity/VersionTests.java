@@ -22,7 +22,7 @@ class VersionTests {
 
         version = version.apply(Version.IncrementMode.MAJOR);
         assertThat(version.getMajor()).isEqualTo(4);
-        assertThat(version.getMinor()).isEqualTo(0);
+        assertThat(version.getMinor()).isZero();
     }
 
     @Test
@@ -63,6 +63,6 @@ class VersionTests {
 
         assertThat(v1.compareTo(v2)).isEqualTo(-1);
         assertThat(v2.compareTo(v3)).isEqualTo(1);
-        assertThat(v2.compareTo(v4)).isEqualTo(0);
+        assertThat(v2.compareTo(v4)).isZero();
     }
 }

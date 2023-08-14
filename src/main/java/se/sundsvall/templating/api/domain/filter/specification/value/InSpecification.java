@@ -11,7 +11,7 @@ import se.sundsvall.templating.api.domain.filter.expression.value.In;
 
 public class InSpecification<T> implements Specification<T> {
 
-    private final In expression;
+    private transient final In expression;
 
     public InSpecification(final In expression) {
         this.expression = expression;

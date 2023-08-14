@@ -16,8 +16,8 @@ import se.sundsvall.templating.api.domain.filter.specification.ExpressionSpecifi
 
 public class OrSpecification<T> extends ExpressionSpecification<T> {
 
-    private final Or expression;
-    private final BiFunction<Class<T>, Expression, Specification<T>> expressionMapper;
+    private transient final Or expression;
+    private transient final BiFunction<Class<T>, Expression, Specification<T>> expressionMapper;
 
     public OrSpecification(final Class<T> entityClass, final Or expression) {
         this(entityClass, expression, FilterSpecifications::toSpecification);
@@ -35,7 +35,7 @@ public class OrSpecification<T> extends ExpressionSpecification<T> {
     public Predicate toPredicate(final Root<T> root, final CriteriaQuery<?> query,
             final CriteriaBuilder criteriaBuilder) {
         var clausePredicates = expression.getExpressions().stream()
-            .map(expression -> expressionMapper.apply(getEntityClass(), expression))
+            .map(currentExpression -> expressionMapper.apply(getEntityClass(), currentExpression))
             .map(specification -> specification.toPredicate(root, query.distinct(true), criteriaBuilder))
             .toList();
 

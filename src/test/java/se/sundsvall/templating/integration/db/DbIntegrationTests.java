@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -97,8 +98,9 @@ class DbIntegrationTests {
             .thenReturn(List.of(TemplateEntity.builder().build()));
 
         var result = dbIntegration.findTemplates(List.of(KeyValue.of("someKey", "someValue")));
-        assertThat(result).isNotNull();
-        assertThat(result).hasSize(1);
+        assertThat(result)
+            .isNotNull()
+            .hasSize(1);
 
         verify(mockTemplateRepository, times(1)).findAll(ArgumentMatchers.<Specification<TemplateEntity>>any());
     }
@@ -143,7 +145,6 @@ class DbIntegrationTests {
             .isThrownBy(() -> dbIntegration.deleteTemplate("someTemplateId", null));
     }
 
-
     @Test
     void test_deleteTemplate_whenTemplateDoesNotExistForProvidedVersion() {
         when(mockTemplateRepository.existsByIdentifierAndVersion(any(String.class), any(Version.class))).thenReturn(false);
@@ -161,9 +162,11 @@ class DbIntegrationTests {
         assertThat(result).isNotNull();
     }
 
-
     @Test
     void test_toTemplateEntitySpecification_throwsExceptionWhenNoMetadataIsProvided() {
-        assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> dbIntegration.toTemplateEntitySpecification(List.of()));
+        var metadata = new ArrayList<KeyValue>();
+
+        assertThatExceptionOfType(IllegalStateException.class)
+            .isThrownBy(() -> dbIntegration.toTemplateEntitySpecification(metadata));
     }
 }

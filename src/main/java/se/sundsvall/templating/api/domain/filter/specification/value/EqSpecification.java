@@ -11,7 +11,7 @@ import se.sundsvall.templating.api.domain.filter.expression.value.Eq;
 
 public class EqSpecification<T> implements Specification<T> {
 
-    private final Eq expression;
+    private transient final Eq expression;
 
     public EqSpecification(final Eq expression) {
         this.expression = expression;
