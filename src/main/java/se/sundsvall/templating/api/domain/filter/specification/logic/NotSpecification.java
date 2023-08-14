@@ -16,8 +16,8 @@ import se.sundsvall.templating.api.domain.filter.specification.ExpressionSpecifi
 
 public class NotSpecification<T> extends ExpressionSpecification<T> {
 
-    private transient final Not expression;
-    private transient final BiFunction<Class<T>, Expression, Specification<T>> expressionMapper;
+    private final transient Not expression;
+    private final transient BiFunction<Class<T>, Expression, Specification<T>> expressionMapper;
 
     public NotSpecification(final Class<T> entityClass, final Not expression) {
         this(entityClass, expression, FilterSpecifications::toSpecification);

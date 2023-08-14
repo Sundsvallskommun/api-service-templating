@@ -63,6 +63,6 @@ class VersionTests {
 
         assertThat(v1.compareTo(v2)).isEqualTo(-1);
         assertThat(v2.compareTo(v3)).isEqualTo(1);
-        assertThat(v2.compareTo(v4)).isZero();
+        assertThat(v2).isEqualByComparingTo(v4);
     }
 }

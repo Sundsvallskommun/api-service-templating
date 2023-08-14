@@ -16,8 +16,8 @@ import se.sundsvall.templating.api.domain.filter.specification.ExpressionSpecifi
 
 public class OrSpecification<T> extends ExpressionSpecification<T> {
 
-    private transient final Or expression;
-    private transient final BiFunction<Class<T>, Expression, Specification<T>> expressionMapper;
+    private final transient Or expression;
+    private final transient BiFunction<Class<T>, Expression, Specification<T>> expressionMapper;
 
     public OrSpecification(final Class<T> entityClass, final Or expression) {
         this(entityClass, expression, FilterSpecifications::toSpecification);

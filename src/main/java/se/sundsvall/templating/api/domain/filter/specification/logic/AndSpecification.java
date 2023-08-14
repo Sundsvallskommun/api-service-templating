@@ -16,8 +16,8 @@ import se.sundsvall.templating.api.domain.filter.specification.ExpressionSpecifi
 
 public class AndSpecification<T> extends ExpressionSpecification<T> {
 
-    private transient final And expression;
-    private transient final BiFunction<Class<T>, Expression, Specification<T>> expressionMapper;
+    private final transient And expression;
+    private final transient BiFunction<Class<T>, Expression, Specification<T>> expressionMapper;
 
     public AndSpecification(final Class<T> entityClass, final And expression) {
         this(entityClass, expression, FilterSpecifications::toSpecification);
