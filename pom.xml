@@ -19,8 +19,7 @@
 
         <published.container.port.test>7551</published.container.port.test>
         <published.container.port.production>7551</published.container.port.production>
-        <published.container.port.sandbox>7552</published.container.port.sandbox>
-
+        
         <json-patch.version>1.13</json-patch.version>
         <pebble.version>3.2.1</pebble.version>
         <jsoup.version>1.16.1</jsoup.version>
