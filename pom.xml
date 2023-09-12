@@ -23,7 +23,7 @@
         <json-patch.version>1.13</json-patch.version>
         <pebble.version>3.2.1</pebble.version>
         <jsoup.version>1.16.1</jsoup.version>
-        <openpdf.version>9.1.22</openpdf.version>
+        <openpdf.version>9.2.2</openpdf.version>
     </properties>
 
     <dependencies>
