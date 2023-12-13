@@ -1,13 +1,12 @@
 package se.sundsvall.templating.api.domain.filter;
 
+import org.springframework.data.jpa.domain.Specification;
+
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-
-import org.springframework.data.jpa.domain.Specification;
-
 import se.sundsvall.templating.api.domain.filter.expression.EmptyExpression;
 import se.sundsvall.templating.api.domain.filter.expression.Expression;
 import se.sundsvall.templating.api.domain.filter.expression.logic.And;
@@ -26,73 +25,77 @@ import se.sundsvall.templating.integration.db.entity.TemplateEntity_;
 
 public final class MetadataFilterSpecifications {
 
-    private MetadataFilterSpecifications() { }
+	private MetadataFilterSpecifications() {}
 
-    public static Specification<TemplateEntity> toSpecification(final Expression expression) {
-        return toSpecification(TemplateEntity.class, expression);
-    }
+	public static Specification<TemplateEntity> toSpecification(final Expression expression) {
+		return toSpecification(TemplateEntity.class, expression);
+	}
 
-    public static Specification<TemplateEntity> toSpecification(final Class<TemplateEntity> entityClass,
-            final Expression expression) {
-        if (expression instanceof And andExpression) {
-            return new AndSpecification<>(TemplateEntity.class, andExpression,
-                MetadataFilterSpecifications::toSpecification);
-        } else if (expression instanceof Or orExpression) {
-            return new OrSpecification<>(TemplateEntity.class, orExpression,
-                MetadataFilterSpecifications::toSpecification);
-        } else if (expression instanceof Not notExpression) {
-            return new NotSpecification<>(TemplateEntity.class, notExpression);
-        } else if (expression instanceof Eq eqExpression) {
-            return new MetadataEqSpecification(eqExpression);
-        } else if (expression instanceof In inExpression) {
-            return new MetadataInSpecification(inExpression);
-        } else if (expression instanceof EmptyExpression) {
-            return FilterSpecifications.createEmptySpecification(entityClass);
-        }
+	public static Specification<TemplateEntity> toSpecification(final Class<TemplateEntity> entityClass,
+		final Expression expression) {
+		if (expression instanceof final And andExpression) {
+			return new AndSpecification<>(TemplateEntity.class, andExpression,
+				MetadataFilterSpecifications::toSpecification);
+		}
+		if (expression instanceof final Or orExpression) {
+			return new OrSpecification<>(TemplateEntity.class, orExpression,
+				MetadataFilterSpecifications::toSpecification);
+		}
+		if (expression instanceof final Not notExpression) {
+			return new NotSpecification<>(TemplateEntity.class, notExpression);
+		} else if (expression instanceof final Eq eqExpression) {
+			return new MetadataEqSpecification(eqExpression);
+		} else if (expression instanceof final In inExpression) {
+			return new MetadataInSpecification(inExpression);
+		} else if (expression instanceof EmptyExpression) {
+			return FilterSpecifications.createEmptySpecification(entityClass);
+		}
 
-        throw new IllegalArgumentException("Unknown expression type: " + expression.getClass().getSimpleName());
-    }
+		throw new IllegalArgumentException("Unknown expression type: " + expression.getClass().getSimpleName());
+	}
 
-    static class MetadataEqSpecification extends EqSpecification<TemplateEntity> {
+	static class MetadataEqSpecification extends EqSpecification<TemplateEntity> {
 
-        MetadataEqSpecification(final Eq expression) {
-            super(expression);
-        }
+		private static final long serialVersionUID = 1408454748967470019L;
 
-        @Override
-        public Predicate toPredicate(final Root<TemplateEntity> root, final CriteriaQuery<?> query,
-                final CriteriaBuilder criteriaBuilder) {
-            var join = root.join(TemplateEntity_.metadata, JoinType.LEFT);
+		MetadataEqSpecification(final Eq expression) {
+			super(expression);
+		}
 
-            return query.where(
-                criteriaBuilder.isMember(join, root.get(TemplateEntity_.metadata)),
-                criteriaBuilder.and(
-                    criteriaBuilder.equal(join.get(MetadataEntity_.key), getExpression().getKey()),
-                    criteriaBuilder.equal(join.get(MetadataEntity_.value), getExpression().getValue())
-            )).getRestriction();
-        }
-    }
+		@Override
+		public Predicate toPredicate(final Root<TemplateEntity> root, final CriteriaQuery<?> query,
+			final CriteriaBuilder criteriaBuilder) {
+			final var join = root.join(TemplateEntity_.metadata, JoinType.LEFT);
 
-    static class MetadataInSpecification extends InSpecification<TemplateEntity> {
+			return query.where(
+				criteriaBuilder.isMember(join, root.get(TemplateEntity_.metadata)),
+				criteriaBuilder.and(
+					criteriaBuilder.equal(join.get(MetadataEntity_.key), getExpression().getKey()),
+					criteriaBuilder.equal(join.get(MetadataEntity_.value), getExpression().getValue()))).getRestriction();
+		}
+	}
 
-        MetadataInSpecification(final In expression) {
-            super(expression);
-        }
+	static class MetadataInSpecification extends InSpecification<TemplateEntity> {
 
-        @Override
-        public Predicate toPredicate(final Root<TemplateEntity> root, final CriteriaQuery<?> query,
-                final CriteriaBuilder criteriaBuilder) {
-            var join = root.join(TemplateEntity_.metadata, JoinType.LEFT);
+		private static final long serialVersionUID = 7794045931616835220L;
 
-            var inClause = criteriaBuilder.in(join.get(MetadataEntity_.value));
-            getExpression().getValue().stream().forEach(inClause::value);
+		MetadataInSpecification(final In expression) {
+			super(expression);
+		}
 
-            return query.where(
-                criteriaBuilder.isMember(join, root.get(TemplateEntity_.metadata)),
-                criteriaBuilder.and(
-                    criteriaBuilder.equal(join.get(MetadataEntity_.key), getExpression().getKey()),
-                    inClause
-            )).getRestriction();
-        }
-    }
+		@Override
+		public Predicate toPredicate(final Root<TemplateEntity> root, final CriteriaQuery<?> query,
+			final CriteriaBuilder criteriaBuilder) {
+			final var join = root.join(TemplateEntity_.metadata, JoinType.LEFT);
+
+			final var inClause = criteriaBuilder.in(join.get(MetadataEntity_.value));
+			getExpression().getValue().stream().forEach(inClause::value);
+
+			return query.where(
+				criteriaBuilder.isMember(join, root.get(TemplateEntity_.metadata)),
+				criteriaBuilder.and(
+					criteriaBuilder.equal(join.get(MetadataEntity_.key), getExpression().getKey()),
+					inClause)).getRestriction();
+		}
+	}
 }

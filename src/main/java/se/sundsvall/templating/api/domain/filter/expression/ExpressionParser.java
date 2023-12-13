@@ -16,91 +16,93 @@ import se.sundsvall.templating.api.domain.filter.util.StreamUtil;
 
 final class ExpressionParser extends StdDeserializer<Expression> {
 
-    ExpressionParser() {
-        super((Class<?>) null);
-    }
+	private static final long serialVersionUID = 8409532033753753103L;
 
-    @Override
-    public Expression deserialize(final JsonParser jsonParser, final DeserializationContext ctx)
-            throws IOException {
-        var root = (JsonNode) jsonParser.getCodec().readTree(jsonParser);
+	ExpressionParser() {
+		super((Class<?>) null);
+	}
 
-        if (!root.isObject() || StreamUtil.fromIterator(root.fields()).toList().isEmpty()) {
-            return new EmptyExpression();
-        }
+	@Override
+	public Expression deserialize(final JsonParser jsonParser, final DeserializationContext ctx)
+		throws IOException {
+		final var root = (JsonNode) jsonParser.getCodec().readTree(jsonParser);
 
-        return parse(root);
-    }
+		if (!root.isObject() || StreamUtil.fromIterator(root.fields()).toList().isEmpty()) {
+			return new EmptyExpression();
+		}
 
-    Expression parse(final JsonNode node) {
-        if (!node.isObject()) {
-            throw new IllegalStateException("Object node expected");
-        }
+		return parse(root);
+	}
 
-        var children = StreamUtil.fromIterator(node.fields()).toList();
-        if (children.size() != 1) {
-            throw new IllegalStateException("Node should contain a single entry");
-        }
+	Expression parse(final JsonNode node) {
+		if (!node.isObject()) {
+			throw new IllegalStateException("Object node expected");
+		}
 
-        var firstChild = children.get(0);
-        var name = firstChild.getKey();
-        var value = firstChild.getValue();
+		final var children = StreamUtil.fromIterator(node.fields()).toList();
+		if (children.size() != 1) {
+			throw new IllegalStateException("Node should contain a single entry");
+		}
 
-        return parseNode(name, value);
-    }
+		final var firstChild = children.get(0);
+		final var name = firstChild.getKey();
+		final var value = firstChild.getValue();
 
-    Expression parseNode(final String name, final JsonNode node) {
-        return switch (name) {
-            case "and" -> parseAnd(node);
-            case "or" -> parseOr(node);
-            case "not" -> parseNot(node);
-            case "eq" -> parseEq(node);
-            case "in" -> parseIn(node);
-            default -> throw new IllegalStateException();
-        };
-    }
+		return parseNode(name, value);
+	}
 
-    And parseAnd(final JsonNode node) {
-        if (!node.isArray()) {
-            throw new IllegalStateException("\"and\" node is not an array");
-        }
+	Expression parseNode(final String name, final JsonNode node) {
+		return switch (name) {
+			case "and" -> parseAnd(node);
+			case "or" -> parseOr(node);
+			case "not" -> parseNot(node);
+			case "eq" -> parseEq(node);
+			case "in" -> parseIn(node);
+			default -> throw new IllegalStateException();
+		};
+	}
 
-        return new And(StreamUtil.fromIterator(node.elements()).map(this::parse).toList());
-    }
+	And parseAnd(final JsonNode node) {
+		if (!node.isArray()) {
+			throw new IllegalStateException("\"and\" node is not an array");
+		}
 
-    Or parseOr(final JsonNode node) {
-        if (!node.isArray()) {
-            throw new IllegalStateException("\"or\" node is not an array");
-        }
+		return new And(StreamUtil.fromIterator(node.elements()).map(this::parse).toList());
+	}
 
-        return new Or(StreamUtil.fromIterator(node.elements()).map(this::parse).toList());
-    }
+	Or parseOr(final JsonNode node) {
+		if (!node.isArray()) {
+			throw new IllegalStateException("\"or\" node is not an array");
+		}
 
-    Not parseNot(final JsonNode node) {
-        return new Not(parse(node));
-    }
+		return new Or(StreamUtil.fromIterator(node.elements()).map(this::parse).toList());
+	}
 
-    Eq parseEq(final JsonNode node) {
-        if (!node.fields().hasNext()) {
-            throw new IllegalStateException("\"eq\" node is empty");
-        }
+	Not parseNot(final JsonNode node) {
+		return new Not(parse(node));
+	}
 
-        var content = node.fields().next();
-        var key = content.getKey();
-        var value = content.getValue().asText();
+	Eq parseEq(final JsonNode node) {
+		if (!node.fields().hasNext()) {
+			throw new IllegalStateException("\"eq\" node is empty");
+		}
 
-        return new Eq(key, value);
-    }
+		final var content = node.fields().next();
+		final var key = content.getKey();
+		final var value = content.getValue().asText();
 
-    In parseIn(final JsonNode node) {
-        if (!node.fields().hasNext()) {
-            throw new IllegalStateException("\"in\" node is empty");
-        }
+		return new Eq(key, value);
+	}
 
-        var content = node.fields().next();
-        var key = content.getKey();
-        var values = StreamUtil.fromIterator(content.getValue().elements()).map(JsonNode::asText).toList();
+	In parseIn(final JsonNode node) {
+		if (!node.fields().hasNext()) {
+			throw new IllegalStateException("\"in\" node is empty");
+		}
 
-        return new In(key, values);
-    }
+		final var content = node.fields().next();
+		final var key = content.getKey();
+		final var values = StreamUtil.fromIterator(content.getValue().elements()).map(JsonNode::asText).toList();
+
+		return new In(key, values);
+	}
 }
