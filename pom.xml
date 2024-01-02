@@ -19,7 +19,7 @@
         <published.container.port.production>7551</published.container.port.production>
         <json-patch.version>1.13</json-patch.version>
         <pebble.version>3.2.2</pebble.version>
-        <jsoup.version>1.17.1</jsoup.version>
+        <jsoup.version>1.17.2</jsoup.version>
         <openpdf.version>9.3.2</openpdf.version>
     </properties>
     <dependencies>
