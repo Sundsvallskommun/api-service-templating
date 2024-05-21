@@ -1,6 +1,7 @@
 package se.sundsvall.templating.service.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static se.sundsvall.templating.util.TemplateUtil.encodeBase64;
 
 import java.util.List;
 import java.util.Set;
@@ -13,7 +14,6 @@ import se.sundsvall.templating.api.domain.TemplateRequest;
 import se.sundsvall.templating.integration.db.entity.DefaultValueEntity;
 import se.sundsvall.templating.integration.db.entity.MetadataEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
-import se.sundsvall.templating.util.BASE64;
 
 class TemplateMapperTests {
 
@@ -78,7 +78,7 @@ class TemplateMapperTests {
             .withDescription("someDescription")
             .withMetadata(List.of(MetadataEntity.builder().build()))
             .withDefaultValues(Set.of(DefaultValueEntity.builder().build()))
-            .withContent(BASE64.encode("someContent"))
+            .withContent(encodeBase64("someContent"))
             .build();
 
         var detailedTemplateResponse = mapper.toDetailedTemplateResponse(templateEntity);
@@ -87,7 +87,7 @@ class TemplateMapperTests {
         assertThat(detailedTemplateResponse.getIdentifier()).isNotBlank();
         assertThat(detailedTemplateResponse.getName()).isEqualTo(templateEntity.getName());
         assertThat(detailedTemplateResponse.getDescription()).isEqualTo(templateEntity.getDescription());
-        assertThat(detailedTemplateResponse.getContent()).isEqualTo(BASE64.encode("someContent"));
+        assertThat(detailedTemplateResponse.getContent()).isEqualTo(encodeBase64("someContent"));
         assertThat(detailedTemplateResponse.getMetadata()).hasSameSizeAs(templateEntity.getMetadata());
         assertThat(detailedTemplateResponse.getDefaultValues()).hasSameSizeAs(templateEntity.getDefaultValues());
     }

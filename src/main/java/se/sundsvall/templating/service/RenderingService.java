@@ -2,16 +2,19 @@ package se.sundsvall.templating.service;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
+import static se.sundsvall.templating.util.TemplateUtil.bytesToString;
+import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
+import static se.sundsvall.templating.util.TemplateUtil.encodeBase64;
+import static se.sundsvall.templating.util.TemplateUtil.getTemplateType;
 
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.zalando.problem.Problem;
@@ -24,50 +27,64 @@ import se.sundsvall.templating.exception.TemplateException;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.entity.DefaultValueEntity;
 import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
-import se.sundsvall.templating.util.BASE64;
+import se.sundsvall.templating.service.processor.PebbleTemplateProcessor;
+import se.sundsvall.templating.service.processor.WordTemplateProcessor;
 
-import io.pebbletemplates.pebble.PebbleEngine;
+import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
+import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 
 @Service
 public class RenderingService {
 
-    private final PebbleEngine pebbleEngine;
-    private final ITextRenderer iTextRenderer;
     private final PebbleProperties pebbleProperties;
+    private final PebbleTemplateProcessor pebbleTemplateProcessor;
+    private final WordTemplateProcessor wordTemplateProcessor;
+    private final ITextRenderer iTextRenderer;
     private final DbIntegration dbIntegration;
 
-    public RenderingService(final PebbleEngine pebbleEngine, final ITextRenderer iTextRenderer,
-            final PebbleProperties pebbleProperties, final DbIntegration dbIntegration) {
-        this.pebbleEngine = pebbleEngine;
-        this.iTextRenderer = iTextRenderer;
+    public RenderingService(final PebbleProperties pebbleProperties,
+            final PebbleTemplateProcessor pebbleTemplateProcessor,
+            final WordTemplateProcessor wordTemplateProcessor,
+            final ITextRenderer iTextRenderer,
+            final DbIntegration dbIntegration) {
         this.pebbleProperties = pebbleProperties;
+        this.pebbleTemplateProcessor = pebbleTemplateProcessor;
+        this.wordTemplateProcessor = wordTemplateProcessor;
+        this.iTextRenderer = iTextRenderer;
         this.dbIntegration = dbIntegration;
     }
 
     public String renderTemplate(final RenderRequest request) {
-        return renderTemplateInternal(request, true);
+        var output = renderTemplateInternal(request);
+
+        return encodeBase64(output);
     }
 
     public String renderTemplateAsPdf(final RenderRequest request) {
-        var renderedTemplate = renderTemplateInternal(request, false);
-        var renderedPdf = renderHtmlAsPdf(renderedTemplate);
+        var output = renderTemplateInternal(request);
+        var renderedPdf = renderHtmlAsPdf(output);
 
-        // Encode the output as BASE64
-        return BASE64.encode(renderedPdf);
+        return encodeBase64(renderedPdf);
     }
 
     public String renderDirect(final DirectRenderRequest request) {
-        return renderDirectInternal(request, true);
+        var output = renderDirectInternal(request);
+
+        return encodeBase64(output);
     }
 
     public String renderDirectAsPdf(final DirectRenderRequest request) {
-        var renderedTemplate = renderDirectInternal(request, false);
-        var renderedPdf = renderHtmlAsPdf(renderedTemplate);
+        var output = renderDirectInternal(request);
 
-        return BASE64.encode(renderedPdf);
+        var renderedPdf = switch (getTemplateType(decodeBase64(request.getContent()))) {
+            case PEBBLE -> renderHtmlAsPdf(output);
+            case WORD -> renderWordAsPdf(output);
+        };
+
+        return encodeBase64(renderedPdf);
     }
 
-    String renderTemplateInternal(final RenderRequest request, final boolean base64EncodeOutput) {
+    byte[] renderTemplateInternal(final RenderRequest request) {
         var template = Optional.ofNullable(request.getIdentifier())
             .flatMap(identifier -> dbIntegration.getTemplate(identifier, request.getVersion()))
             .orElseGet(() -> Optional.ofNullable(request.getMetadata()).flatMap(dbIntegration::findTemplate).orElse(null));
@@ -99,42 +116,44 @@ public class RenderingService {
         // Add provided parameters
         mergedParametersAndDefaultValues.putAll(Optional.ofNullable(request.getParameters()).orElse(Map.of()));
 
-        try (var writer = new StringWriter()) {
-            pebbleEngine.getTemplate(template.getIdentifier() + ":" + template.getVersion())
-                .evaluate(writer, mergedParametersAndDefaultValues);
+        // Process the template
+        return switch (template.getType()) {
+            case PEBBLE -> pebbleTemplateProcessor.process(template.getIdentifier() + ":" + template.getVersion(), mergedParametersAndDefaultValues);
+            case WORD -> wordTemplateProcessor.process(template.getContentBytes(), mergedParametersAndDefaultValues);
+        };
+    }
 
-            // Optionally encode the output as BASE64
-            return base64EncodeOutput ? BASE64.encode(writer.toString()) : writer.toString();
-        } catch (Exception e) {
-            throw new TemplateException(e);
+    byte[] renderDirectInternal(final DirectRenderRequest request) {
+        var template = decodeBase64(request.getContent());
+
+        return switch (getTemplateType(template)) {
+            case PEBBLE -> pebbleTemplateProcessor.process(DelegatingLoader.DIRECT_PREFIX + request.getContent(), request.getParameters());
+            case WORD -> wordTemplateProcessor.process(template, request.getParameters());
+        };
+    }
+
+    byte[] renderHtmlAsPdf(final byte[] document) {
+        try (var out = new ByteArrayOutputStream()) {
+            iTextRenderer.setDocumentFromString(bytesToString(document));
+            iTextRenderer.layout();
+            iTextRenderer.createPDF(out);
+            iTextRenderer.finishPDF();
+
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw new TemplateException("Unable to render PDF", e);
         }
     }
 
-    String renderDirectInternal(final DirectRenderRequest request, final boolean base64EncodeOutput) {
-        try (var writer = new StringWriter()) {
-            pebbleEngine.getTemplate(DelegatingLoader.DIRECT_PREFIX + request.getContent())
-                .evaluate(writer, request.getParameters());
+    byte[] renderWordAsPdf(final byte[] document) {
+        try (var in = new ByteArrayInputStream(document);
+             var doc = new XWPFDocument(in);
+             var out = new ByteArrayOutputStream()) {
+            PdfConverter.getInstance().convert(doc, out, PdfOptions.create());
 
-            var output = writer.toString().substring(DelegatingLoader.DIRECT_PREFIX.length());
-
-            // Optionally encode the output as BASE64
-            return base64EncodeOutput ? BASE64.encode(output) : output;
-        } catch (Exception e) {
-            throw new TemplateException(e);
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw new TemplateException("Unable to render PDF", e);
         }
-    }
-
-    byte[] renderHtmlAsPdf(final String html) {
-        var os = new ByteArrayOutputStream();
-
-        var document = Jsoup.parse(html, StandardCharsets.UTF_8.name());
-        document.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
-
-        iTextRenderer.setDocumentFromString(document.html());
-        iTextRenderer.layout();
-        iTextRenderer.createPDF(os);
-        iTextRenderer.finishPDF();
-
-        return os.toByteArray();
     }
 }

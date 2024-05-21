@@ -5,12 +5,12 @@ INSERT INTO `templates` (`id`, `identifier`, `name`, `description`, `major`, `mi
 VALUES ('df21b2c9-ddbf-4b4d-bdac-207b29216c60', 'second.template', 'Second template', 'Some description', 1, 0, 'aGFyIGR1IG7DpWdvbiB1bGw=', 'Initial version');
 
 INSERT INTO `templates` (`id`, `identifier`, `name`, `description`, `major`, `minor`, `content`, `changelog`)
-VALUES ('a9b98ede-4475-49a4-ad31-6607fb154544', 'third.template', 'Third template', 'Some description', 1, 0, 'amEgamEga8OkcmEgYmFybg==', 'Initial version');
+VALUES ('a9b98ede-4475-49a4-ad31-6607fb154544', 'third.template', 'Third template', 'Some description', 1, 0, 'amEgamEga8OkcmEgdW5nZQ==', 'Initial version');
 INSERT INTO `templates` (`id`, `identifier`, `name`, `description`, `major`, `minor`, `content`, `changelog`)
-VALUES ('72eac1d7-2767-4642-84ab-f9786de7fe63', 'third.template', 'Third template', 'Some description', 1, 1, 'amEgamEga8OkcmEgdW5nZQ==', 'Updated version');
+VALUES ('72eac1d7-2767-4642-84ab-f9786de7fe63', 'third.template', 'Third template', 'Some description', 1, 1, 'amEgamEga8OkcmEgYmFybg==', 'Updated version');
 
 INSERT INTO `templates` (`id`, `identifier`, `name`, `description`, `major`, `minor`, `content`, `changelog`)
-VALUES ('d0339b9d-392a-44c9-8038-7480edd471af', 'fourth.template', 'Fourth template', 'Some description', 1, 0, 'amFnIGhhciBzw6Rja2rDpHZlbG4gZnVsbA==', 'Initial version');
+VALUES ('d0339b9d-392a-44c9-8038-7480edd471af', 'fourth.template', 'Fourth template', 'Some description', 1, 0, 'amFnIGhhciBoZWxhIHPDpGNrasOkdmVsbiBmdWxs', 'Initial version');
 
 INSERT INTO `templates_metadata` (`id`, `template_id`, `metadata_key`, `value`)
 VALUES('6a4f8f00-29fa-4dc2-951b-1a71d617e8b3', 'df21b2c9-ddbf-4b4d-bdac-207b29216c60', 'verksamhet', 'SBK');

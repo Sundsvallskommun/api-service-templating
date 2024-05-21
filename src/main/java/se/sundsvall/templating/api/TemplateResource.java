@@ -3,6 +3,9 @@ package se.sundsvall.templating.api;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.validation.Valid;
+
+import com.github.fge.jsonpatch.JsonPatch;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,16 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.zalando.problem.Problem;
 
-import com.github.fge.jsonpatch.JsonPatch;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
 import se.sundsvall.templating.api.domain.OpenApiExamples;
 import se.sundsvall.templating.api.domain.TemplateRequest;
@@ -38,6 +31,14 @@ import se.sundsvall.templating.api.domain.validation.ValidTemplateId;
 import se.sundsvall.templating.api.domain.validation.ValidTemplateVersion;
 import se.sundsvall.templating.domain.KeyValue;
 import se.sundsvall.templating.service.TemplateService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Validated
 @RestController
@@ -94,7 +95,7 @@ class TemplateResource {
 		content = @Content(schema = @Schema(implementation = Problem.class)))
 	@GetMapping("/{identifier}")
 	ResponseEntity<DetailedTemplateResponse> getTemplate(
-		@PathVariable("identifier") @ValidTemplateId final String identifier) {
+			@PathVariable("identifier") @ValidTemplateId final String identifier) {
 		return getTemplate(identifier, null);
 	}
 
@@ -109,8 +110,8 @@ class TemplateResource {
 		content = @Content(schema = @Schema(implementation = Problem.class)))
 	@GetMapping("/{identifier}/{version}")
 	ResponseEntity<DetailedTemplateResponse> getTemplate(
-		@PathVariable("identifier") @ValidTemplateId final String identifier,
-		@PathVariable("version") @ValidTemplateVersion final String version) {
+			@PathVariable("identifier") @ValidTemplateId final String identifier,
+			@PathVariable("version") @ValidTemplateVersion final String version) {
 		return templatingService.getTemplate(identifier, version)
 			.map(ResponseEntity::ok)
 			.orElse(ResponseEntity.notFound().build());
@@ -152,9 +153,9 @@ class TemplateResource {
 		content = @Content(schema = @Schema(implementation = Problem.class)))
 	@PatchMapping(value = "/{identifier}/{version}", consumes = "application/json-patch+json")
 	ResponseEntity<TemplateResponse> updateTemplate(
-		@PathVariable("identifier") @ValidTemplateId final String identifier,
-		@PathVariable("version") @ValidTemplateVersion final String version,
-		@RequestBody @Schema(example = OpenApiExamples.UPDATE) final JsonPatch jsonPatch) {
+			@PathVariable("identifier") @ValidTemplateId final String identifier,
+			@PathVariable("version") @ValidTemplateVersion final String version,
+			@RequestBody @Schema(example = OpenApiExamples.UPDATE) final JsonPatch jsonPatch) {
 		final var template = templatingService.updateTemplate(identifier, version, jsonPatch);
 
 		return ResponseEntity.ok(template);
@@ -187,8 +188,8 @@ class TemplateResource {
 		content = @Content(schema = @Schema(implementation = Problem.class)))
 	@DeleteMapping("/{identifier}/{version}")
 	ResponseEntity<Void> deleteTemplate(
-		@PathVariable("identifier") @ValidTemplateId final String identifier,
-		@PathVariable("version") @ValidTemplateVersion final String version) {
+			@PathVariable("identifier") @ValidTemplateId final String identifier,
+			@PathVariable("version") @ValidTemplateVersion final String version) {
 		templatingService.deleteTemplate(identifier, version);
 
 		return ResponseEntity.ok().build();

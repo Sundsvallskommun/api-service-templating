@@ -1,12 +1,14 @@
 package se.sundsvall.templating.service.pebble.loader;
 
+import static se.sundsvall.templating.util.TemplateUtil.bytesToString;
+import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
+
 import java.io.BufferedReader;
 import java.io.Reader;
 import java.io.StringReader;
 
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.service.pebble.IdentifierAndVersion;
-import se.sundsvall.templating.util.BASE64;
 
 import io.pebbletemplates.pebble.error.LoaderException;
 import io.pebbletemplates.pebble.loader.Loader;
@@ -22,7 +24,7 @@ public class DatabaseLoader implements Loader<IdentifierAndVersion> {
     @Override
     public Reader getReader(final IdentifierAndVersion identifierAndVersion) {
         return dbIntegration.getTemplate(identifierAndVersion.getIdentifier(), identifierAndVersion.getVersion())
-            .map(template -> new BufferedReader(new StringReader(BASE64.decode(template.getContent()))))
+            .map(template -> new BufferedReader(new StringReader(bytesToString(decodeBase64(template.getContent())))))
             .orElseThrow(() -> new LoaderException(null, "Unable to find template '" + identifierAndVersion + "'"));
     }
 

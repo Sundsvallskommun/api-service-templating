@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import se.sundsvall.templating.configuration.properties.PebbleProperties;
-import se.sundsvall.templating.configuration.properties.RenderingProperties;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.service.pebble.loader.DatabaseLoader;
 import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
@@ -16,7 +15,7 @@ import io.pebbletemplates.pebble.lexer.Syntax;
 import io.pebbletemplates.pebble.loader.StringLoader;
 
 @Configuration
-@EnableConfigurationProperties({PebbleProperties.class, RenderingProperties.class})
+@EnableConfigurationProperties(PebbleProperties.class)
 class PebbleConfiguration {
 
     private final PebbleProperties pebbleProperties;
