@@ -17,6 +17,6 @@ public class DirectRenderRequest {
     @Schema(description = "The template content, as a BASE64-encoded string")
     private String content;
 
-    @Schema(description = "Parameters", nullable = true, example = OpenApiExamples.PARAMETERS)
+    @Schema(description = "Parameters (string values may be BASE64-encoded, and in that case they should be on the form \"BASE64:<base64-encoded-value>\")", nullable = true, example = OpenApiExamples.PARAMETERS)
     private Map<String, Object> parameters;
 }

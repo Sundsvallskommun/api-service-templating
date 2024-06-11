@@ -1,6 +1,7 @@
 package se.sundsvall.templating.service;
 
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 import static se.sundsvall.templating.util.TemplateUtil.bytesToString;
 import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
@@ -9,8 +10,8 @@ import static se.sundsvall.templating.util.TemplateUtil.getTemplateType;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -35,6 +36,8 @@ import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 
 @Service
 public class RenderingService {
+
+    private static final String BASE64_VALUE_PREFIX = "BASE64:";
 
     private final PebbleProperties pebbleProperties;
     private final PebbleTemplateProcessor pebbleTemplateProcessor;
@@ -85,12 +88,12 @@ public class RenderingService {
     }
 
     byte[] renderTemplateInternal(final RenderRequest request) {
-        var template = Optional.ofNullable(request.getIdentifier())
+        var template = ofNullable(request.getIdentifier())
             .flatMap(identifier -> dbIntegration.getTemplate(identifier, request.getVersion()))
-            .orElseGet(() -> Optional.ofNullable(request.getMetadata()).flatMap(dbIntegration::findTemplate).orElse(null));
+            .orElseGet(() -> ofNullable(request.getMetadata()).flatMap(dbIntegration::findTemplate).orElse(null));
 
         if (null == template) {
-            var message = Optional.ofNullable(request.getIdentifier())
+            var message = ofNullable(request.getIdentifier())
                 .map(ignored -> format("Unable to find template using identifier: '%s'", request.getIdentifier()))
                 .orElseGet(() -> format("Unable to find template using metadata: %s", request.getMetadata()));
 
@@ -113,8 +116,10 @@ public class RenderingService {
         mergedParametersAndDefaultValues.put("_version", template.getVersion());
         // Add default values
         mergedParametersAndDefaultValues.putAll(defaultValues);
-        // Add provided parameters
-        mergedParametersAndDefaultValues.putAll(Optional.ofNullable(request.getParameters()).orElse(Map.of()));
+        // Decode request parameters
+        var decodedRequestParameters = decodeRequestParameters(request.getParameters());
+        // Add request parameters
+        mergedParametersAndDefaultValues.putAll(decodedRequestParameters);
 
         // Process the template
         return switch (template.getType()) {
@@ -126,9 +131,12 @@ public class RenderingService {
     byte[] renderDirectInternal(final DirectRenderRequest request) {
         var template = decodeBase64(request.getContent());
 
+        // Decode request parameters
+        var decodedRequestParameters = decodeRequestParameters(request.getParameters());
+
         return switch (getTemplateType(template)) {
-            case PEBBLE -> pebbleTemplateProcessor.process(DelegatingLoader.DIRECT_PREFIX + request.getContent(), request.getParameters());
-            case WORD -> wordTemplateProcessor.process(template, request.getParameters());
+            case PEBBLE -> pebbleTemplateProcessor.process(DelegatingLoader.DIRECT_PREFIX + request.getContent(), decodedRequestParameters);
+            case WORD -> wordTemplateProcessor.process(template, decodedRequestParameters);
         };
     }
 
@@ -155,5 +163,24 @@ public class RenderingService {
         } catch (IOException e) {
             throw new TemplateException("Unable to render PDF", e);
         }
+    }
+
+    /**
+     * Decodes any parameter value that is a string and is prefixed with "BASE64:".
+     *
+     * @param requestParameters the original request parameters
+     * @return the request parameters with any BASE64-encoded values decoded
+     */
+    Map<String, Object> decodeRequestParameters(final Map<String, Object> requestParameters) {
+        return ofNullable(requestParameters)
+            .map(parameters -> parameters.entrySet().stream()
+                .map(entry -> {
+                    var value = entry.getValue();
+                    if (value instanceof String stringValue && stringValue.startsWith(BASE64_VALUE_PREFIX)) {
+                        value = bytesToString(decodeBase64(stringValue.substring(BASE64_VALUE_PREFIX.length())));
+                    }
+                    return new AbstractMap.SimpleEntry<>(entry.getKey(), value);
+                })
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))).orElse(Map.of());
     }
 }
