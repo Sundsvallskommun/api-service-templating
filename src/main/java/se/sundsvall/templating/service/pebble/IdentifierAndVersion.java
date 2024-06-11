@@ -1,12 +1,14 @@
 package se.sundsvall.templating.service.pebble;
 
+import static se.sundsvall.templating.util.TemplateUtil.bytesToString;
+import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
+
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
 import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
-import se.sundsvall.templating.util.BASE64;
 
 import lombok.Getter;
 
@@ -20,7 +22,7 @@ public class IdentifierAndVersion {
 
     public IdentifierAndVersion(final String identiferAndVersion) {
         if (identiferAndVersion.startsWith(DelegatingLoader.DIRECT_PREFIX)) {
-            identifier = DelegatingLoader.DIRECT_PREFIX + BASE64.decode(identiferAndVersion.substring(DelegatingLoader.DIRECT_PREFIX.length()));
+            identifier = DelegatingLoader.DIRECT_PREFIX + bytesToString(decodeBase64(identiferAndVersion.substring(DelegatingLoader.DIRECT_PREFIX.length())));
             version = DelegatingLoader.DIRECT_PREFIX + "NOVERSION";
         } else {
             var matcher = PATTERN.matcher(identiferAndVersion);

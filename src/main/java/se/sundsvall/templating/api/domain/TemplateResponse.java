@@ -3,6 +3,8 @@ package se.sundsvall.templating.api.domain;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import se.sundsvall.templating.domain.TemplateType;
+
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -23,6 +25,9 @@ public class TemplateResponse {
 
     @Schema(description = "Version")
     private String version;
+
+    @Schema(description = "Type")
+    private TemplateType type;
 
     @Schema(description = "Name")
     private String name;

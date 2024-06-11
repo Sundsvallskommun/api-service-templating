@@ -1,5 +1,8 @@
 package se.sundsvall.templating.integration.db.entity;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Optional.ofNullable;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +12,8 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -17,7 +22,10 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
+
+import se.sundsvall.templating.domain.TemplateType;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -53,6 +61,10 @@ public class TemplateEntity {
     @With
     private Version version = new Version(1, 0);
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", length = 16, nullable = false)
+    private TemplateType type;
+
     @Column(name = "name", length = 64, nullable = false)
     private String name;
 
@@ -81,16 +93,22 @@ public class TemplateEntity {
      * Custom @Builder-annotated constructor to exclude id and version from builder.
      */
     @Builder(setterPrefix = "with")
-    TemplateEntity(final String identifier, final String name, final String description,
-            final String content, final String changeLog, final List<MetadataEntity> metadata,
-            final Set<DefaultValueEntity> defaultValues) {
+    TemplateEntity(final String identifier, final TemplateType type, final String name,
+            final String description, final String content, final String changeLog,
+            final List<MetadataEntity> metadata, final Set<DefaultValueEntity> defaultValues) {
         this.identifier = identifier;
+        this.type = type;
         this.name = name;
         this.description = description;
         this.content = content;
         this.changeLog = changeLog;
         this.metadata = metadata;
         this.defaultValues = defaultValues;
+    }
+
+    @Transient
+    public byte[] getContentBytes() {
+        return ofNullable(content).map(content -> content.getBytes(UTF_8)).orElse(null);
     }
 
     @PrePersist

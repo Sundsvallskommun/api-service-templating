@@ -11,14 +11,18 @@
     </parent>
     <groupId>se.sundsvall</groupId>
     <artifactId>api-service-templating</artifactId>
-    <version>1.1</version>
-    <name>api-service-templating</name>
+    <version>1.2</version>
+
     <properties>
         <json-patch.version>1.13</json-patch.version>
         <pebble.version>3.2.2</pebble.version>
         <jsoup.version>1.17.2</jsoup.version>
         <openpdf.version>9.3.2</openpdf.version>
+        <docx4j.version>11.4.11</docx4j.version>
+        <poi.version>5.2.5</poi.version>
+        <poi-pdf-converter.version>2.0.6</poi-pdf-converter.version>
     </properties>
+
     <dependencies>
         <!-- Test -->
         <dependency>
@@ -41,6 +45,7 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+
         <!-- JPA/JDBC -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -55,17 +60,20 @@
             <artifactId>mariadb-java-client</artifactId>
             <scope>runtime</scope>
         </dependency>
+
         <!-- Flyway -->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-mysql</artifactId>
         </dependency>
+
         <!-- Pebble template engine -->
         <dependency>
             <groupId>io.pebbletemplates</groupId>
             <artifactId>pebble</artifactId>
             <version>${pebble.version}</version>
         </dependency>
+
         <!-- OpenPDF -->
         <dependency>
             <groupId>org.jsoup</groupId>
@@ -77,6 +85,19 @@
             <artifactId>flying-saucer-pdf-openpdf</artifactId>
             <version>${openpdf.version}</version>
         </dependency>
+
+        <!-- Apache POI -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>fr.opensagres.xdocreport</groupId>
+            <artifactId>fr.opensagres.poi.xwpf.converter.pdf</artifactId>
+            <version>${poi-pdf-converter.version}</version>
+        </dependency>
+        
         <!-- Other -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -95,6 +116,7 @@
             <version>${json-patch.version}</version>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -115,8 +137,9 @@
                         <!-- Exclude JPA specifications and metamodels -->
                         <exclude>**/se/sundsvall/templating/integration/db/spec/**/**</exclude>
                         <exclude>**/se/sundsvall/templating/integration/db/entity/*_*</exclude>
-                        <!-- Figure out how to mock the PebbleTemplate#evaluate and writer stuff and re-enable this... -->
+                        <!-- Figure out how to/find the energy to mock PDFConverter and PebbleTemplate stuff and re-enable this... -->
                         <exclude>**/se/sundsvall/templating/service/RenderingService*</exclude>
+                        <exclude>**/se/sundsvall/templating/service/processor/**/*</exclude>
                         <exclude>**/se/sundsvall/templating/util/**/*</exclude>
                     </excludes>
                 </configuration>

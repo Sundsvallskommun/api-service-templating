@@ -37,6 +37,6 @@ public class RenderRequest {
     @ArraySchema(schema = @Schema(description = "Template metadata"))
     private List<@Valid KeyValue> metadata;
 
-    @Schema(description = "Parameters", nullable = true, example = OpenApiExamples.PARAMETERS)
+    @Schema(description = "Parameters (string values may be BASE64-encoded, and in that case they should be on the form \"BASE64:<base64-encoded-value>\")", nullable = true, example = OpenApiExamples.PARAMETERS)
     private Map<String, Object> parameters;
 }

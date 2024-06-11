@@ -1,6 +1,8 @@
 package se.sundsvall.templating.service.mapper;
 
 import static java.util.stream.Collectors.toSet;
+import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
+import static se.sundsvall.templating.util.TemplateUtil.getTemplateType;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +28,7 @@ public class TemplateMapper {
 
         return TemplateEntity.builder()
             .withIdentifier(templateRequest.getIdentifier())
+            .withType(getTemplateType(decodeBase64(templateRequest.getContent())))
             .withName(templateRequest.getName())
             .withDescription(templateRequest.getDescription())
             .withContent(templateRequest.getContent())
@@ -53,6 +56,7 @@ public class TemplateMapper {
         return TemplateResponse.builder()
             .withIdentifier(templateEntity.getIdentifier())
             .withVersion(templateEntity.getVersion().toString())
+            .withType(templateEntity.getType())
             .withName(templateEntity.getName())
             .withDescription(templateEntity.getDescription())
             .withMetadata(templateEntity.getMetadata().stream()
@@ -80,6 +84,7 @@ public class TemplateMapper {
         return DetailedTemplateResponse.builder()
             .withIdentifier(templateEntity.getIdentifier())
             .withVersion(templateEntity.getVersion().toString())
+            .withType(templateEntity.getType())
             .withName(templateEntity.getName())
             .withDescription(templateEntity.getDescription())
             .withMetadata(templateEntity.getMetadata().stream()

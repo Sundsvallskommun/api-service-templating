@@ -2,6 +2,7 @@
   {
     "identifier": "second.template",
     "version": "1.0",
+    "type": "PEBBLE",
     "name": "Second template",
     "description": "Some description",
     "metadata": [
@@ -30,6 +31,7 @@
   {
     "identifier": "fourth.template",
     "version": "1.0",
+    "type": "PEBBLE",
     "name": "Fourth template",
     "description": "Some description",
     "metadata": [
