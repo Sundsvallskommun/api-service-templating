@@ -16,6 +16,8 @@ import java.util.TreeMap;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.zalando.problem.Problem;
@@ -124,7 +126,7 @@ public class RenderingService {
         // Process the template
         return switch (template.getType()) {
             case PEBBLE -> pebbleTemplateProcessor.process(template.getIdentifier() + ":" + template.getVersion(), mergedParametersAndDefaultValues);
-            case WORD -> wordTemplateProcessor.process(template.getContentBytes(), mergedParametersAndDefaultValues);
+            case WORD -> wordTemplateProcessor.process(decodeBase64(template.getContent()), mergedParametersAndDefaultValues);
         };
     }
 
@@ -142,7 +144,12 @@ public class RenderingService {
 
     byte[] renderHtmlAsPdf(final byte[] document) {
         try (var out = new ByteArrayOutputStream()) {
-            iTextRenderer.setDocumentFromString(bytesToString(document));
+            // Run the document through Jsoup to wrap it in a proper HTML/XML document in order to
+            // get OpenPDF to play nice
+            var doc = Jsoup.parse(bytesToString(document), "UTF-8");
+            doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
+
+            iTextRenderer.setDocumentFromString(doc.html());
             iTextRenderer.layout();
             iTextRenderer.createPDF(out);
             iTextRenderer.finishPDF();
