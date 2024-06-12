@@ -156,7 +156,7 @@ class RenderingServiceTests {
 
         service.renderHtmlAsPdf(document.getBytes(UTF_8));
 
-        verify(mockITextRenderer, times(1)).setDocumentFromString(document);
+        verify(mockITextRenderer, times(1)).setDocumentFromString("<html>\n <head></head>\n <body>\n  " + document + "\n </body>\n</html>");
         verify(mockITextRenderer, times(1)).layout();
         verify(mockITextRenderer, times(1)).createPDF(any(OutputStream.class));
         verify(mockITextRenderer, times(1)).finishPDF();
