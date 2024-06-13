@@ -2,6 +2,7 @@ package se.sundsvall.templating.service;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toMap;
 import static se.sundsvall.templating.util.TemplateUtil.bytesToString;
 import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
@@ -11,6 +12,7 @@ import static se.sundsvall.templating.util.TemplateUtil.getTemplateType;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.AbstractMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -92,7 +94,10 @@ public class RenderingService {
     byte[] renderTemplateInternal(final RenderRequest request) {
         var template = ofNullable(request.getIdentifier())
             .flatMap(identifier -> dbIntegration.getTemplate(identifier, request.getVersion()))
-            .orElseGet(() -> ofNullable(request.getMetadata()).flatMap(dbIntegration::findTemplate).orElse(null));
+            .orElseGet(() -> ofNullable(request.getMetadata())
+                .filter(not(List::isEmpty))
+                .flatMap(dbIntegration::findTemplate)
+                .orElse(null));
 
         if (null == template) {
             var message = ofNullable(request.getIdentifier())
