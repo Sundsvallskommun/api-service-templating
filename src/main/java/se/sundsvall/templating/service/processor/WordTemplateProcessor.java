@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.xml.namespace.QName;
+
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
@@ -19,6 +21,7 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTProofErr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSdtBlock;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTText;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +29,8 @@ import se.sundsvall.templating.exception.TemplateException;
 
 @Component
 public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
+
+    private static final String[] PLACEHOLDER_FORMATS = {"{{%s}}", "{{ %s }}", "{{ %s}}", "{{%s }}"};
 
     private static final String CONTENT_TYPE_TEMPLATE = "application/vnd.openxmlformats-officedocument.wordprocessingml.template.main+xml";
     private static final String CONTENT_TYPE_MACRO_ENABLED_TEMPLATE = "application/vnd.ms-word.template.macroEnabledTemplate.main+xml";
@@ -51,6 +56,8 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
             replaceInParagraphs(document.getParagraphs(), flattenedParameters);
             // Process the document body table cells, if any
             replaceInTables(document.getTables(), flattenedParameters);
+            // Process content controls
+            replaceInContentControls(document, flattenedParameters);
 
             // Process document footer(s), if any
             for (var footer : document.getFooterList()) {
@@ -93,10 +100,9 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
         for (var paragraph : paragraphs) {
             for (var replacement : parameters.entrySet()) {
                 // Naively "guess" the placeholder formatting with regard to spacing
-                replaceTextSegment(paragraph, "{{%s}}".formatted(replacement.getKey()), replacement.getValue());
-                replaceTextSegment(paragraph, "{{ %s }}".formatted(replacement.getKey()), replacement.getValue());
-                replaceTextSegment(paragraph, "{{ %s}}".formatted(replacement.getKey()), replacement.getValue());
-                replaceTextSegment(paragraph, "{{%s }}".formatted(replacement.getKey()), replacement.getValue());
+                for (var placeholderFormat : PLACEHOLDER_FORMATS) {
+                    replaceTextSegment(paragraph, placeholderFormat.formatted(replacement.getKey()), replacement.getValue());
+                }
             }
         }
     }
@@ -215,6 +221,40 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
         }
         return null;
     }
+
+    private static void replaceInContentControls(final XWPFDocument document, final Map<String, Object> parameters) {
+        try (var xmlCursor = document.getDocument().getBody().newCursor()) {
+            var qNameSdt = new QName("http://schemas.openxmlformats.org/wordprocessingml/2006/main", "sdt", "w");
+
+            while (xmlCursor.hasNextToken()) {
+                var tokenType = xmlCursor.toNextToken();
+
+                if (tokenType.isStart()) {
+                    if (qNameSdt.equals(xmlCursor.getName())) {
+                        if (xmlCursor.getObject() instanceof CTSdtBlock ctSdtBlock) {
+                            var content = ctSdtBlock.getSdtContent();
+
+                            for (var ctp : content.getPArray()) {
+                                for (var ctr : ctp.getRArray()) {
+                                    for (var cttext : ctr.getTArray()) {
+                                        var stringValue = cttext.getStringValue();
+                                        for (var parameter : parameters.entrySet()) {
+                                            // Naively "guess" the placeholder formatting with regard to spacing
+                                            for (var placeholderFormat : PLACEHOLDER_FORMATS) {
+                                                stringValue = stringValue.replace(placeholderFormat.formatted(parameter.getKey()), parameter.getValue().toString());
+                                            }
+                                        }
+                                        cttext.setStringValue(stringValue);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     Map<String, Object> flattenMap(final Map<String, Object> map) {
         return map.entrySet().stream()
