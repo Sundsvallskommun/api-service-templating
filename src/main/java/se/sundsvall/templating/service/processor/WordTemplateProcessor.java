@@ -229,24 +229,20 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
             while (xmlCursor.hasNextToken()) {
                 var tokenType = xmlCursor.toNextToken();
 
-                if (tokenType.isStart()) {
-                    if (qNameSdt.equals(xmlCursor.getName())) {
-                        if (xmlCursor.getObject() instanceof CTSdtBlock ctSdtBlock) {
-                            var content = ctSdtBlock.getSdtContent();
+                if (tokenType.isStart() && qNameSdt.equals(xmlCursor.getName()) && xmlCursor.getObject() instanceof CTSdtBlock ctSdtBlock) {
+                    var content = ctSdtBlock.getSdtContent();
 
-                            for (var ctp : content.getPArray()) {
-                                for (var ctr : ctp.getRArray()) {
-                                    for (var cttext : ctr.getTArray()) {
-                                        var stringValue = cttext.getStringValue();
-                                        for (var parameter : parameters.entrySet()) {
-                                            // Naively "guess" the placeholder formatting with regard to spacing
-                                            for (var placeholderFormat : PLACEHOLDER_FORMATS) {
-                                                stringValue = stringValue.replace(placeholderFormat.formatted(parameter.getKey()), parameter.getValue().toString());
-                                            }
-                                        }
-                                        cttext.setStringValue(stringValue);
+                    for (var ctp : content.getPArray()) {
+                        for (var ctr : ctp.getRArray()) {
+                            for (var cttext : ctr.getTArray()) {
+                                var stringValue = cttext.getStringValue();
+                                for (var parameter : parameters.entrySet()) {
+                                    // Naively "guess" the placeholder formatting with regard to spacing
+                                    for (var placeholderFormat : PLACEHOLDER_FORMATS) {
+                                        stringValue = stringValue.replace(placeholderFormat.formatted(parameter.getKey()), parameter.getValue().toString());
                                     }
                                 }
+                                cttext.setStringValue(stringValue);
                             }
                         }
                     }
