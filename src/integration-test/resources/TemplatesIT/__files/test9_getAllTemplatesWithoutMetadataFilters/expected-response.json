@@ -1,0 +1,13 @@
+[
+  {
+    "identifier": "first.template",
+    "version": "1.0",
+    "type": "PEBBLE",
+    "name": "First template",
+    "description": "Some description from other municipality",
+    "metadata": [],
+    "defaultValues": [],
+    "changeLog": "Initial version",
+    "lastModifiedAt": "${json-unit.ignore}"
+  }
+]

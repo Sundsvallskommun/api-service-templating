@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.zalando.problem.Problem;
 
+import se.sundsvall.dept44.common.validators.annotation.ValidMunicipalityId;
 import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
 import se.sundsvall.templating.api.domain.OpenApiExamples;
 import se.sundsvall.templating.api.domain.TemplateRequest;
@@ -42,7 +43,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Validated
 @RestController
-@RequestMapping(value = "/templates", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/{municipalityId}/templates", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Template resources")
 @ApiResponse(
 	responseCode = "500",
@@ -64,8 +65,9 @@ class TemplateResource {
 			array = @ArraySchema(schema = @Schema(implementation = TemplateResponse.class))))
 	@PostMapping("/search")
 	List<TemplateResponse> searchTemplates(
+		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
 		@RequestBody final Expression expression) {
-		return templatingService.getTemplates(MetadataFilterSpecifications.toSpecification(expression));
+		return templatingService.getTemplates(municipalityId, MetadataFilterSpecifications.toSpecification(expression));
 	}
 
 	@Operation(summary = "Get all available templates, content excluded")
@@ -76,12 +78,13 @@ class TemplateResource {
 			array = @ArraySchema(schema = @Schema(implementation = TemplateResponse.class))))
 	@GetMapping
 	List<TemplateResponse> getAllTemplates(
+		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
 		@RequestParam(defaultValue = "{}") @Parameter(description = "Metadata filters (dictionary/map: <code>{ \"key\": \"value\", ... }</code> ). Not required") final Map<String, String> filters) {
 		final var metadata = filters.entrySet().stream()
 			.map(filter -> KeyValue.of(filter.getKey(), filter.getValue()))
 			.toList();
 
-		return templatingService.getTemplates(metadata);
+		return templatingService.getTemplates(municipalityId, metadata);
 	}
 
 	@Operation(summary = "Get the latest version of a template by identifier, including content")
@@ -95,8 +98,9 @@ class TemplateResource {
 		content = @Content(schema = @Schema(implementation = Problem.class)))
 	@GetMapping("/{identifier}")
 	ResponseEntity<DetailedTemplateResponse> getTemplate(
-			@PathVariable("identifier") @ValidTemplateId final String identifier) {
-		return getTemplate(identifier, null);
+		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
+		@PathVariable("identifier") @ValidTemplateId final String identifier) {
+		return getTemplate(municipalityId, identifier, null);
 	}
 
 	@Operation(summary = "Get a specific version of a template by identifier, including content")
@@ -110,9 +114,10 @@ class TemplateResource {
 		content = @Content(schema = @Schema(implementation = Problem.class)))
 	@GetMapping("/{identifier}/{version}")
 	ResponseEntity<DetailedTemplateResponse> getTemplate(
+			@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
 			@PathVariable("identifier") @ValidTemplateId final String identifier,
 			@PathVariable("version") @ValidTemplateVersion final String version) {
-		return templatingService.getTemplate(identifier, version)
+		return templatingService.getTemplate(municipalityId, identifier, version)
 			.map(ResponseEntity::ok)
 			.orElse(ResponseEntity.notFound().build());
 	}
@@ -127,8 +132,10 @@ class TemplateResource {
 		description = "Bad Request",
 		content = @Content(schema = @Schema(implementation = Problem.class)))
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-	ResponseEntity<TemplateResponse> saveTemplate(@Valid @RequestBody final TemplateRequest request) {
-		final var template = templatingService.saveTemplate(request);
+	ResponseEntity<TemplateResponse> saveTemplate(
+		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
+		@Valid @RequestBody final TemplateRequest request) {
+		final var template = templatingService.saveTemplate(municipalityId, request);
 
 		final var uri = UriComponentsBuilder.fromPath("/template")
 			.pathSegment(template.getIdentifier())
@@ -153,10 +160,11 @@ class TemplateResource {
 		content = @Content(schema = @Schema(implementation = Problem.class)))
 	@PatchMapping(value = "/{identifier}/{version}", consumes = "application/json-patch+json")
 	ResponseEntity<TemplateResponse> updateTemplate(
+		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
 			@PathVariable("identifier") @ValidTemplateId final String identifier,
 			@PathVariable("version") @ValidTemplateVersion final String version,
 			@RequestBody @Schema(example = OpenApiExamples.UPDATE) final JsonPatch jsonPatch) {
-		final var template = templatingService.updateTemplate(identifier, version, jsonPatch);
+		final var template = templatingService.updateTemplate(municipalityId, identifier, version, jsonPatch);
 
 		return ResponseEntity.ok(template);
 	}
@@ -171,8 +179,10 @@ class TemplateResource {
 		description = "Not Found",
 		content = @Content(schema = @Schema(implementation = Problem.class)))
 	@DeleteMapping("/{identifier}")
-	ResponseEntity<Void> deleteTemplate(@PathVariable("identifier") @ValidTemplateId final String identifier) {
-		templatingService.deleteTemplate(identifier, null);
+	ResponseEntity<Void> deleteTemplate(
+		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
+		@PathVariable("identifier") @ValidTemplateId final String identifier) {
+		templatingService.deleteTemplate(municipalityId, identifier, null);
 
 		return ResponseEntity.ok().build();
 	}
@@ -188,9 +198,10 @@ class TemplateResource {
 		content = @Content(schema = @Schema(implementation = Problem.class)))
 	@DeleteMapping("/{identifier}/{version}")
 	ResponseEntity<Void> deleteTemplate(
-			@PathVariable("identifier") @ValidTemplateId final String identifier,
-			@PathVariable("version") @ValidTemplateVersion final String version) {
-		templatingService.deleteTemplate(identifier, version);
+		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
+		@PathVariable("identifier") @ValidTemplateId final String identifier,
+		@PathVariable("version") @ValidTemplateVersion final String version) {
+		templatingService.deleteTemplate(municipalityId, identifier, version);
 
 		return ResponseEntity.ok().build();
 	}

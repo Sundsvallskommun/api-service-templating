@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockStatic;
@@ -19,7 +18,6 @@ import static se.sundsvall.templating.domain.TemplateType.WORD;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Writer;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -48,6 +46,9 @@ import io.pebbletemplates.pebble.template.PebbleTemplate;
 @ExtendWith(MockitoExtension.class)
 class RenderingServiceTests {
 
+    private static final String MUNICIPALITY_ID = "municipalityId";
+    public static final String IDENTIFIER = "someTemplateId";
+
     @Mock
     private ITextRenderer mockITextRenderer;
     @Mock
@@ -74,44 +75,45 @@ class RenderingServiceTests {
 
     @Test
     void renderTemplate() {
-        when(mockRenderRequest.getIdentifier()).thenReturn("someTemplateId");
-        when(mockTemplateEntity.getIdentifier()).thenReturn("someTemplateId");
+        when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
+        when(mockTemplateEntity.getIdentifier()).thenReturn(IDENTIFIER);
         when(mockTemplateEntity.getType()).thenReturn(PEBBLE);
-        when(mockDbIntegration.getTemplate(any(String.class), nullable(String.class)))
+        when(mockDbIntegration.getTemplate(any(), any(), any()))
             .thenReturn(Optional.of(mockTemplateEntity));
         when(mockPebbleTemplateProcessor.process(any(String.class), anyMap())).thenReturn("someResult".getBytes(UTF_8));
 
-        var result = service.renderTemplate(mockRenderRequest);
+        var result = service.renderTemplate(MUNICIPALITY_ID, mockRenderRequest);
         assertThat(result).isNotNull();
 
         verify(mockRenderRequest, times(1)).getIdentifier();
         verify(mockRenderRequest, times(1)).getParameters();
-        verify(mockDbIntegration, times(1)).getTemplate(any(String.class), nullable(String.class));
+        verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
         verify(mockPebbleTemplateProcessor).process(any(String.class), anyMap());
         verifyNoInteractions(mockWordTemplateProcessor);
     }
 
     @Test
-    void renderTemplate_whenRenderingFails() throws IOException {
-        when(mockTemplateEntity.getId()).thenReturn("someTemplateId");
-        when(mockRenderRequest.getIdentifier()).thenReturn("someTemplateId");
-        when(mockDbIntegration.getTemplate(any(String.class), any(String.class))).thenReturn(Optional.of(mockTemplateEntity));
-        doThrow(new IOException()).when(mockPebbleTemplate).evaluate(any(Writer.class), anyMap());
+    void renderTemplate_whenRenderingFails() {
+        when(mockTemplateEntity.getIdentifier()).thenReturn(IDENTIFIER);
+        when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
+        when(mockDbIntegration.getTemplate(any(), any(), any())).thenReturn(Optional.of(mockTemplateEntity));
+        when(mockTemplateEntity.getType()).thenReturn(PEBBLE);
+        doThrow(new TemplateException(new IOException())).when(mockPebbleTemplateProcessor).process(any(), anyMap());
 
         assertThatExceptionOfType(RuntimeException.class)
-            .isThrownBy(() -> service.renderTemplate(mockRenderRequest));
+            .isThrownBy(() -> service.renderTemplate(MUNICIPALITY_ID, mockRenderRequest));
     }
 
     @Test
     void renderTemplate_whenTemplateDoesNotExist() {
-        when(mockRenderRequest.getIdentifier()).thenReturn("someTemplateId");
+        when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
         when(mockRenderRequest.getVersion()).thenReturn("1.8");
-        when(mockDbIntegration.getTemplate(any(String.class), any(String.class))).thenReturn(Optional.empty());
+        when(mockDbIntegration.getTemplate(any(), any(), any())).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(ThrowableProblem.class)
-            .isThrownBy(() -> service.renderTemplate(mockRenderRequest));
+            .isThrownBy(() -> service.renderTemplate(MUNICIPALITY_ID, mockRenderRequest));
 
-        verify(mockDbIntegration, times(1)).getTemplate(any(String.class), any(String.class));
+        verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, IDENTIFIER, "1.8");
         verify(mockRenderRequest, times(3)).getIdentifier();
     }
 

@@ -22,13 +22,14 @@ import configuration.TestContainersConfiguration;
 @Sql({"/db/truncate.sql", "/db/data.sql"})
 class TemplatesIT extends AbstractAppTest {
 
-    private static final String PATH = "/templates";
+    private static final String PATH_2281 = "/2281/templates";
+    private static final String PATH_2282 = "/2282/templates";
 
     @Test
     @Sql("/db/truncate.sql")
     void test1_getAllTemplatesWhenNoTemplatesExist() {
         setupCall()
-            .withServicePath(PATH)
+            .withServicePath(PATH_2281)
             .withHttpMethod(HttpMethod.GET)
             .withExpectedResponseStatus(HttpStatus.OK)
             .withExpectedResponse("expected-response.json")
@@ -38,7 +39,7 @@ class TemplatesIT extends AbstractAppTest {
     @Test
     void test2_getAllTemplatesWithoutMetadataFilters() {
         setupCall()
-            .withServicePath(PATH)
+            .withServicePath(PATH_2281)
             .withHttpMethod(HttpMethod.GET)
             .withExpectedResponseStatus(HttpStatus.OK)
             .withExpectedResponse("expected-response.json")
@@ -47,7 +48,7 @@ class TemplatesIT extends AbstractAppTest {
 
     @Test
     void test3_getAllTemplatesWithMetadataFilters() {
-        var path = fromPath(PATH)
+        var path = fromPath(PATH_2281)
             .queryParam("verksamhet", "SBK")
             .queryParam("process", "PRH")
             .build()
@@ -64,7 +65,7 @@ class TemplatesIT extends AbstractAppTest {
     @Test
     void test4_searchTemplatesWithNoInput() {
         setupCall()
-            .withServicePath(PATH + "/search")
+            .withServicePath(PATH_2281 + "/search")
             .withHttpMethod(HttpMethod.POST)
             .withRequest("{}")
             .withExpectedResponseStatus(HttpStatus.OK)
@@ -75,7 +76,7 @@ class TemplatesIT extends AbstractAppTest {
     @Test
     void test5_searchTemplates() {
         setupCall()
-            .withServicePath(PATH + "/search")
+            .withServicePath(PATH_2281 + "/search")
             .withHttpMethod(HttpMethod.POST)
             .withRequest("request.json")
             .withExpectedResponseStatus(HttpStatus.OK)
@@ -86,7 +87,7 @@ class TemplatesIT extends AbstractAppTest {
     @Test
     void test6_getTemplateWhenTemplateDoesNotExist() {
         setupCall()
-            .withServicePath(PATH + "/some.nonexistent.identifier")
+            .withServicePath(PATH_2281 + "/some.nonexistent.identifier")
             .withHttpMethod(HttpMethod.GET)
             .withExpectedResponseStatus(HttpStatus.NOT_FOUND)
             .sendRequestAndVerifyResponse();
@@ -95,7 +96,7 @@ class TemplatesIT extends AbstractAppTest {
     @Test
     void test7_getTemplateWithRequestedVersion() {
         setupCall()
-            .withServicePath(PATH + "/third.template/1.0")
+            .withServicePath(PATH_2281 + "/third.template/1.0")
             .withHttpMethod(HttpMethod.GET)
             .withExpectedResponseStatus(HttpStatus.OK)
             .withExpectedResponse("expected-response.json")
@@ -105,11 +106,20 @@ class TemplatesIT extends AbstractAppTest {
     @Test
     void test8_getTemplateWithoutRequestedVersionReturnsLatestVersion() {
         setupCall()
-            .withServicePath(PATH + "/third.template")
+            .withServicePath(PATH_2281 + "/third.template")
             .withHttpMethod(HttpMethod.GET)
             .withExpectedResponseStatus(HttpStatus.OK)
             .withExpectedResponse("expected-response.json")
             .sendRequestAndVerifyResponse();
     }
 
+    @Test
+    void test9_getAllTemplatesWithoutMetadataFilters() {
+        setupCall()
+            .withServicePath(PATH_2282)
+            .withHttpMethod(HttpMethod.GET)
+            .withExpectedResponseStatus(HttpStatus.OK)
+            .withExpectedResponse("expected-response.json")
+            .sendRequestAndVerifyResponse();
+    }
 }

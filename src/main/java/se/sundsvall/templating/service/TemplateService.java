@@ -38,31 +38,31 @@ public class TemplateService {
     }
 
     @Transactional(readOnly = true)
-    public List<TemplateResponse> getTemplates(final Specification<TemplateEntity> filter) {
-        return dbIntegration.findTemplates(filter).stream().map(mapper::toTemplateResponse).toList();
+    public List<TemplateResponse> getTemplates(final String municipalityId, final Specification<TemplateEntity> filter) {
+        return dbIntegration.findTemplates(municipalityId, filter).stream().map(mapper::toTemplateResponse).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<TemplateResponse> getTemplates(final List<KeyValue> metadata) {
+    public List<TemplateResponse> getTemplates(final String municipalityId, final List<KeyValue> metadata) {
         if (metadata == null || metadata.isEmpty()) {
-            return dbIntegration.getAllTemplates().stream()
+            return dbIntegration.getAllTemplates(municipalityId).stream()
                 .map(mapper::toTemplateResponse)
                 .toList();
         } else {
-            return dbIntegration.findTemplates(metadata).stream()
+            return dbIntegration.findTemplates(municipalityId, metadata).stream()
                 .map(mapper::toTemplateResponse)
                 .toList();
         }
     }
 
     @Transactional(readOnly = true)
-    public Optional<DetailedTemplateResponse> getTemplate(final String identifier, final String version) {
-        return dbIntegration.getTemplate(identifier, version)
+    public Optional<DetailedTemplateResponse> getTemplate(final String municipalityId, final String identifier, final String version) {
+        return dbIntegration.getTemplate(municipalityId, identifier, version)
             .map(mapper::toDetailedTemplateResponse);
     }
 
-    public TemplateResponse saveTemplate(final TemplateRequest templateRequest) {
-        var version = dbIntegration.getTemplate(templateRequest.getIdentifier(), null)
+    public TemplateResponse saveTemplate(final String municipalityId, final TemplateRequest templateRequest) {
+        var version = dbIntegration.getTemplate(municipalityId, templateRequest.getIdentifier(), null)
             .map(templateEntity -> {
                 if (null == templateRequest.getVersionIncrement()) {
                     throw Problem.valueOf(Status.BAD_REQUEST, "'versionIncrement' must be set, since template with identifier '" + templateRequest.getIdentifier() + "' already exists");
@@ -78,16 +78,16 @@ public class TemplateService {
         return mapper.toTemplateResponse(dbIntegration.saveTemplate(templateEntity));
     }
 
-    public TemplateResponse updateTemplate(final String identifier, final String version, final JsonPatch jsonPatch) {
-        return dbIntegration.getTemplate(identifier, version)
+    public TemplateResponse updateTemplate(final String municipalityId, final String identifier, final String version, final JsonPatch jsonPatch) {
+        return dbIntegration.getTemplate(municipalityId, identifier, version)
             .map(templateEntity -> applyPatch(jsonPatch, TemplateEntity.class, templateEntity))
             .map(dbIntegration::saveTemplate)
             .map(mapper::toTemplateResponse)
             .orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "Unable to find template '" + identifier + ":" + version + "'"));
     }
 
-    public void deleteTemplate(final String identifier, final String version) {
-        dbIntegration.deleteTemplate(identifier, version);
+    public void deleteTemplate(final String municipalityId, final String identifier, final String version) {
+        dbIntegration.deleteTemplate(municipalityId, identifier, version);
     }
 
     <T> T applyPatch(final JsonPatch patch, final Class<T> targetClass, final T target) {

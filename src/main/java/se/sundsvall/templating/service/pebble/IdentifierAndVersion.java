@@ -19,13 +19,15 @@ public class IdentifierAndVersion {
 
     private final String identifier;
     private final String version;
+    private final String municipalityId;
 
-    public IdentifierAndVersion(final String identiferAndVersion) {
-        if (identiferAndVersion.startsWith(DelegatingLoader.DIRECT_PREFIX)) {
-            identifier = DelegatingLoader.DIRECT_PREFIX + bytesToString(decodeBase64(identiferAndVersion.substring(DelegatingLoader.DIRECT_PREFIX.length())));
+    public IdentifierAndVersion(final String municipalityId, final String identifierAndVersion) {
+        this.municipalityId = municipalityId;
+        if (identifierAndVersion.startsWith(DelegatingLoader.DIRECT_PREFIX)) {
+            identifier = DelegatingLoader.DIRECT_PREFIX + bytesToString(decodeBase64(identifierAndVersion.substring(DelegatingLoader.DIRECT_PREFIX.length())));
             version = DelegatingLoader.DIRECT_PREFIX + "NOVERSION";
         } else {
-            var matcher = PATTERN.matcher(identiferAndVersion);
+            var matcher = PATTERN.matcher(identifierAndVersion);
             if (!matcher.matches()) {
                 throw new IllegalArgumentException("Unable to parse identifier and/or version");
             }
@@ -44,12 +46,12 @@ public class IdentifierAndVersion {
             return false;
         }
         var other = (IdentifierAndVersion) o;
-        return identifier.equals(other.identifier) && Objects.equals(version, other.version);
+        return identifier.equals(other.identifier) && Objects.equals(version, other.version) && municipalityId.equals(other.municipalityId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(identifier, version);
+        return Objects.hash(identifier, version, municipalityId);
     }
 
     @Override
@@ -58,6 +60,7 @@ public class IdentifierAndVersion {
         if (StringUtils.isNotBlank(version)) {
             sb.append(":").append(version);
         }
+        sb.append("@").append(municipalityId);
         return sb.toString();
     }
 }

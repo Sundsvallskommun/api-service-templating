@@ -13,6 +13,7 @@ import org.zalando.problem.Status;
 
 import se.sundsvall.templating.domain.KeyValue;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
+import se.sundsvall.templating.integration.db.entity.TemplateEntity_;
 import se.sundsvall.templating.integration.db.entity.Version;
 import se.sundsvall.templating.integration.db.spec.Specifications;
 
@@ -27,22 +28,22 @@ public class DbIntegration {
     }
 
     @Transactional(readOnly = true)
-    public List<TemplateEntity> getAllTemplates() {
-        return templateRepository.findAll();
+    public List<TemplateEntity> getAllTemplates(final String municipalityId) {
+        return templateRepository.findAllByMunicipalityId(municipalityId);
     }
 
     @Transactional(readOnly = true)
-    public Optional<TemplateEntity> getTemplate(final String identifier, final String version) {
+    public Optional<TemplateEntity> getTemplate(final String municipalityId, final String identifier, final String version) {
         return Optional.ofNullable(version)
             .map(Version::parse)
-            .map(parsedVersion -> templateRepository.findByIdentifierAndVersion(identifier, parsedVersion))
-            .orElseGet(() -> templateRepository.findLatestByIdentifier(identifier));
+            .map(parsedVersion -> templateRepository.findByIdentifierAndVersionAndMunicipalityId(identifier, parsedVersion, municipalityId))
+            .orElseGet(() -> templateRepository.findLatestByIdentifierAndMunicipalityId(identifier, municipalityId));
     }
 
     @Transactional(readOnly = true)
-    public Optional<TemplateEntity> findTemplate(final List<KeyValue> metadata) {
+    public Optional<TemplateEntity> findTemplate(final String municipalityId, final List<KeyValue> metadata) {
         try {
-            return templateRepository.findOne(toTemplateEntitySpecification(metadata));
+            return templateRepository.findOne(toTemplateEntitySpecification(municipalityId, metadata));
         } catch (IncorrectResultSizeDataAccessException e) {
             throw Problem.valueOf(Status.NOT_FOUND, "Metadata query resulted in multiple matching templates");
         }
@@ -50,16 +51,17 @@ public class DbIntegration {
 
 
     @Transactional(readOnly = true)
-    public List<TemplateEntity> findTemplates(final Specification<TemplateEntity> filter) {
-        return templateRepository.findAll(filter);
+    public List<TemplateEntity> findTemplates(final String municipalityId, final Specification<TemplateEntity> filter) {
+        var filterWithMunicipalityId = filter.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(TemplateEntity_.municipalityId), municipalityId));
+        return templateRepository.findAll(filterWithMunicipalityId);
     }
 
     @Transactional(readOnly = true)
-    public List<TemplateEntity> findTemplates(final List<KeyValue> metadata) {
-        return templateRepository.findAll(toTemplateEntitySpecification(metadata));
+    public List<TemplateEntity> findTemplates(final String municipalityId, final List<KeyValue> metadata) {
+        return templateRepository.findAll(toTemplateEntitySpecification(municipalityId, metadata));
     }
 
-    Specification<TemplateEntity> toTemplateEntitySpecification(final List<KeyValue> metadata) {
+    Specification<TemplateEntity> toTemplateEntitySpecification(final String municipalityId, final List<KeyValue> metadata) {
         var specifications = new ArrayList<>(metadata.stream()
             .map(entry -> Specifications.hasMetadata(entry.getKey(), entry.getValue()))
             .toList());
@@ -72,6 +74,8 @@ public class DbIntegration {
         for (var additionalSpecification : specifications) {
             specification = specification.and(additionalSpecification);
         }
+
+        specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get(TemplateEntity_.municipalityId), municipalityId));
         return specification;
     }
 
@@ -79,26 +83,26 @@ public class DbIntegration {
         return templateRepository.save(templateEntity);
     }
 
-    public boolean existsByIdentifier(final String identifier) {
-        return templateRepository.existsByIdentifier(identifier);
+    public boolean existsByIdentifier(final String municipalityId, final String identifier) {
+        return templateRepository.existsByIdentifierAndMunicipalityId(identifier, municipalityId);
     }
 
 
-    public void deleteTemplate(final String identifier, final String version) {
+    public void deleteTemplate(final String municipalityId, final String identifier, final String version) {
         Optional.ofNullable(version)
             .map(Version::parse)
             .ifPresentOrElse(parsedVersion -> {
-                if (!templateRepository.existsByIdentifierAndVersion(identifier, parsedVersion)) {
+                if (!templateRepository.existsByIdentifierAndVersionAndMunicipalityId(identifier, parsedVersion, municipalityId)) {
                     throw Problem.valueOf(Status.NOT_FOUND, "Unable to find template '" + identifier + ":" + parsedVersion + "'");
                 }
 
-                templateRepository.deleteByIdentifierAndVersion(identifier, parsedVersion);
+                templateRepository.deleteByIdentifierAndVersionAndMunicipalityId(identifier, parsedVersion, municipalityId);
             }, () -> {
-                if (!templateRepository.existsByIdentifier(identifier)) {
+                if (!templateRepository.existsByIdentifierAndMunicipalityId(identifier, municipalityId)) {
                     throw Problem.valueOf(Status.NOT_FOUND, "Unable to find template '" + identifier + "'");
                 }
 
-                templateRepository.deleteByIdentifier(identifier);
+                templateRepository.deleteByIdentifierAndMunicipalityId(identifier, municipalityId);
             });
     }
 }
