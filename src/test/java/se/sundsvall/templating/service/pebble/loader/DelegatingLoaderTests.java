@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import se.sundsvall.templating.domain.ContextMunicipalityId;
 import se.sundsvall.templating.service.pebble.IdentifierAndVersion;
 
 import io.pebbletemplates.pebble.loader.StringLoader;
@@ -23,23 +24,27 @@ import io.pebbletemplates.pebble.loader.StringLoader;
 @ExtendWith(MockitoExtension.class)
 class DelegatingLoaderTests {
 
+    private static final String MUNICIPALITY_ID = "municipalityId";
+
     @Mock
     private DatabaseLoader mockDatabaseLoader;
     @Mock
     private StringLoader mockStringLoader;
+    @Mock
+    private ContextMunicipalityId mockContextMunicipalityId;
 
     private DelegatingLoader loader;
 
     @BeforeEach
     void setUp() {
-        loader = new DelegatingLoader(mockDatabaseLoader, mockStringLoader);
+        loader = new DelegatingLoader(mockDatabaseLoader, mockStringLoader, mockContextMunicipalityId);
     }
 
     @Test
     void test_getReader() {
         when(mockDatabaseLoader.getReader(any(IdentifierAndVersion.class))).thenReturn(new StringReader(""));
 
-        var reader = loader.getReader(new IdentifierAndVersion("someTemplateId"));
+        var reader = loader.getReader(new IdentifierAndVersion(MUNICIPALITY_ID, "someTemplateId"));
         assertThat(reader).isNotNull();
 
         verify(mockStringLoader, never()).getReader(any(String.class));
@@ -50,7 +55,7 @@ class DelegatingLoaderTests {
     void test_getReader_directRendering() {
         when(mockStringLoader.getReader(any(String.class))).thenReturn(new StringReader(""));
 
-        var reader = loader.getReader(new IdentifierAndVersion("DIRECT:someTemplate"));
+        var reader = loader.getReader(new IdentifierAndVersion(MUNICIPALITY_ID,"DIRECT:someTemplate"));
         assertThat(reader).isNotNull();
 
         verify(mockStringLoader, times(1)).getReader(any(String.class));
@@ -95,9 +100,11 @@ class DelegatingLoaderTests {
 
     @Test
     void test_createCacheKey() {
+        when(mockContextMunicipalityId.getValue()).thenReturn(MUNICIPALITY_ID);
         assertThat(loader.createCacheKey("someTemplateId")).satisfies(identifierAndVersion -> {
             assertThat(identifierAndVersion.getIdentifier()).isEqualTo("someTemplateId");
             assertThat(identifierAndVersion.getVersion()).isNull();
+            assertThat(identifierAndVersion.getMunicipalityId()).isEqualTo(MUNICIPALITY_ID);
         });
     }
 

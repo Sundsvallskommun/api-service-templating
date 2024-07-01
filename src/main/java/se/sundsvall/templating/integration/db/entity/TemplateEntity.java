@@ -40,7 +40,7 @@ import lombok.With;
     name = "templates",
     uniqueConstraints = @UniqueConstraint(
         name = "unique_identifier_and_version",
-        columnNames = { "identifier", "major", "minor" }
+        columnNames = { "identifier", "major", "minor" , "municipality_id"}
     )
 )
 @Getter
@@ -55,6 +55,9 @@ public class TemplateEntity {
 
     @Column(name = "identifier", nullable = false)
     private String identifier;
+
+    @Column(name = "municipality_id", nullable = false)
+    private String municipalityId;
 
     @Embedded
     @Setter(AccessLevel.PRIVATE)
@@ -93,10 +96,11 @@ public class TemplateEntity {
      * Custom @Builder-annotated constructor to exclude id and version from builder.
      */
     @Builder(setterPrefix = "with")
-    TemplateEntity(final String identifier, final TemplateType type, final String name,
+    TemplateEntity(final String identifier, final String municipalityId, final TemplateType type, final String name,
             final String description, final String content, final String changeLog,
             final List<MetadataEntity> metadata, final Set<DefaultValueEntity> defaultValues) {
         this.identifier = identifier;
+        this.municipalityId = municipalityId;
         this.type = type;
         this.name = name;
         this.description = description;

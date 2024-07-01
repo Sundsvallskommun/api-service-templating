@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import se.sundsvall.templating.configuration.properties.PebbleProperties;
+import se.sundsvall.templating.domain.ContextMunicipalityId;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.service.pebble.loader.DatabaseLoader;
 import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
@@ -25,8 +26,8 @@ class PebbleConfiguration {
     }
 
     @Bean("pebble.database-loader")
-    DatabaseLoader pebbleDatabaseLoader(final DbIntegration dbIntegration) {
-        return new DatabaseLoader(dbIntegration);
+    DatabaseLoader pebbleDatabaseLoader(final DbIntegration dbIntegration, final ContextMunicipalityId requestScropedMunicipalityId) {
+        return new DatabaseLoader(dbIntegration, requestScropedMunicipalityId);
     }
 
     @Bean("pebble.string-loader")
@@ -36,9 +37,10 @@ class PebbleConfiguration {
 
     @Bean("pebble.delegating-loader")
     DelegatingLoader pebbleDelegatingLoader(
-            @Qualifier("pebble.database-loader") final DatabaseLoader databaseLoader,
-            @Qualifier("pebble.string-loader") final StringLoader stringLoader) {
-        return new DelegatingLoader(databaseLoader, stringLoader);
+        @Qualifier("pebble.database-loader") final DatabaseLoader databaseLoader,
+        @Qualifier("pebble.string-loader") final StringLoader stringLoader,
+        final ContextMunicipalityId requestScopedMunicipalityId) {
+        return new DelegatingLoader(databaseLoader, stringLoader, requestScopedMunicipalityId);
     }
 
     @Bean

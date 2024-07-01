@@ -2,6 +2,7 @@ package se.sundsvall.templating.service.pebble.loader;
 
 import java.io.Reader;
 
+import se.sundsvall.templating.domain.ContextMunicipalityId;
 import se.sundsvall.templating.service.pebble.IdentifierAndVersion;
 
 import io.pebbletemplates.pebble.loader.Loader;
@@ -13,11 +14,13 @@ public class DelegatingLoader implements Loader<IdentifierAndVersion> {
 
     private final DatabaseLoader databaseLoader;
     private final StringLoader stringLoader;
+    private final ContextMunicipalityId requestScopedMunicipalityId;
 
     public DelegatingLoader(final DatabaseLoader databaseLoader,
-            final StringLoader stringLoader) {
+            final StringLoader stringLoader, ContextMunicipalityId requestScopedMunicipalityId) {
         this.databaseLoader = databaseLoader;
         this.stringLoader = stringLoader;
+        this.requestScopedMunicipalityId = requestScopedMunicipalityId;
     }
 
     @Override
@@ -55,7 +58,7 @@ public class DelegatingLoader implements Loader<IdentifierAndVersion> {
 
     @Override
     public IdentifierAndVersion createCacheKey(final String identifier) {
-        return new IdentifierAndVersion(identifier);
+        return new IdentifierAndVersion(requestScopedMunicipalityId.getValue(), identifier);
     }
 
     @Override

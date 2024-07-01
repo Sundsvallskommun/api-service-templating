@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import se.sundsvall.templating.domain.ContextMunicipalityId;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.service.pebble.IdentifierAndVersion;
@@ -27,40 +27,44 @@ import io.pebbletemplates.pebble.error.LoaderException;
 @ExtendWith(MockitoExtension.class)
 class DatabaseLoaderTests {
 
+    private static final String MUNICIPALITY_ID = "2281";
+
     @Mock
     private DbIntegration mockDbIntegration;
     @Mock
     private TemplateEntity mockTemplateEntity;
+    @Mock
+    private ContextMunicipalityId mockContextMunicipalityId;
 
     private DatabaseLoader loader;
 
     @BeforeEach
     void setUp() {
-        loader = new DatabaseLoader(mockDbIntegration);
+        loader = new DatabaseLoader(mockDbIntegration, mockContextMunicipalityId);
     }
 
     @Test
     void test_getReader() {
         when(mockTemplateEntity.getContent()).thenReturn("someContent");
-        when(mockDbIntegration.getTemplate(any(String.class), any(String.class))).thenReturn(Optional.of(mockTemplateEntity));
+        when(mockDbIntegration.getTemplate(any(), any(), any())).thenReturn(Optional.of(mockTemplateEntity));
 
-        var reader = loader.getReader(new IdentifierAndVersion("someTemplateId:1.0"));
+        var reader = loader.getReader(new IdentifierAndVersion(MUNICIPALITY_ID, "someTemplateId:1.0"));
         assertThat(reader).isNotNull();
 
-        verify(mockDbIntegration, times(1)).getTemplate(any(String.class), any(String.class));
+        verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, "someTemplateId", "1.0");
     }
 
     @Test
     void test_getReader_whenTemplateDoesNotExist() {
-        var templateId = new IdentifierAndVersion("someTemplateId");
+        var templateId = new IdentifierAndVersion(MUNICIPALITY_ID, "someTemplateId");
 
-        when(mockDbIntegration.getTemplate(any(String.class), nullable(String.class))).thenReturn(Optional.empty());
+        when(mockDbIntegration.getTemplate(any(), any(), any())).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(LoaderException.class)
             .isThrownBy(() -> loader.getReader(templateId))
-            .withMessageStartingWith("Unable to find template 'someTemplateId'");
+            .withMessageStartingWith("Unable to find template 'someTemplateId@2281'");
 
-        verify(mockDbIntegration, times(1)).getTemplate(any(String.class), nullable(String.class));
+        verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, "someTemplateId", null);
     }
 
     @Test
@@ -87,29 +91,33 @@ class DatabaseLoaderTests {
 
     @Test
     void test_createCacheKey() {
+        when(mockContextMunicipalityId.getValue()).thenReturn(MUNICIPALITY_ID);
         assertThat(loader.createCacheKey("someTemplateId")).satisfies(identifierAndVersion -> {
             assertThat(identifierAndVersion.getIdentifier()).isEqualTo("someTemplateId");
             assertThat(identifierAndVersion.getVersion()).isNull();
+            assertThat(identifierAndVersion.getMunicipalityId()).isEqualTo(MUNICIPALITY_ID);
         });
     }
 
     @Test
     void test_resourceExists() {
-        when(mockDbIntegration.getTemplate(any(String.class), eq(null)))
+        when(mockContextMunicipalityId.getValue()).thenReturn(MUNICIPALITY_ID);
+        when(mockDbIntegration.getTemplate(any(), any(), eq(null)))
             .thenReturn(Optional.of(TemplateEntity.builder().build()));
 
         assertThat(loader.resourceExists("someTemplateId")).isTrue();
 
-        verify(mockDbIntegration, times(1)).getTemplate(any(String.class), eq(null));
+        verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, "someTemplateId", null);
     }
 
     @Test
     void test_resourceExists_whenResourceDoesNotExist() {
-        when(mockDbIntegration.getTemplate(any(String.class), any(String.class)))
+        when(mockContextMunicipalityId.getValue()).thenReturn(MUNICIPALITY_ID);
+        when(mockDbIntegration.getTemplate(any(), any(), any()))
             .thenReturn(Optional.empty());
 
         assertThat(loader.resourceExists("someTemplateId:1.2")).isFalse();
 
-        verify(mockDbIntegration, times(1)).getTemplate(any(String.class), any(String.class));
+        verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, "someTemplateId", "1.2");
     }
 }

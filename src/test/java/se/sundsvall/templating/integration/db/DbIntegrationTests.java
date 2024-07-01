@@ -28,6 +28,9 @@ import se.sundsvall.templating.integration.db.entity.Version;
 @ExtendWith(MockitoExtension.class)
 class DbIntegrationTests {
 
+    public static final String MUNICIPALITY_ID = "municipalityId";
+    public static final String IDENTIFIER = "someTemplateId";
+
     @Mock
     private TemplateRepository mockTemplateRepository;
 
@@ -40,36 +43,36 @@ class DbIntegrationTests {
 
     @Test
     void test_getAllTemplates() {
-        when(mockTemplateRepository.findAll())
+        when(mockTemplateRepository.findAllByMunicipalityId(any()))
             .thenReturn(List.of(TemplateEntity.builder().build(), TemplateEntity.builder().build()));
 
-        var templates = dbIntegration.getAllTemplates();
+        var templates = dbIntegration.getAllTemplates(MUNICIPALITY_ID);
         assertThat(templates).hasSize(2);
 
-        verify(mockTemplateRepository, times(1)).findAll();
+        verify(mockTemplateRepository, times(1)).findAllByMunicipalityId(MUNICIPALITY_ID);
     }
 
     @Test
     void test_getTemplate() {
-        when(mockTemplateRepository.findLatestByIdentifier(any(String.class)))
+        when(mockTemplateRepository.findLatestByIdentifierAndMunicipalityId(any(), any()))
             .thenReturn(Optional.of(TemplateEntity.builder().build()));
 
-        var optionalTemplate = dbIntegration.getTemplate("someTemplateId", null);
+        var optionalTemplate = dbIntegration.getTemplate(MUNICIPALITY_ID,IDENTIFIER, null);
         assertThat(optionalTemplate).isPresent();
 
-        verify(mockTemplateRepository, times(1)).findLatestByIdentifier(any(String.class));
+        verify(mockTemplateRepository, times(1)).findLatestByIdentifierAndMunicipalityId(IDENTIFIER, MUNICIPALITY_ID);
     }
 
 
     @Test
     void test_getTemplateForProvidedVersion() {
-        when(mockTemplateRepository.findByIdentifierAndVersion(any(String.class), any(Version.class)))
+        when(mockTemplateRepository.findByIdentifierAndVersionAndMunicipalityId(any(), any(), any()))
             .thenReturn(Optional.of(TemplateEntity.builder().build()));
 
-        var optionalTemplate = dbIntegration.getTemplate("someTemplateId", "1.0");
+        var optionalTemplate = dbIntegration.getTemplate(MUNICIPALITY_ID, IDENTIFIER, "1.0");
         assertThat(optionalTemplate).isPresent();
 
-        verify(mockTemplateRepository, times(1)).findByIdentifierAndVersion(any(String.class), any(Version.class));
+        verify(mockTemplateRepository, times(1)).findByIdentifierAndVersionAndMunicipalityId(IDENTIFIER, new Version(1, 0), MUNICIPALITY_ID);
     }
 
     @Test
@@ -77,7 +80,7 @@ class DbIntegrationTests {
         when(mockTemplateRepository.findOne(ArgumentMatchers.<Specification<TemplateEntity>>any()))
             .thenReturn(Optional.of(TemplateEntity.builder().build()));
 
-        var optionalTemplate = dbIntegration.findTemplate(List.of(KeyValue.of("someKey", "someValue")));
+        var optionalTemplate = dbIntegration.findTemplate(MUNICIPALITY_ID, List.of(KeyValue.of("someKey", "someValue")));
         assertThat(optionalTemplate).isPresent();
 
         verify(mockTemplateRepository, times(1)).findOne(ArgumentMatchers.<Specification<TemplateEntity>>any());
@@ -89,7 +92,7 @@ class DbIntegrationTests {
             .thenThrow(new IncorrectResultSizeDataAccessException(2));
 
         assertThatExceptionOfType(ThrowableProblem.class)
-            .isThrownBy(() -> dbIntegration.findTemplate(List.of(KeyValue.of("someKey", "someValue"))));
+            .isThrownBy(() -> dbIntegration.findTemplate(MUNICIPALITY_ID, List.of(KeyValue.of("someKey", "someValue"))));
     }
 
     @Test
@@ -97,7 +100,7 @@ class DbIntegrationTests {
         when(mockTemplateRepository.findAll(ArgumentMatchers.<Specification<TemplateEntity>>any()))
             .thenReturn(List.of(TemplateEntity.builder().build()));
 
-        var result = dbIntegration.findTemplates(List.of(KeyValue.of("someKey", "someValue")));
+        var result = dbIntegration.findTemplates(MUNICIPALITY_ID, List.of(KeyValue.of("someKey", "someValue")));
         assertThat(result)
             .isNotNull()
             .hasSize(1);
@@ -118,39 +121,39 @@ class DbIntegrationTests {
 
     @Test
     void test_deleteTemplate() {
-        when(mockTemplateRepository.existsByIdentifier(any(String.class))).thenReturn(true);
+        when(mockTemplateRepository.existsByIdentifierAndMunicipalityId(any(), any())).thenReturn(true);
 
-        dbIntegration.deleteTemplate("someTemplateId", null);
+        dbIntegration.deleteTemplate(MUNICIPALITY_ID,IDENTIFIER, null);
 
-        verify(mockTemplateRepository, times(1)).existsByIdentifier(any(String.class));
-        verify(mockTemplateRepository, times(1)).deleteByIdentifier(any(String.class));
+        verify(mockTemplateRepository, times(1)).existsByIdentifierAndMunicipalityId(IDENTIFIER, MUNICIPALITY_ID);
+        verify(mockTemplateRepository, times(1)).deleteByIdentifierAndMunicipalityId(IDENTIFIER, MUNICIPALITY_ID);
     }
 
 
     @Test
     void test_deleteTemplateForProvidedVersion() {
-        when(mockTemplateRepository.existsByIdentifierAndVersion(any(String.class), any(Version.class))).thenReturn(true);
+        when(mockTemplateRepository.existsByIdentifierAndVersionAndMunicipalityId(any(), any(), any())).thenReturn(true);
 
-        dbIntegration.deleteTemplate("someTemplateId", "1.0");
+        dbIntegration.deleteTemplate(MUNICIPALITY_ID, IDENTIFIER, "1.0");
 
-        verify(mockTemplateRepository, times(1)).existsByIdentifierAndVersion(any(String.class), any(Version.class));
-        verify(mockTemplateRepository, times(1)).deleteByIdentifierAndVersion(any(String.class), any(Version.class));
+        verify(mockTemplateRepository, times(1)).existsByIdentifierAndVersionAndMunicipalityId(IDENTIFIER, new Version(1,0), MUNICIPALITY_ID);
+        verify(mockTemplateRepository, times(1)).deleteByIdentifierAndVersionAndMunicipalityId(IDENTIFIER, new Version(1,0), MUNICIPALITY_ID);
     }
 
     @Test
     void test_deleteTemplate_whenTemplateDoesNotExist() {
-        when(mockTemplateRepository.existsByIdentifier(any(String.class))).thenReturn(false);
+        when(mockTemplateRepository.existsByIdentifierAndMunicipalityId(any(), any())).thenReturn(false);
 
         assertThatExceptionOfType(ThrowableProblem.class)
-            .isThrownBy(() -> dbIntegration.deleteTemplate("someTemplateId", null));
+            .isThrownBy(() -> dbIntegration.deleteTemplate(MUNICIPALITY_ID, IDENTIFIER, null));
     }
 
     @Test
     void test_deleteTemplate_whenTemplateDoesNotExistForProvidedVersion() {
-        when(mockTemplateRepository.existsByIdentifierAndVersion(any(String.class), any(Version.class))).thenReturn(false);
+        when(mockTemplateRepository.existsByIdentifierAndVersionAndMunicipalityId(any(), any(), any())).thenReturn(false);
 
         assertThatExceptionOfType(ThrowableProblem.class)
-            .isThrownBy(() -> dbIntegration.deleteTemplate("someTemplateId", "1.0"));
+            .isThrownBy(() -> dbIntegration.deleteTemplate(MUNICIPALITY_ID, IDENTIFIER, "1.0"));
     }
 
     @Test
@@ -158,7 +161,7 @@ class DbIntegrationTests {
         var metadata = List.of(
             KeyValue.of("someKey", "someValue"), KeyValue.of("otherKey", "otherValue"));
 
-        var result = dbIntegration.toTemplateEntitySpecification(metadata);
+        var result = dbIntegration.toTemplateEntitySpecification(MUNICIPALITY_ID, metadata);
         assertThat(result).isNotNull();
     }
 
@@ -167,6 +170,6 @@ class DbIntegrationTests {
         var metadata = new ArrayList<KeyValue>();
 
         assertThatExceptionOfType(IllegalStateException.class)
-            .isThrownBy(() -> dbIntegration.toTemplateEntitySpecification(metadata));
+            .isThrownBy(() -> dbIntegration.toTemplateEntitySpecification(MUNICIPALITY_ID, metadata));
     }
 }

@@ -61,14 +61,14 @@ public class RenderingService {
         this.dbIntegration = dbIntegration;
     }
 
-    public String renderTemplate(final RenderRequest request) {
-        var output = renderTemplateInternal(request);
+    public String renderTemplate(final String municipalityId, final RenderRequest request) {
+        var output = renderTemplateInternal(municipalityId, request);
 
         return encodeBase64(output);
     }
 
-    public String renderTemplateAsPdf(final RenderRequest request) {
-        var output = renderTemplateInternal(request);
+    public String renderTemplateAsPdf(final String municipalityId, final RenderRequest request) {
+        var output = renderTemplateInternal(municipalityId, request);
         var renderedPdf = renderHtmlAsPdf(output);
 
         return encodeBase64(renderedPdf);
@@ -91,12 +91,12 @@ public class RenderingService {
         return encodeBase64(renderedPdf);
     }
 
-    byte[] renderTemplateInternal(final RenderRequest request) {
+    byte[] renderTemplateInternal(final String municipalityId, final RenderRequest request) {
         var template = ofNullable(request.getIdentifier())
-            .flatMap(identifier -> dbIntegration.getTemplate(identifier, request.getVersion()))
+            .flatMap(identifier -> dbIntegration.getTemplate(municipalityId, identifier, request.getVersion()))
             .orElseGet(() -> ofNullable(request.getMetadata())
                 .filter(not(List::isEmpty))
-                .flatMap(dbIntegration::findTemplate)
+                .flatMap(map -> dbIntegration.findTemplate(municipalityId, map))
                 .orElse(null));
 
         if (null == template) {
