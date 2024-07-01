@@ -61,7 +61,7 @@ class RenderResource {
 	ResponseEntity<RenderResponse> render(
 		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
 		@Valid @RequestBody final RenderRequest request) {
-		requestScopedMunicipalityId.setId(municipalityId);
+		requestScopedMunicipalityId.setValue(municipalityId);
 		final var output = renderingService.renderTemplate(municipalityId, request);
 
 		final var response = RenderResponse.builder()
@@ -84,7 +84,7 @@ class RenderResource {
 	ResponseEntity<RenderResponse> renderPdf(
 		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
 		@Valid @RequestBody final RenderRequest request) {
-		requestScopedMunicipalityId.setId(municipalityId);
+		requestScopedMunicipalityId.setValue(municipalityId);
 		final var output = renderingService.renderTemplateAsPdf(municipalityId, request);
 
 		final var response = RenderResponse.builder()
@@ -103,7 +103,7 @@ class RenderResource {
 	ResponseEntity<DirectRenderResponse> renderDirect(
 		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
 		@Valid @RequestBody final DirectRenderRequest request) {
-		requestScopedMunicipalityId.setId(municipalityId);
+		requestScopedMunicipalityId.setValue(municipalityId);
 		final var response = DirectRenderResponse.builder()
 			.withOutput(renderingService.renderDirect(request))
 			.build();
@@ -120,7 +120,7 @@ class RenderResource {
 	ResponseEntity<DirectRenderResponse> renderDirectPdf(
 		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
 		@Valid @RequestBody final DirectRenderRequest request) {
-		requestScopedMunicipalityId.setId(municipalityId);
+		requestScopedMunicipalityId.setValue(municipalityId);
 		final var response = DirectRenderResponse.builder()
 			.withOutput(renderingService.renderDirectAsPdf(request))
 			.build();

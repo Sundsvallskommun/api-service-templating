@@ -3,6 +3,7 @@ package se.sundsvall.templating.integration.db;
 import java.util.List;
 import java.util.Optional;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import org.springframework.data.repository.query.Param;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.integration.db.entity.Version;
 
+@CircuitBreaker(name = "templateRepository")
 public interface TemplateRepository extends JpaRepository<TemplateEntity, String>, JpaSpecificationExecutor<TemplateEntity> {
 
     boolean existsByIdentifierAndMunicipalityId(String identifier, String municipalityId);

@@ -10,7 +10,7 @@ public class MunicipalityIdConfiguration {
 
 	@Bean
 	@RequestScope
-	public ContextMunicipalityId requestScopedBean() {
+	ContextMunicipalityId requestScopedBean() {
 		return new ContextMunicipalityId();
 	}
 }

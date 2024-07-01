@@ -100,7 +100,7 @@ class DelegatingLoaderTests {
 
     @Test
     void test_createCacheKey() {
-        when(mockContextMunicipalityId.getId()).thenReturn(MUNICIPALITY_ID);
+        when(mockContextMunicipalityId.getValue()).thenReturn(MUNICIPALITY_ID);
         assertThat(loader.createCacheKey("someTemplateId")).satisfies(identifierAndVersion -> {
             assertThat(identifierAndVersion.getIdentifier()).isEqualTo("someTemplateId");
             assertThat(identifierAndVersion.getVersion()).isNull();

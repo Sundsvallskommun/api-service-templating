@@ -58,7 +58,7 @@ public class DelegatingLoader implements Loader<IdentifierAndVersion> {
 
     @Override
     public IdentifierAndVersion createCacheKey(final String identifier) {
-        return new IdentifierAndVersion(requestScopedMunicipalityId.getId(), identifier);
+        return new IdentifierAndVersion(requestScopedMunicipalityId.getValue(), identifier);
     }
 
     @Override

@@ -53,12 +53,12 @@ public class DatabaseLoader implements Loader<IdentifierAndVersion> {
 
     @Override
     public IdentifierAndVersion createCacheKey(final String identifierAndVersion) {
-        return new IdentifierAndVersion(requestScopedMunicipalityId.getId(), identifierAndVersion);
+        return new IdentifierAndVersion(requestScopedMunicipalityId.getValue(), identifierAndVersion);
     }
 
     @Override
     public boolean resourceExists(final String identifierAndVersion) {
-        var parsedIdentifierAndVersion = new IdentifierAndVersion(requestScopedMunicipalityId.getId(), identifierAndVersion);
+        var parsedIdentifierAndVersion = new IdentifierAndVersion(requestScopedMunicipalityId.getValue(), identifierAndVersion);
 
         return dbIntegration.getTemplate(parsedIdentifierAndVersion.getMunicipalityId(), parsedIdentifierAndVersion.getIdentifier(), parsedIdentifierAndVersion.getVersion()).isPresent();
     }

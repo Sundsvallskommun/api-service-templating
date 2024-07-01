@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -92,7 +91,7 @@ class DatabaseLoaderTests {
 
     @Test
     void test_createCacheKey() {
-        when(mockContextMunicipalityId.getId()).thenReturn(MUNICIPALITY_ID);
+        when(mockContextMunicipalityId.getValue()).thenReturn(MUNICIPALITY_ID);
         assertThat(loader.createCacheKey("someTemplateId")).satisfies(identifierAndVersion -> {
             assertThat(identifierAndVersion.getIdentifier()).isEqualTo("someTemplateId");
             assertThat(identifierAndVersion.getVersion()).isNull();
@@ -102,18 +101,18 @@ class DatabaseLoaderTests {
 
     @Test
     void test_resourceExists() {
-        when(mockContextMunicipalityId.getId()).thenReturn(MUNICIPALITY_ID);
+        when(mockContextMunicipalityId.getValue()).thenReturn(MUNICIPALITY_ID);
         when(mockDbIntegration.getTemplate(any(), any(), eq(null)))
             .thenReturn(Optional.of(TemplateEntity.builder().build()));
 
         assertThat(loader.resourceExists("someTemplateId")).isTrue();
 
-        verify(mockDbIntegration, times(1)).getTemplate(eq(MUNICIPALITY_ID), eq("someTemplateId"), eq(null));
+        verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, "someTemplateId", null);
     }
 
     @Test
     void test_resourceExists_whenResourceDoesNotExist() {
-        when(mockContextMunicipalityId.getId()).thenReturn(MUNICIPALITY_ID);
+        when(mockContextMunicipalityId.getValue()).thenReturn(MUNICIPALITY_ID);
         when(mockDbIntegration.getTemplate(any(), any(), any()))
             .thenReturn(Optional.empty());
 

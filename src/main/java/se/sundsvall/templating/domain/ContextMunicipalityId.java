@@ -6,5 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ContextMunicipalityId {
-	private String id;
+	private String value;
 }
