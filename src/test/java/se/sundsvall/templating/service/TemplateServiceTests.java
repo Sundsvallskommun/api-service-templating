@@ -3,6 +3,7 @@ package se.sundsvall.templating.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -149,7 +150,7 @@ class TemplateServiceTests {
 
         when(mockDbIntegration.getTemplate(any(), any(), eq(null)))
             .thenReturn(Optional.of(mockTemplateEntity));
-        when(mockTemplateMapper.toTemplateEntity(any(TemplateRequest.class)))
+        when(mockTemplateMapper.toTemplateEntity(any(TemplateRequest.class), anyString()))
             .thenReturn(TemplateEntity.builder().build());
         when(mockTemplateMapper.toTemplateResponse(any(TemplateEntity.class)))
             .thenReturn(TemplateResponse.builder().build());
@@ -165,7 +166,7 @@ class TemplateServiceTests {
         verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
         verify(mockTemplateEntity, times(1)).getVersion();
         verify(mockVersion, times(1)).apply(any(Version.IncrementMode.class));
-        verify(mockTemplateMapper, times(1)).toTemplateEntity(any(TemplateRequest.class));
+        verify(mockTemplateMapper, times(1)).toTemplateEntity(any(TemplateRequest.class), anyString());
         verify(mockTemplateMapper, times(1)).toTemplateResponse(any(TemplateEntity.class));
         verify(mockDbIntegration, times(1)).saveTemplate(any(TemplateEntity.class));
     }
@@ -185,7 +186,7 @@ class TemplateServiceTests {
 
         verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
         verify(mockTemplateEntity, never()).getVersion();
-        verify(mockTemplateMapper, never()).toTemplateEntity(any(TemplateRequest.class));
+        verify(mockTemplateMapper, never()).toTemplateEntity(any(TemplateRequest.class), anyString());
         verify(mockTemplateMapper, never()).toTemplateResponse(any(TemplateEntity.class));
         verify(mockDbIntegration, never()).saveTemplate(any(TemplateEntity.class));
     }

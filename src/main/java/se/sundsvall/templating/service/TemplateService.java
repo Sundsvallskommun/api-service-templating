@@ -72,7 +72,7 @@ public class TemplateService {
             })
             .orElse(new Version(1, 0));
 
-        var templateEntity = mapper.toTemplateEntity(templateRequest)
+        var templateEntity = mapper.toTemplateEntity(templateRequest, municipalityId)
             .withVersion(version);
 
         return mapper.toTemplateResponse(dbIntegration.saveTemplate(templateEntity));
