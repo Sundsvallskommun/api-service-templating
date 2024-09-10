@@ -21,12 +21,13 @@ import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 @Component
 public class TemplateMapper {
 
-    public TemplateEntity toTemplateEntity(final TemplateRequest templateRequest) {
+    public TemplateEntity toTemplateEntity(final TemplateRequest templateRequest, final String municipalityId) {
         if (templateRequest == null) {
             return null;
         }
 
         return TemplateEntity.builder()
+            .withMunicipalityId(municipalityId)
             .withIdentifier(templateRequest.getIdentifier())
             .withType(getTemplateType(decodeBase64(templateRequest.getContent())))
             .withName(templateRequest.getName())

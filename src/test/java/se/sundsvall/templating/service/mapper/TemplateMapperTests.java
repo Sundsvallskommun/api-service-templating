@@ -28,7 +28,7 @@ class TemplateMapperTests {
         request.setMetadata(List.of(Metadata.builder().build()));
         request.setDefaultValues(List.of(DefaultValue.builder().build()));
 
-        var templateEntity = mapper.toTemplateEntity(request);
+        var templateEntity = mapper.toTemplateEntity(request, "municipalityId");
 
         assertThat(templateEntity).isNotNull();
         assertThat(templateEntity.getName()).isEqualTo("someName");
@@ -40,7 +40,7 @@ class TemplateMapperTests {
 
     @Test
     void test_toTemplateEntity_whenTemplateRequestIsNull() {
-        assertThat(mapper.toTemplateEntity(null)).isNull();
+        assertThat(mapper.toTemplateEntity(null, "municipalityId")).isNull();
     }
 
     @Test
