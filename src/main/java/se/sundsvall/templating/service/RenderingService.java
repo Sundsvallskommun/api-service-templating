@@ -31,6 +31,7 @@ import se.sundsvall.templating.configuration.properties.PebbleProperties;
 import se.sundsvall.templating.exception.TemplateException;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.integration.db.entity.DefaultValueEntity;
+import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
 import se.sundsvall.templating.service.processor.PebbleTemplateProcessor;
 import se.sundsvall.templating.service.processor.WordTemplateProcessor;
@@ -62,28 +63,21 @@ public class RenderingService {
     }
 
     public String renderTemplate(final String municipalityId, final RenderRequest request) {
-        var output = renderTemplateInternal(municipalityId, request);
+        // Get the template
+        var template = getTemplate(municipalityId, request);
+        // Render it
+        var output = renderTemplateInternal(template, request.getParameters());
 
         return encodeBase64(output);
     }
 
     public String renderTemplateAsPdf(final String municipalityId, final RenderRequest request) {
-        var output = renderTemplateInternal(municipalityId, request);
-        var renderedPdf = renderHtmlAsPdf(output);
-
-        return encodeBase64(renderedPdf);
-    }
-
-    public String renderDirect(final DirectRenderRequest request) {
-        var output = renderDirectInternal(request);
-
-        return encodeBase64(output);
-    }
-
-    public String renderDirectAsPdf(final DirectRenderRequest request) {
-        var output = renderDirectInternal(request);
-
-        var renderedPdf = switch (getTemplateType(decodeBase64(request.getContent()))) {
+        // Get the template
+        var template = getTemplate(municipalityId, request);
+        // Pre-render it
+        var output = renderTemplateInternal(template, request.getParameters());
+        // Render it as a PDF
+        var renderedPdf = switch (template.getType()) {
             case PEBBLE -> renderHtmlAsPdf(output);
             case WORD -> renderWordAsPdf(output);
         };
@@ -91,22 +85,28 @@ public class RenderingService {
         return encodeBase64(renderedPdf);
     }
 
-    byte[] renderTemplateInternal(final String municipalityId, final RenderRequest request) {
-        var template = ofNullable(request.getIdentifier())
-            .flatMap(identifier -> dbIntegration.getTemplate(municipalityId, identifier, request.getVersion()))
-            .orElseGet(() -> ofNullable(request.getMetadata())
-                .filter(not(List::isEmpty))
-                .flatMap(map -> dbIntegration.findTemplate(municipalityId, map))
-                .orElse(null));
+    public String renderDirect(final DirectRenderRequest request) {
+        // Render the provided template
+        var output = renderDirectInternal(request);
 
-        if (null == template) {
-            var message = ofNullable(request.getIdentifier())
-                .map(ignored -> format("Unable to find template using identifier: '%s'", request.getIdentifier()))
-                .orElseGet(() -> format("Unable to find template using metadata: %s", request.getMetadata()));
+        return encodeBase64(output);
+    }
 
-            throw Problem.valueOf(Status.NOT_FOUND, message);
-        }
+    public String renderDirectAsPdf(final DirectRenderRequest request) {
+        // Render the provided template
+        var output = renderDirectInternal(request);
+        // Decode the provided template content, to be able to guess the type
+        var content = decodeBase64(request.getContent());
+        // Render it as a PDF
+        var renderedPdf = switch (getTemplateType(content)) {
+            case PEBBLE -> renderHtmlAsPdf(output);
+            case WORD -> renderWordAsPdf(output);
+        };
 
+        return encodeBase64(renderedPdf);
+    }
+
+    byte[] renderTemplateInternal(final TemplateEntity template, final Map<String, Object> requestParameters) {
         // Extract template default values
         var defaultValues = template.getDefaultValues().stream()
             .collect(toMap(DefaultValueEntity::getFieldName, DefaultValueEntity::getValue));
@@ -117,14 +117,14 @@ public class RenderingService {
         var mergedParametersAndDefaultValues = new TreeMap<>(
             pebbleProperties.isUseCaseInsensitiveKeys() ? String.CASE_INSENSITIVE_ORDER : null);
 
-        // Add identifier and version as extra template parameters, prefixed with underscore to
-        // minimize the risk of name clashes
+        // Add identifier and version as extra template parameters (prefixed with underscore to
+        // minimize the risk of name clashes)
         mergedParametersAndDefaultValues.put("_identifier", template.getIdentifier());
         mergedParametersAndDefaultValues.put("_version", template.getVersion());
         // Add default values
         mergedParametersAndDefaultValues.putAll(defaultValues);
         // Decode request parameters
-        var decodedRequestParameters = decodeRequestParameters(request.getParameters());
+        var decodedRequestParameters = decodeRequestParameters(requestParameters);
         // Add request parameters
         mergedParametersAndDefaultValues.putAll(decodedRequestParameters);
 
@@ -175,6 +175,25 @@ public class RenderingService {
         } catch (IOException e) {
             throw new TemplateException("Unable to render PDF", e);
         }
+    }
+
+    TemplateEntity getTemplate(final String municipalityId, final RenderRequest request) {
+        var template = ofNullable(request.getIdentifier())
+            .flatMap(identifier -> dbIntegration.getTemplate(municipalityId, identifier, request.getVersion()))
+            .orElseGet(() -> ofNullable(request.getMetadata())
+                .filter(not(List::isEmpty))
+                .flatMap(map -> dbIntegration.findTemplate(municipalityId, map))
+                .orElse(null));
+
+        if (null == template) {
+            var message = ofNullable(request.getIdentifier())
+                .map(ignored -> format("Unable to find template using identifier: '%s'", request.getIdentifier()))
+                .orElseGet(() -> format("Unable to find template using metadata: %s", request.getMetadata()));
+
+            throw Problem.valueOf(Status.NOT_FOUND, message);
+        }
+
+        return template;
     }
 
     /**
