@@ -3,6 +3,7 @@ package se.sundsvall.templating.service.processor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTProofErr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRPr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSdtBlock;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTText;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STLineSpacingRule;
 import org.springframework.stereotype.Component;
 
 import se.sundsvall.templating.exception.TemplateException;
@@ -30,7 +32,7 @@ import se.sundsvall.templating.exception.TemplateException;
 @Component
 public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 
-    private static final String[] PLACEHOLDER_FORMATS = {"{{%s}}", "{{ %s }}", "{{ %s}}", "{{%s }}"};
+    private static final String[] PLACEHOLDER_VARIANTS = {"{{%s}}", "{{ %s }}", "{{ %s}}", "{{%s }}"};
 
     private static final String CONTENT_TYPE_TEMPLATE = "application/vnd.openxmlformats-officedocument.wordprocessingml.template.main+xml";
     private static final String CONTENT_TYPE_MACRO_ENABLED_TEMPLATE = "application/vnd.ms-word.template.macroEnabledTemplate.main+xml";
@@ -43,7 +45,6 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
         try (var in = new ByteArrayInputStream(template);
              var document = new XWPFDocument(in);
              var out = new ByteArrayOutputStream()) {
-
             // Process document header(s), if any
             for (var header : document.getHeaderList()) {
                 // Process document header body, if any
@@ -100,7 +101,7 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
         for (var paragraph : paragraphs) {
             for (var replacement : parameters.entrySet()) {
                 // Naively "guess" the placeholder formatting with regard to spacing
-                for (var placeholderFormat : PLACEHOLDER_FORMATS) {
+                for (var placeholderFormat : PLACEHOLDER_VARIANTS) {
                     replaceTextSegment(paragraph, placeholderFormat.formatted(replacement.getKey()), replacement.getValue());
                 }
             }
@@ -112,11 +113,22 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
             for (var row : table.getRows()) {
                 for (var cell : row.getTableCells()) {
                     replaceInParagraphs(cell.getParagraphs(), parameters);
+                    replaceInTables(cell.getTables(), parameters);
+
+                    // Naively try to fix table spacing
+                    cell.getParagraphs().forEach(xwpfParagraph -> {
+                        var ctp = xwpfParagraph.getCTP();
+                        var ppr = ctp.isSetPPr() ? ctp.getPPr() : ctp.addNewPPr();
+                        var spacing = ppr.isSetSpacing()? ppr.getSpacing() : ppr.addNewSpacing();
+                        spacing.setBefore(BigInteger.valueOf(0));
+                        spacing.setAfter(BigInteger.valueOf(64));
+                        spacing.setLineRule(STLineSpacingRule.AT_LEAST);
+                        spacing.setLine(BigInteger.valueOf(64));
+                    });
                 }
             }
         }
     }
-
 
     private static void replaceTextSegment(final XWPFParagraph paragraph, final String textToFind, final Object replacement) {
         TextSegment foundTextSegment;
@@ -238,7 +250,7 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
                                 var stringValue = cttext.getStringValue();
                                 for (var parameter : parameters.entrySet()) {
                                     // Naively "guess" the placeholder formatting with regard to spacing
-                                    for (var placeholderFormat : PLACEHOLDER_FORMATS) {
+                                    for (var placeholderFormat : PLACEHOLDER_VARIANTS) {
                                         stringValue = stringValue.replace(placeholderFormat.formatted(parameter.getKey()), parameter.getValue().toString());
                                     }
                                 }
