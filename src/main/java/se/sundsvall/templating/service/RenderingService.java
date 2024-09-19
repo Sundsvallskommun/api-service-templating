@@ -169,7 +169,7 @@ public class RenderingService {
         try (var in = new ByteArrayInputStream(document);
              var doc = new XWPFDocument(in);
              var out = new ByteArrayOutputStream()) {
-            PdfConverter.getInstance().convert(doc, out, PdfOptions.create());
+            PdfConverter.getInstance().convert(doc, out, PdfOptions.getDefault());
 
             return out.toByteArray();
         } catch (IOException e) {
