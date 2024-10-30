@@ -6,16 +6,16 @@ import org.junit.jupiter.api.Test;
 
 class TemplateResponseTests {
 
-    @Test
-    void testBuilderAndGetters() {
-        var response = TemplateResponse.builder()
-            .withIdentifier("someId")
-            .withName("someName")
-            .withDescription("someDescription")
-            .build();
+	@Test
+	void testBuilderAndGetters() {
+		var response = TemplateResponse.builder()
+			.withIdentifier("someId")
+			.withName("someName")
+			.withDescription("someDescription")
+			.build();
 
-        assertThat(response.getIdentifier()).isEqualTo("someId");
-        assertThat(response.getName()).isEqualTo("someName");
-        assertThat(response.getDescription()).isEqualTo("someDescription");
-    }
+		assertThat(response.getIdentifier()).isEqualTo("someId");
+		assertThat(response.getName()).isEqualTo("someName");
+		assertThat(response.getDescription()).isEqualTo("someDescription");
+	}
 }

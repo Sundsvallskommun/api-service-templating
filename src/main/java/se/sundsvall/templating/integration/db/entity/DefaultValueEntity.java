@@ -19,22 +19,22 @@ import lombok.Setter;
 @NoArgsConstructor
 public class DefaultValueEntity {
 
-    @Id
-    @Column(name = "id", length = 36, nullable = false, unique = true)
-    private final String id = UUID.randomUUID().toString();
+	@Id
+	@Column(name = "id", length = 36, nullable = false, unique = true)
+	private final String id = UUID.randomUUID().toString();
 
-    @Column(name = "field_name", length = 32, nullable = false)
-    private String fieldName;
+	@Column(name = "field_name", length = 32, nullable = false)
+	private String fieldName;
 
-    @Column(name = "`value`", nullable = false)
-    private String value;
+	@Column(name = "`value`", nullable = false)
+	private String value;
 
-    /*
-     * Custom @Builder-annotated constructor to exclude id from builder.
-     */
-    @Builder(setterPrefix = "with")
-    DefaultValueEntity(final String fieldName, final String value) {
-        this.fieldName = fieldName;
-        this.value = value;
-    }
+	/*
+	 * Custom @Builder-annotated constructor to exclude id from builder.
+	 */
+	@Builder(setterPrefix = "with")
+	DefaultValueEntity(final String fieldName, final String value) {
+		this.fieldName = fieldName;
+		this.value = value;
+	}
 }

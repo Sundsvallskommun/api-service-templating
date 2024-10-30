@@ -15,19 +15,19 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class KeyValue {
 
-    @NotBlank
-    private final String key;
+	@NotBlank
+	private final String key;
 
-    @NotBlank
-    private final String value;
+	@NotBlank
+	private final String value;
 
-    @JsonCreator
-    public static KeyValue of(@JsonProperty("key") final String key, @JsonProperty("value") final String value) {
-        return new KeyValue(key, value);
-    }
+	@JsonCreator
+	public static KeyValue of(@JsonProperty("key") final String key, @JsonProperty("value") final String value) {
+		return new KeyValue(key, value);
+	}
 
-    @Override
-    public String toString() {
-        return format("{%s=%s}", key, value);
-    }
+	@Override
+	public String toString() {
+		return format("{%s=%s}", key, value);
+	}
 }

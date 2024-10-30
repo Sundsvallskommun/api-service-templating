@@ -27,16 +27,16 @@ import lombok.Setter;
 @Schema(description = "Request to render a template")
 public class RenderRequest {
 
-    @Schema(description = "Template identifier", nullable = true)
-    private String identifier;
+	@Schema(description = "Template identifier", nullable = true)
+	private String identifier;
 
-    @ValidTemplateVersion
-    @Schema(description = "Template version", nullable = true)
-    private String version;
+	@ValidTemplateVersion
+	@Schema(description = "Template version", nullable = true)
+	private String version;
 
-    @ArraySchema(schema = @Schema(description = "Template metadata"))
-    private List<@Valid KeyValue> metadata;
+	@ArraySchema(schema = @Schema(description = "Template metadata"))
+	private List<@Valid KeyValue> metadata;
 
-    @Schema(description = "Parameters (string values may be BASE64-encoded, and in that case they should be on the form \"BASE64:<base64-encoded-value>\")", nullable = true, example = OpenApiExamples.PARAMETERS)
-    private Map<String, Object> parameters;
+	@Schema(description = "Parameters (string values may be BASE64-encoded, and in that case they should be on the form \"BASE64:<base64-encoded-value>\")", nullable = true, example = OpenApiExamples.PARAMETERS)
+	private Map<String, Object> parameters;
 }

@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class RenderResponse {
 
-    @Schema(description = "Output, as a BASE64-encoded string")
-    private String output;
+	@Schema(description = "Output, as a BASE64-encoded string")
+	private String output;
 }

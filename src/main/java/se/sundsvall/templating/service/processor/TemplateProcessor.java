@@ -4,5 +4,5 @@ import java.util.Map;
 
 public interface TemplateProcessor<T> {
 
-    byte[] process(T template, Map<String, Object> parameters);
+	byte[] process(T template, Map<String, Object> parameters);
 }

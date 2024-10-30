@@ -114,9 +114,9 @@ class TemplateResource {
 		content = @Content(schema = @Schema(implementation = Problem.class)))
 	@GetMapping("/{identifier}/{version}")
 	ResponseEntity<DetailedTemplateResponse> getTemplate(
-			@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
-			@PathVariable("identifier") @ValidTemplateId final String identifier,
-			@PathVariable("version") @ValidTemplateVersion final String version) {
+		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
+		@PathVariable("identifier") @ValidTemplateId final String identifier,
+		@PathVariable("version") @ValidTemplateVersion final String version) {
 		return templatingService.getTemplate(municipalityId, identifier, version)
 			.map(ResponseEntity::ok)
 			.orElse(ResponseEntity.notFound().build());
@@ -161,9 +161,9 @@ class TemplateResource {
 	@PatchMapping(value = "/{identifier}/{version}", consumes = "application/json-patch+json")
 	ResponseEntity<TemplateResponse> updateTemplate(
 		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
-			@PathVariable("identifier") @ValidTemplateId final String identifier,
-			@PathVariable("version") @ValidTemplateVersion final String version,
-			@RequestBody @Schema(example = OpenApiExamples.UPDATE) final JsonPatch jsonPatch) {
+		@PathVariable("identifier") @ValidTemplateId final String identifier,
+		@PathVariable("version") @ValidTemplateVersion final String version,
+		@RequestBody @Schema(example = OpenApiExamples.UPDATE) final JsonPatch jsonPatch) {
 		final var template = templatingService.updateTemplate(municipalityId, identifier, version, jsonPatch);
 
 		return ResponseEntity.ok(template);

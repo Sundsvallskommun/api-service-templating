@@ -1,31 +1,29 @@
-[
-  {
-    "identifier": "second.template",
-    "version": "1.0",
-    "type": "PEBBLE",
-    "name": "Second template",
-    "description": "Some description",
-    "metadata": [
-      {
-        "key": "process",
-        "value": "PRH"
-      },
-      {
-        "key": "verksamhet",
-        "value": "SBK"
-      }
-    ],
-    "defaultValues": [
-      {
-        "fieldName": "first_name",
-        "value": "Bobby"
-      },
-      {
-        "fieldName": "last_name",
-        "value": "Brun"
-      }
-    ],
-    "changeLog": "Initial version",
-    "lastModifiedAt": "${json-unit.ignore}"
-  }
-]
+[{
+	"identifier": "second.template",
+	"metadata": [
+		{
+			"value": "PRH",
+			"key": "process"
+		},
+		{
+			"value": "SBK",
+			"key": "verksamhet"
+		}
+	],
+	"lastModifiedAt": "${json-unit.ignore}",
+	"name": "Second template",
+	"description": "Some description",
+	"defaultValues": [
+		{
+			"fieldName": "first_name",
+			"value": "Bobby"
+		},
+		{
+			"fieldName": "last_name",
+			"value": "Brun"
+		}
+	],
+	"changeLog": "Initial version",
+	"type": "PEBBLE",
+	"version": "1.0"
+}]

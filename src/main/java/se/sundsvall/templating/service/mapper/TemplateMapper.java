@@ -21,88 +21,88 @@ import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 @Component
 public class TemplateMapper {
 
-    public TemplateEntity toTemplateEntity(final TemplateRequest templateRequest, final String municipalityId) {
-        if (templateRequest == null) {
-            return null;
-        }
+	public TemplateEntity toTemplateEntity(final TemplateRequest templateRequest, final String municipalityId) {
+		if (templateRequest == null) {
+			return null;
+		}
 
-        return TemplateEntity.builder()
-            .withMunicipalityId(municipalityId)
-            .withIdentifier(templateRequest.getIdentifier())
-            .withType(getTemplateType(decodeBase64(templateRequest.getContent())))
-            .withName(templateRequest.getName())
-            .withDescription(templateRequest.getDescription())
-            .withContent(templateRequest.getContent())
-            .withChangeLog(templateRequest.getChangeLog())
-            .withMetadata(Optional.ofNullable(templateRequest.getMetadata()).orElse(List.of()).stream()
-                .map(metadata -> MetadataEntity.builder()
-                    .withKey(metadata.getKey())
-                    .withValue(metadata.getValue())
-                    .build())
-                .toList())
-            .withDefaultValues(Optional.ofNullable(templateRequest.getDefaultValues()).orElse(List.of()).stream()
-                .map(defaultValue -> DefaultValueEntity.builder()
-                    .withFieldName(defaultValue.getFieldName())
-                    .withValue(defaultValue.getValue())
-                    .build())
-                .collect(toSet()))
-            .build();
-    }
+		return TemplateEntity.builder()
+			.withMunicipalityId(municipalityId)
+			.withIdentifier(templateRequest.getIdentifier())
+			.withType(getTemplateType(decodeBase64(templateRequest.getContent())))
+			.withName(templateRequest.getName())
+			.withDescription(templateRequest.getDescription())
+			.withContent(templateRequest.getContent())
+			.withChangeLog(templateRequest.getChangeLog())
+			.withMetadata(Optional.ofNullable(templateRequest.getMetadata()).orElse(List.of()).stream()
+				.map(metadata -> MetadataEntity.builder()
+					.withKey(metadata.getKey())
+					.withValue(metadata.getValue())
+					.build())
+				.toList())
+			.withDefaultValues(Optional.ofNullable(templateRequest.getDefaultValues()).orElse(List.of()).stream()
+				.map(defaultValue -> DefaultValueEntity.builder()
+					.withFieldName(defaultValue.getFieldName())
+					.withValue(defaultValue.getValue())
+					.build())
+				.collect(toSet()))
+			.build();
+	}
 
-    public TemplateResponse toTemplateResponse(final TemplateEntity templateEntity) {
-        if (templateEntity == null) {
-            return null;
-        }
+	public TemplateResponse toTemplateResponse(final TemplateEntity templateEntity) {
+		if (templateEntity == null) {
+			return null;
+		}
 
-        return TemplateResponse.builder()
-            .withIdentifier(templateEntity.getIdentifier())
-            .withVersion(templateEntity.getVersion().toString())
-            .withType(templateEntity.getType())
-            .withName(templateEntity.getName())
-            .withDescription(templateEntity.getDescription())
-            .withMetadata(templateEntity.getMetadata().stream()
-                .map(templateEntityMetadata -> Metadata.builder()
-                    .withKey(templateEntityMetadata.getKey())
-                    .withValue(templateEntityMetadata.getValue())
-                    .build())
-                .toList())
-            .withDefaultValues(templateEntity.getDefaultValues().stream()
-                .map(templateEntityDefaultValue -> DefaultValue.builder()
-                    .withFieldName(templateEntityDefaultValue.getFieldName())
-                    .withValue(templateEntityDefaultValue.getValue())
-                    .build())
-                .toList())
-            .withChangeLog(templateEntity.getChangeLog())
-            .withLastModifiedAt(templateEntity.getLastModifiedAt())
-            .build();
-    }
+		return TemplateResponse.builder()
+			.withIdentifier(templateEntity.getIdentifier())
+			.withVersion(templateEntity.getVersion().toString())
+			.withType(templateEntity.getType())
+			.withName(templateEntity.getName())
+			.withDescription(templateEntity.getDescription())
+			.withMetadata(templateEntity.getMetadata().stream()
+				.map(templateEntityMetadata -> Metadata.builder()
+					.withKey(templateEntityMetadata.getKey())
+					.withValue(templateEntityMetadata.getValue())
+					.build())
+				.toList())
+			.withDefaultValues(templateEntity.getDefaultValues().stream()
+				.map(templateEntityDefaultValue -> DefaultValue.builder()
+					.withFieldName(templateEntityDefaultValue.getFieldName())
+					.withValue(templateEntityDefaultValue.getValue())
+					.build())
+				.toList())
+			.withChangeLog(templateEntity.getChangeLog())
+			.withLastModifiedAt(templateEntity.getLastModifiedAt())
+			.build();
+	}
 
-    public DetailedTemplateResponse toDetailedTemplateResponse(final TemplateEntity templateEntity) {
-        if (templateEntity == null) {
-            return null;
-        }
+	public DetailedTemplateResponse toDetailedTemplateResponse(final TemplateEntity templateEntity) {
+		if (templateEntity == null) {
+			return null;
+		}
 
-        return DetailedTemplateResponse.builder()
-            .withIdentifier(templateEntity.getIdentifier())
-            .withVersion(templateEntity.getVersion().toString())
-            .withType(templateEntity.getType())
-            .withName(templateEntity.getName())
-            .withDescription(templateEntity.getDescription())
-            .withMetadata(templateEntity.getMetadata().stream()
-                .map(templateEntityMetadata -> Metadata.builder()
-                    .withKey(templateEntityMetadata.getKey())
-                    .withValue(templateEntityMetadata.getValue())
-                    .build())
-                .toList())
-            .withDefaultValues(templateEntity.getDefaultValues().stream()
-                .map(templateEntityDefaultValue -> DefaultValue.builder()
-                    .withFieldName(templateEntityDefaultValue.getFieldName())
-                    .withValue(templateEntityDefaultValue.getValue())
-                    .build())
-                .toList())
-            .withContent(templateEntity.getContent())
-            .withChangeLog(templateEntity.getChangeLog())
-            .withLastModifiedAt(templateEntity.getLastModifiedAt())
-            .build();
-    }
+		return DetailedTemplateResponse.builder()
+			.withIdentifier(templateEntity.getIdentifier())
+			.withVersion(templateEntity.getVersion().toString())
+			.withType(templateEntity.getType())
+			.withName(templateEntity.getName())
+			.withDescription(templateEntity.getDescription())
+			.withMetadata(templateEntity.getMetadata().stream()
+				.map(templateEntityMetadata -> Metadata.builder()
+					.withKey(templateEntityMetadata.getKey())
+					.withValue(templateEntityMetadata.getValue())
+					.build())
+				.toList())
+			.withDefaultValues(templateEntity.getDefaultValues().stream()
+				.map(templateEntityDefaultValue -> DefaultValue.builder()
+					.withFieldName(templateEntityDefaultValue.getFieldName())
+					.withValue(templateEntityDefaultValue.getValue())
+					.build())
+				.toList())
+			.withContent(templateEntity.getContent())
+			.withChangeLog(templateEntity.getChangeLog())
+			.withLastModifiedAt(templateEntity.getLastModifiedAt())
+			.build();
+	}
 }

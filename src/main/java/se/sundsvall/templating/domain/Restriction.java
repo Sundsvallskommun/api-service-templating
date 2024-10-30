@@ -12,74 +12,74 @@ import lombok.Getter;
 @Generated
 public interface Restriction {
 
-    /**
-     * Returns a new {@code Restriction} logically combining the given ones using AND.
-     *
-     * @param restrictions the restrictions to combine using AND
-     * @return a new {@code Restriction}
-     */
-    static Restriction and(final Restriction...restrictions) {
-        return new And(restrictions);
-    }
+	/**
+	 * Returns a new {@code Restriction} logically combining the given ones using AND.
+	 *
+	 * @param  restrictions the restrictions to combine using AND
+	 * @return              a new {@code Restriction}
+	 */
+	static Restriction and(final Restriction... restrictions) {
+		return new And(restrictions);
+	}
 
-    /**
-     * Returns a new {@code Restriction} logically combining the given ones using OR.
-     *
-     * @param restrictions the restrictions to combine using OR
-     * @return a new {@code Restriction}
-     */
-    static Restriction or(final Restriction...restrictions) {
-        return new Or(restrictions);
-    }
+	/**
+	 * Returns a new {@code Restriction} logically combining the given ones using OR.
+	 *
+	 * @param  restrictions the restrictions to combine using OR
+	 * @return              a new {@code Restriction}
+	 */
+	static Restriction or(final Restriction... restrictions) {
+		return new Or(restrictions);
+	}
 
-    /**
-     * Returns a new {@code Restriction} matching the given key and value.
-     *
-     * @param key the key
-     * @param value the value
-     * @return a new {@code Restriction}
-     */
-    static Restriction equalTo(final String key, final String value) {
-        return KeyValue.equalTo(key, value);
-    }
+	/**
+	 * Returns a new {@code Restriction} matching the given key and value.
+	 *
+	 * @param  key   the key
+	 * @param  value the value
+	 * @return       a new {@code Restriction}
+	 */
+	static Restriction equalTo(final String key, final String value) {
+		return KeyValue.equalTo(key, value);
+	}
 
-    @Generated
-    @Getter
-    abstract class Junction implements Restriction {
+	@Generated
+	@Getter
+	abstract class Junction implements Restriction {
 
-        private final List<Restriction> restrictions = new ArrayList<>();
+		private final List<Restriction> restrictions = new ArrayList<>();
 
-        protected Junction(final List<Restriction> restrictions) {
-            this.restrictions.addAll(restrictions);
-        }
-    }
+		protected Junction(final List<Restriction> restrictions) {
+			this.restrictions.addAll(restrictions);
+		}
+	}
 
-    @Generated
-    class And extends Junction {
+	@Generated
+	class And extends Junction {
 
-        public And(final Restriction...clauses) {
-            super(Arrays.asList(clauses));
-        }
-    }
+		public And(final Restriction... clauses) {
+			super(Arrays.asList(clauses));
+		}
+	}
 
-    @Generated
-    class Or extends Junction {
+	@Generated
+	class Or extends Junction {
 
-        public Or(final Restriction...restrictions) {
-            super(Arrays.asList(restrictions));
-        }
-    }
+		public Or(final Restriction... restrictions) {
+			super(Arrays.asList(restrictions));
+		}
+	}
 
-    @Generated
-    @Getter
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    class KeyValue implements Restriction {
+	@Generated
+	@Getter
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	class KeyValue implements Restriction {
 
-        private final String key;
-        private final String value;
+		private final String key;
+		private final String value;
 
-        public static Restriction equalTo(final String key, final String value) {
-            return new KeyValue(key, value);
-        }
-    }
+		public static Restriction equalTo(final String key, final String value) {
+			return new KeyValue(key, value);
+		}
+	}
 }

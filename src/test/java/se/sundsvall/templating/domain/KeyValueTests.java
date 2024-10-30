@@ -16,51 +16,50 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class KeyValueTests {
 
-    private Validator validator;
+	private Validator validator;
 
-    @BeforeEach
-    void setUp() {
-        validator = Validation.buildDefaultValidatorFactory().getValidator();
-    }
+	@BeforeEach
+	void setUp() {
+		validator = Validation.buildDefaultValidatorFactory().getValidator();
+	}
 
-    @Test
-    void test_of_createsKeyValue_ok() {
-        var keyValue = KeyValue.of("someKey", "someValue");
+	@Test
+	void test_of_createsKeyValue_ok() {
+		var keyValue = KeyValue.of("someKey", "someValue");
 
-        assertThat(keyValue).isNotNull();
-        assertThat(keyValue.getKey()).isEqualTo("someKey");
-        assertThat(keyValue.getValue()).isEqualTo("someValue");
-    }
+		assertThat(keyValue).isNotNull();
+		assertThat(keyValue.getKey()).isEqualTo("someKey");
+		assertThat(keyValue.getValue()).isEqualTo("someValue");
+	}
 
-    @ParameterizedTest
-    @MethodSource("getKeyValuesForValidation")
-    void test_validation(final KeyValue keyValue) {
-        var constraints = copyOf(validator.validate(keyValue));
+	@ParameterizedTest
+	@MethodSource("getKeyValuesForValidation")
+	void test_validation(final KeyValue keyValue) {
+		var constraints = copyOf(validator.validate(keyValue));
 
-        assertThat(constraints).hasSize(1);
-        assertThat(constraints.get(0)).satisfies(constraintViolation -> {
-            if (isBlank(keyValue.getKey())) {
-                assertThat(constraintViolation.getPropertyPath()).hasToString("key");
-            } else {
-                assertThat(constraintViolation.getPropertyPath()).hasToString("value");
-            }
-            assertThat(constraintViolation.getMessage()).isEqualTo("must not be blank");
-        });
-    }
+		assertThat(constraints).hasSize(1);
+		assertThat(constraints.get(0)).satisfies(constraintViolation -> {
+			if (isBlank(keyValue.getKey())) {
+				assertThat(constraintViolation.getPropertyPath()).hasToString("key");
+			} else {
+				assertThat(constraintViolation.getPropertyPath()).hasToString("value");
+			}
+			assertThat(constraintViolation.getMessage()).isEqualTo("must not be blank");
+		});
+	}
 
-    @Test
-    void test_toString() {
-        var keyValue = KeyValue.of("someKey", "someValue");
+	@Test
+	void test_toString() {
+		var keyValue = KeyValue.of("someKey", "someValue");
 
-        assertThat(keyValue).hasToString("{someKey=someValue}");
-    }
+		assertThat(keyValue).hasToString("{someKey=someValue}");
+	}
 
-    static Stream<KeyValue> getKeyValuesForValidation() {
-        return Stream.of(
-            KeyValue.of(null, "someValue"),
-            KeyValue.of("", "someValue"),
-            KeyValue.of("someKey", null),
-            KeyValue.of("someKey", "")
-        );
-    }
+	static Stream<KeyValue> getKeyValuesForValidation() {
+		return Stream.of(
+			KeyValue.of(null, "someValue"),
+			KeyValue.of("", "someValue"),
+			KeyValue.of("someKey", null),
+			KeyValue.of("someKey", ""));
+	}
 }
