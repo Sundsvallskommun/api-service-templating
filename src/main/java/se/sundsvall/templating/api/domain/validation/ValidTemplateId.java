@@ -10,16 +10,18 @@ import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 @Documented
-@Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.PARAMETER})
+@Target({
+	ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.PARAMETER
+})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = ValidTemplateIdValidator.class)
 public @interface ValidTemplateId {
 
-    String PATTERN = "[A-Za-z\\d\\-\\.]+$";
+	String PATTERN = "[A-Za-z\\d\\-\\.]+$";
 
-    String message() default "must be set and may only contain letters, digits, dashes and dots";
+	String message() default "must be set and may only contain letters, digits, dashes and dots";
 
-    Class<?>[] groups() default { };
+	Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default {};
+	Class<? extends Payload>[] payload() default {};
 }

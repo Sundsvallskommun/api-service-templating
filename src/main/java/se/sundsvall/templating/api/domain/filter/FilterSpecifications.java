@@ -17,27 +17,27 @@ import se.sundsvall.templating.api.domain.filter.specification.value.InSpecifica
 
 public final class FilterSpecifications {
 
-    private FilterSpecifications() { }
+	private FilterSpecifications() {}
 
-    public static <T> Specification<T> toSpecification(final Class<T> entityClass, final Expression expression) {
-        if (expression instanceof And andExpression) {
-            return new AndSpecification<>(entityClass, andExpression);
-        } else if (expression instanceof Or orExpression) {
-            return new OrSpecification<>(entityClass, orExpression);
-        } else if (expression instanceof Not notExpression) {
-            return new NotSpecification<>(entityClass, notExpression);
-        } else if (expression instanceof Eq eqExpression) {
-            return new EqSpecification<>(eqExpression);
-        } else if (expression instanceof In inExpression) {
-            return new InSpecification<>(inExpression);
-        } else if (expression instanceof EmptyExpression) {
-            return createEmptySpecification(entityClass);
-        }
+	public static <T> Specification<T> toSpecification(final Class<T> entityClass, final Expression expression) {
+		if (expression instanceof And andExpression) {
+			return new AndSpecification<>(entityClass, andExpression);
+		} else if (expression instanceof Or orExpression) {
+			return new OrSpecification<>(entityClass, orExpression);
+		} else if (expression instanceof Not notExpression) {
+			return new NotSpecification<>(entityClass, notExpression);
+		} else if (expression instanceof Eq eqExpression) {
+			return new EqSpecification<>(eqExpression);
+		} else if (expression instanceof In inExpression) {
+			return new InSpecification<>(inExpression);
+		} else if (expression instanceof EmptyExpression) {
+			return createEmptySpecification(entityClass);
+		}
 
-        throw new IllegalArgumentException("Unknown expression type: " + expression.getClass().getSimpleName());
-    }
+		throw new IllegalArgumentException("Unknown expression type: " + expression.getClass().getSimpleName());
+	}
 
-    public static <T> Specification<T> createEmptySpecification(final Class<T> entityClass) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.createQuery(entityClass).getRestriction();
-    }
+	public static <T> Specification<T> createEmptySpecification(final Class<T> entityClass) {
+		return (root, query, criteriaBuilder) -> criteriaBuilder.createQuery(entityClass).getRestriction();
+	}
 }

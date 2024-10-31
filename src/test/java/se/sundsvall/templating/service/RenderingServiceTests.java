@@ -46,132 +46,132 @@ import io.pebbletemplates.pebble.template.PebbleTemplate;
 @ExtendWith(MockitoExtension.class)
 class RenderingServiceTests {
 
-    private static final String MUNICIPALITY_ID = "municipalityId";
-    public static final String IDENTIFIER = "someTemplateId";
+	private static final String MUNICIPALITY_ID = "municipalityId";
+	public static final String IDENTIFIER = "someTemplateId";
 
-    @Mock
-    private ITextRenderer mockITextRenderer;
-    @Mock
-    private PebbleProperties mockPebbleProperties;
-    @Mock
-    private PebbleTemplateProcessor mockPebbleTemplateProcessor;
-    @Mock
-    private WordTemplateProcessor mockWordTemplateProcessor;
-    @Mock
-    private DbIntegration mockDbIntegration;
+	@Mock
+	private ITextRenderer mockITextRenderer;
+	@Mock
+	private PebbleProperties mockPebbleProperties;
+	@Mock
+	private PebbleTemplateProcessor mockPebbleTemplateProcessor;
+	@Mock
+	private WordTemplateProcessor mockWordTemplateProcessor;
+	@Mock
+	private DbIntegration mockDbIntegration;
 
-    @Mock
-    private PebbleTemplate mockPebbleTemplate;
-    @Mock
-    private RenderRequest mockRenderRequest;
-    @Mock
-    private DirectRenderRequest mockDirectRenderRequest;
+	@Mock
+	private PebbleTemplate mockPebbleTemplate;
+	@Mock
+	private RenderRequest mockRenderRequest;
+	@Mock
+	private DirectRenderRequest mockDirectRenderRequest;
 
-    @Mock
-    private TemplateEntity mockTemplateEntity;
+	@Mock
+	private TemplateEntity mockTemplateEntity;
 
-    @InjectMocks
-    private RenderingService service;
+	@InjectMocks
+	private RenderingService service;
 
-    @Test
-    void renderTemplate() {
-        when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
-        when(mockTemplateEntity.getIdentifier()).thenReturn(IDENTIFIER);
-        when(mockTemplateEntity.getType()).thenReturn(PEBBLE);
-        when(mockDbIntegration.getTemplate(any(), any(), any()))
-            .thenReturn(Optional.of(mockTemplateEntity));
-        when(mockPebbleTemplateProcessor.process(any(String.class), anyMap())).thenReturn("someResult".getBytes(UTF_8));
+	@Test
+	void renderTemplate() {
+		when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockTemplateEntity.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockTemplateEntity.getType()).thenReturn(PEBBLE);
+		when(mockDbIntegration.getTemplate(any(), any(), any()))
+			.thenReturn(Optional.of(mockTemplateEntity));
+		when(mockPebbleTemplateProcessor.process(any(String.class), anyMap())).thenReturn("someResult".getBytes(UTF_8));
 
-        var result = service.renderTemplate(MUNICIPALITY_ID, mockRenderRequest);
-        assertThat(result).isNotNull();
+		var result = service.renderTemplate(MUNICIPALITY_ID, mockRenderRequest);
+		assertThat(result).isNotNull();
 
-        verify(mockRenderRequest, times(1)).getIdentifier();
-        verify(mockRenderRequest, times(1)).getParameters();
-        verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
-        verify(mockPebbleTemplateProcessor).process(any(String.class), anyMap());
-        verifyNoInteractions(mockWordTemplateProcessor);
-    }
+		verify(mockRenderRequest, times(1)).getIdentifier();
+		verify(mockRenderRequest, times(1)).getParameters();
+		verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
+		verify(mockPebbleTemplateProcessor).process(any(String.class), anyMap());
+		verifyNoInteractions(mockWordTemplateProcessor);
+	}
 
-    @Test
-    void renderTemplate_whenRenderingFails() {
-        when(mockTemplateEntity.getIdentifier()).thenReturn(IDENTIFIER);
-        when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
-        when(mockDbIntegration.getTemplate(any(), any(), any())).thenReturn(Optional.of(mockTemplateEntity));
-        when(mockTemplateEntity.getType()).thenReturn(PEBBLE);
-        doThrow(new TemplateException(new IOException())).when(mockPebbleTemplateProcessor).process(any(), anyMap());
+	@Test
+	void renderTemplate_whenRenderingFails() {
+		when(mockTemplateEntity.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockDbIntegration.getTemplate(any(), any(), any())).thenReturn(Optional.of(mockTemplateEntity));
+		when(mockTemplateEntity.getType()).thenReturn(PEBBLE);
+		doThrow(new TemplateException(new IOException())).when(mockPebbleTemplateProcessor).process(any(), anyMap());
 
-        assertThatExceptionOfType(RuntimeException.class)
-            .isThrownBy(() -> service.renderTemplate(MUNICIPALITY_ID, mockRenderRequest));
-    }
+		assertThatExceptionOfType(RuntimeException.class)
+			.isThrownBy(() -> service.renderTemplate(MUNICIPALITY_ID, mockRenderRequest));
+	}
 
-    @Test
-    void renderTemplate_whenTemplateDoesNotExist() {
-        when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
-        when(mockRenderRequest.getVersion()).thenReturn("1.8");
-        when(mockDbIntegration.getTemplate(any(), any(), any())).thenReturn(Optional.empty());
+	@Test
+	void renderTemplate_whenTemplateDoesNotExist() {
+		when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockRenderRequest.getVersion()).thenReturn("1.8");
+		when(mockDbIntegration.getTemplate(any(), any(), any())).thenReturn(Optional.empty());
 
-        assertThatExceptionOfType(ThrowableProblem.class)
-            .isThrownBy(() -> service.renderTemplate(MUNICIPALITY_ID, mockRenderRequest));
+		assertThatExceptionOfType(ThrowableProblem.class)
+			.isThrownBy(() -> service.renderTemplate(MUNICIPALITY_ID, mockRenderRequest));
 
-        verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, IDENTIFIER, "1.8");
-        verify(mockRenderRequest, times(3)).getIdentifier();
-    }
+		verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, IDENTIFIER, "1.8");
+		verify(mockRenderRequest, times(3)).getIdentifier();
+	}
 
-    @ParameterizedTest
-    @EnumSource(TemplateType.class)
-    void renderDirectInternal(final TemplateType templateType) {
-        var result = "someResult".getBytes(UTF_8);
+	@ParameterizedTest
+	@EnumSource(TemplateType.class)
+	void renderDirectInternal(final TemplateType templateType) {
+		var result = "someResult".getBytes(UTF_8);
 
-        when(mockDirectRenderRequest.getContent()).thenReturn("bG9yZW0gaXBzdW0=");
+		when(mockDirectRenderRequest.getContent()).thenReturn("bG9yZW0gaXBzdW0=");
 
-        try (var mockTemplateUtil = mockStatic(TemplateUtil.class)) {
-            mockTemplateUtil.when(() -> TemplateUtil.decodeBase64(any(String.class))).thenCallRealMethod();
-            mockTemplateUtil.when(() -> TemplateUtil.getTemplateType(any(byte[].class))).thenReturn(templateType);
+		try (var mockTemplateUtil = mockStatic(TemplateUtil.class)) {
+			mockTemplateUtil.when(() -> TemplateUtil.decodeBase64(any(String.class))).thenCallRealMethod();
+			mockTemplateUtil.when(() -> TemplateUtil.getTemplateType(any(byte[].class))).thenReturn(templateType);
 
-            if (templateType == WORD) {
-                when(mockWordTemplateProcessor.process(any(byte[].class), anyMap())).thenReturn(result);
+			if (templateType == WORD) {
+				when(mockWordTemplateProcessor.process(any(byte[].class), anyMap())).thenReturn(result);
 
-                assertThat(service.renderDirectInternal(mockDirectRenderRequest)).isEqualTo(result);
+				assertThat(service.renderDirectInternal(mockDirectRenderRequest)).isEqualTo(result);
 
-                verify(mockWordTemplateProcessor).process(any(byte[].class), anyMap());
-                verifyNoMoreInteractions(mockWordTemplateProcessor);
-                verifyNoInteractions(mockPebbleTemplateProcessor);
-            } else {
-                when(mockPebbleTemplateProcessor.process(any(String.class), anyMap())).thenReturn(result);
+				verify(mockWordTemplateProcessor).process(any(byte[].class), anyMap());
+				verifyNoMoreInteractions(mockWordTemplateProcessor);
+				verifyNoInteractions(mockPebbleTemplateProcessor);
+			} else {
+				when(mockPebbleTemplateProcessor.process(any(String.class), anyMap())).thenReturn(result);
 
-                assertThat(service.renderDirectInternal(mockDirectRenderRequest)).isEqualTo(result);
+				assertThat(service.renderDirectInternal(mockDirectRenderRequest)).isEqualTo(result);
 
-                verify(mockPebbleTemplateProcessor).process(any(String.class), anyMap());
-                verifyNoMoreInteractions(mockPebbleTemplateProcessor);
-                verifyNoInteractions(mockWordTemplateProcessor);
-            }
+				verify(mockPebbleTemplateProcessor).process(any(String.class), anyMap());
+				verifyNoMoreInteractions(mockPebbleTemplateProcessor);
+				verifyNoInteractions(mockWordTemplateProcessor);
+			}
 
-            mockTemplateUtil.verify(() -> TemplateUtil.decodeBase64(any(String.class)));
-            mockTemplateUtil.verify(() -> TemplateUtil.getTemplateType(any(byte[].class)));
-            mockTemplateUtil.verifyNoMoreInteractions();
-        }
-    }
+			mockTemplateUtil.verify(() -> TemplateUtil.decodeBase64(any(String.class)));
+			mockTemplateUtil.verify(() -> TemplateUtil.getTemplateType(any(byte[].class)));
+			mockTemplateUtil.verifyNoMoreInteractions();
+		}
+	}
 
-    @Test
-    void renderHtmlAsPdf() {
-        var document = "someTemplateContent";
+	@Test
+	void renderHtmlAsPdf() {
+		var document = "someTemplateContent";
 
-        service.renderHtmlAsPdf(document.getBytes(UTF_8));
+		service.renderHtmlAsPdf(document.getBytes(UTF_8));
 
-        verify(mockITextRenderer, times(1)).setDocumentFromString("<html>\n <head></head>\n <body>\n  " + document + "\n </body>\n</html>");
-        verify(mockITextRenderer, times(1)).layout();
-        verify(mockITextRenderer, times(1)).createPDF(any(OutputStream.class));
-        verify(mockITextRenderer, times(1)).finishPDF();
-    }
+		verify(mockITextRenderer, times(1)).setDocumentFromString("<html>\n <head></head>\n <body>\n  " + document + "\n </body>\n</html>");
+		verify(mockITextRenderer, times(1)).layout();
+		verify(mockITextRenderer, times(1)).createPDF(any(OutputStream.class));
+		verify(mockITextRenderer, times(1)).finishPDF();
+	}
 
-    @Test
-    void renderHtmlAsPdf_whenExceptionIsThrown() {
-        var template = "someTemplateContent".getBytes(UTF_8);
+	@Test
+	void renderHtmlAsPdf_whenExceptionIsThrown() {
+		var template = "someTemplateContent".getBytes(UTF_8);
 
-        doAnswer(invocation -> { throw new IOException("dummy"); }).when(mockITextRenderer).createPDF(any(OutputStream.class));
+		doAnswer(invocation -> { throw new IOException("dummy"); }).when(mockITextRenderer).createPDF(any(OutputStream.class));
 
-        assertThatExceptionOfType(TemplateException.class)
-            .isThrownBy(() -> service.renderHtmlAsPdf(template))
-            .withMessage("Unable to render PDF");
-    }
+		assertThatExceptionOfType(TemplateException.class)
+			.isThrownBy(() -> service.renderHtmlAsPdf(template))
+			.withMessage("Unable to render PDF");
+	}
 }

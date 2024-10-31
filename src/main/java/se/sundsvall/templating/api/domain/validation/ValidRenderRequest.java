@@ -15,9 +15,9 @@ import jakarta.validation.Payload;
 @Constraint(validatedBy = ValidRenderRequestValidator.class)
 public @interface ValidRenderRequest {
 
-    String message() default "exactly one of 'identifier' or 'metadata' must be set and non-null/empty";
+	String message() default "exactly one of 'identifier' or 'metadata' must be set and non-null/empty";
 
-    Class<?>[] groups() default { };
+	Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default {};
+	Class<? extends Payload>[] payload() default {};
 }

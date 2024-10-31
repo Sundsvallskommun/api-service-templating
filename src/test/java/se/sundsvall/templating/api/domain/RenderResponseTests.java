@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 
 class RenderResponseTests {
 
-    @Test
-    void testBuilderAndGetters() {
-        var response = RenderResponse.builder()
-            .withOutput("someContent")
-            .build();
+	@Test
+	void testBuilderAndGetters() {
+		var response = RenderResponse.builder()
+			.withOutput("someContent")
+			.build();
 
-        assertThat(response.getOutput()).isEqualTo("someContent");
-    }
+		assertThat(response.getOutput()).isEqualTo("someContent");
+	}
 }

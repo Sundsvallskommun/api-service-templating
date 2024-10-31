@@ -22,68 +22,68 @@ import se.sundsvall.templating.service.RenderingService;
 @ExtendWith(MockitoExtension.class)
 class RenderResourceTests {
 
-    private static final String MUNICIPALITY_ID = "2281";
+	private static final String MUNICIPALITY_ID = "2281";
 
-    @Mock
-    private RenderingService mockRenderingService;
+	@Mock
+	private RenderingService mockRenderingService;
 
-    @Mock
-    private ContextMunicipalityId mockContextMunicipalityId;
+	@Mock
+	private ContextMunicipalityId mockContextMunicipalityId;
 
-    private RenderResource resource;
+	private RenderResource resource;
 
-    @BeforeEach
-    void setUp() {
-        resource = new RenderResource(mockContextMunicipalityId, mockRenderingService);
-    }
+	@BeforeEach
+	void setUp() {
+		resource = new RenderResource(mockContextMunicipalityId, mockRenderingService);
+	}
 
-    @Test
-    void test_render() {
-        when(mockRenderingService.renderTemplate(any(), any(RenderRequest.class))).thenReturn("someText");
+	@Test
+	void test_render() {
+		when(mockRenderingService.renderTemplate(any(), any(RenderRequest.class))).thenReturn("someText");
 
-        var result = resource.render(MUNICIPALITY_ID, new RenderRequest());
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().getOutput()).isEqualTo("someText");
+		var result = resource.render(MUNICIPALITY_ID, new RenderRequest());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isNotNull();
+		assertThat(result.getBody().getOutput()).isEqualTo("someText");
 
-        verify(mockRenderingService, times(1)).renderTemplate(eq(MUNICIPALITY_ID), any(RenderRequest.class));
-    }
+		verify(mockRenderingService, times(1)).renderTemplate(eq(MUNICIPALITY_ID), any(RenderRequest.class));
+	}
 
-    @Test
-    void test_renderAsPdf() {
-        when(mockRenderingService.renderTemplateAsPdf(any(), any(RenderRequest.class))).thenReturn("someText");
+	@Test
+	void test_renderAsPdf() {
+		when(mockRenderingService.renderTemplateAsPdf(any(), any(RenderRequest.class))).thenReturn("someText");
 
-        var result = resource.renderPdf(MUNICIPALITY_ID, new RenderRequest());
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().getOutput()).isEqualTo("someText");
+		var result = resource.renderPdf(MUNICIPALITY_ID, new RenderRequest());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isNotNull();
+		assertThat(result.getBody().getOutput()).isEqualTo("someText");
 
-        verify(mockRenderingService, times(1)).renderTemplateAsPdf(eq(MUNICIPALITY_ID), any(RenderRequest.class));
-    }
+		verify(mockRenderingService, times(1)).renderTemplateAsPdf(eq(MUNICIPALITY_ID), any(RenderRequest.class));
+	}
 
-    @Test
-    void test_renderDirect() {
-        when(mockRenderingService.renderDirect(any(DirectRenderRequest.class)))
-            .thenReturn("someText");
+	@Test
+	void test_renderDirect() {
+		when(mockRenderingService.renderDirect(any(DirectRenderRequest.class)))
+			.thenReturn("someText");
 
-        var result = resource.renderDirect(MUNICIPALITY_ID, new DirectRenderRequest());
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().getOutput()).isEqualTo("someText");
+		var result = resource.renderDirect(MUNICIPALITY_ID, new DirectRenderRequest());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isNotNull();
+		assertThat(result.getBody().getOutput()).isEqualTo("someText");
 
-        verify(mockRenderingService, times(1)).renderDirect(any(DirectRenderRequest.class));
-    }
-    
-    @Test
-    void test_renderDirectAsPdf() {
-        when(mockRenderingService.renderDirectAsPdf(any(DirectRenderRequest.class)))
-            .thenReturn("someText");
+		verify(mockRenderingService, times(1)).renderDirect(any(DirectRenderRequest.class));
+	}
 
-        var result = resource.renderDirectPdf(MUNICIPALITY_ID, new DirectRenderRequest());
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().getOutput()).isEqualTo("someText");
+	@Test
+	void test_renderDirectAsPdf() {
+		when(mockRenderingService.renderDirectAsPdf(any(DirectRenderRequest.class)))
+			.thenReturn("someText");
 
-        verify(mockRenderingService, times(1)).renderDirectAsPdf(any(DirectRenderRequest.class));
-    }
+		var result = resource.renderDirectPdf(MUNICIPALITY_ID, new DirectRenderRequest());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isNotNull();
+		assertThat(result.getBody().getOutput()).isEqualTo("someText");
+
+		verify(mockRenderingService, times(1)).renderDirectAsPdf(any(DirectRenderRequest.class));
+	}
 }

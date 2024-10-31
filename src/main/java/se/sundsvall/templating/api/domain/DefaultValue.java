@@ -14,9 +14,9 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Template default value")
 public class DefaultValue {
 
-    @Schema(description = "Field name")
-    private String fieldName;
+	@Schema(description = "Field name")
+	private String fieldName;
 
-    @Schema(description = "Value")
-    private String value;
+	@Schema(description = "Value")
+	private String value;
 }

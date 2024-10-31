@@ -42,176 +42,176 @@ import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 @Service
 public class RenderingService {
 
-    private static final String BASE64_VALUE_PREFIX = "BASE64:";
+	private static final String BASE64_VALUE_PREFIX = "BASE64:";
 
-    private final PebbleProperties pebbleProperties;
-    private final PebbleTemplateProcessor pebbleTemplateProcessor;
-    private final WordTemplateProcessor wordTemplateProcessor;
-    private final ITextRenderer iTextRenderer;
-    private final DbIntegration dbIntegration;
+	private final PebbleProperties pebbleProperties;
+	private final PebbleTemplateProcessor pebbleTemplateProcessor;
+	private final WordTemplateProcessor wordTemplateProcessor;
+	private final ITextRenderer iTextRenderer;
+	private final DbIntegration dbIntegration;
 
-    public RenderingService(final PebbleProperties pebbleProperties,
-            final PebbleTemplateProcessor pebbleTemplateProcessor,
-            final WordTemplateProcessor wordTemplateProcessor,
-            final ITextRenderer iTextRenderer,
-            final DbIntegration dbIntegration) {
-        this.pebbleProperties = pebbleProperties;
-        this.pebbleTemplateProcessor = pebbleTemplateProcessor;
-        this.wordTemplateProcessor = wordTemplateProcessor;
-        this.iTextRenderer = iTextRenderer;
-        this.dbIntegration = dbIntegration;
-    }
+	public RenderingService(final PebbleProperties pebbleProperties,
+		final PebbleTemplateProcessor pebbleTemplateProcessor,
+		final WordTemplateProcessor wordTemplateProcessor,
+		final ITextRenderer iTextRenderer,
+		final DbIntegration dbIntegration) {
+		this.pebbleProperties = pebbleProperties;
+		this.pebbleTemplateProcessor = pebbleTemplateProcessor;
+		this.wordTemplateProcessor = wordTemplateProcessor;
+		this.iTextRenderer = iTextRenderer;
+		this.dbIntegration = dbIntegration;
+	}
 
-    public String renderTemplate(final String municipalityId, final RenderRequest request) {
-        // Get the template
-        var template = getTemplate(municipalityId, request);
-        // Render it
-        var output = renderTemplateInternal(template, request.getParameters());
+	public String renderTemplate(final String municipalityId, final RenderRequest request) {
+		// Get the template
+		var template = getTemplate(municipalityId, request);
+		// Render it
+		var output = renderTemplateInternal(template, request.getParameters());
 
-        return encodeBase64(output);
-    }
+		return encodeBase64(output);
+	}
 
-    public String renderTemplateAsPdf(final String municipalityId, final RenderRequest request) {
-        // Get the template
-        var template = getTemplate(municipalityId, request);
-        // Pre-render it
-        var output = renderTemplateInternal(template, request.getParameters());
-        // Render it as a PDF
-        var renderedPdf = switch (template.getType()) {
-            case PEBBLE -> renderHtmlAsPdf(output);
-            case WORD -> renderWordAsPdf(output);
-        };
+	public String renderTemplateAsPdf(final String municipalityId, final RenderRequest request) {
+		// Get the template
+		var template = getTemplate(municipalityId, request);
+		// Pre-render it
+		var output = renderTemplateInternal(template, request.getParameters());
+		// Render it as a PDF
+		var renderedPdf = switch (template.getType()) {
+			case PEBBLE -> renderHtmlAsPdf(output);
+			case WORD -> renderWordAsPdf(output);
+		};
 
-        return encodeBase64(renderedPdf);
-    }
+		return encodeBase64(renderedPdf);
+	}
 
-    public String renderDirect(final DirectRenderRequest request) {
-        // Render the provided template
-        var output = renderDirectInternal(request);
+	public String renderDirect(final DirectRenderRequest request) {
+		// Render the provided template
+		var output = renderDirectInternal(request);
 
-        return encodeBase64(output);
-    }
+		return encodeBase64(output);
+	}
 
-    public String renderDirectAsPdf(final DirectRenderRequest request) {
-        // Render the provided template
-        var output = renderDirectInternal(request);
-        // Decode the provided template content, to be able to guess the type
-        var content = decodeBase64(request.getContent());
-        // Render it as a PDF
-        var renderedPdf = switch (getTemplateType(content)) {
-            case PEBBLE -> renderHtmlAsPdf(output);
-            case WORD -> renderWordAsPdf(output);
-        };
+	public String renderDirectAsPdf(final DirectRenderRequest request) {
+		// Render the provided template
+		var output = renderDirectInternal(request);
+		// Decode the provided template content, to be able to guess the type
+		var content = decodeBase64(request.getContent());
+		// Render it as a PDF
+		var renderedPdf = switch (getTemplateType(content)) {
+			case PEBBLE -> renderHtmlAsPdf(output);
+			case WORD -> renderWordAsPdf(output);
+		};
 
-        return encodeBase64(renderedPdf);
-    }
+		return encodeBase64(renderedPdf);
+	}
 
-    byte[] renderTemplateInternal(final TemplateEntity template, final Map<String, Object> requestParameters) {
-        // Extract template default values
-        var defaultValues = template.getDefaultValues().stream()
-            .collect(toMap(DefaultValueEntity::getFieldName, DefaultValueEntity::getValue));
+	byte[] renderTemplateInternal(final TemplateEntity template, final Map<String, Object> requestParameters) {
+		// Extract template default values
+		var defaultValues = template.getDefaultValues().stream()
+			.collect(toMap(DefaultValueEntity::getFieldName, DefaultValueEntity::getValue));
 
-        // Merge default values and request parameters, default values first, allowing for request
-        // parameters to override any matching default value. Also, (configurable) use a TreeMap
-        // with a case-insensitive comparator, to allow the use of case-insensitive keys
-        var mergedParametersAndDefaultValues = new TreeMap<>(
-            pebbleProperties.isUseCaseInsensitiveKeys() ? String.CASE_INSENSITIVE_ORDER : null);
+		// Merge default values and request parameters, default values first, allowing for request
+		// parameters to override any matching default value. Also, (configurable) use a TreeMap
+		// with a case-insensitive comparator, to allow the use of case-insensitive keys
+		var mergedParametersAndDefaultValues = new TreeMap<>(
+			pebbleProperties.isUseCaseInsensitiveKeys() ? String.CASE_INSENSITIVE_ORDER : null);
 
-        // Add identifier and version as extra template parameters (prefixed with underscore to
-        // minimize the risk of name clashes)
-        mergedParametersAndDefaultValues.put("_identifier", template.getIdentifier());
-        mergedParametersAndDefaultValues.put("_version", template.getVersion());
-        // Add default values
-        mergedParametersAndDefaultValues.putAll(defaultValues);
-        // Decode request parameters
-        var decodedRequestParameters = decodeRequestParameters(requestParameters);
-        // Add request parameters
-        mergedParametersAndDefaultValues.putAll(decodedRequestParameters);
+		// Add identifier and version as extra template parameters (prefixed with underscore to
+		// minimize the risk of name clashes)
+		mergedParametersAndDefaultValues.put("_identifier", template.getIdentifier());
+		mergedParametersAndDefaultValues.put("_version", template.getVersion());
+		// Add default values
+		mergedParametersAndDefaultValues.putAll(defaultValues);
+		// Decode request parameters
+		var decodedRequestParameters = decodeRequestParameters(requestParameters);
+		// Add request parameters
+		mergedParametersAndDefaultValues.putAll(decodedRequestParameters);
 
-        // Process the template
-        return switch (template.getType()) {
-            case PEBBLE -> pebbleTemplateProcessor.process(template.getIdentifier() + ":" + template.getVersion(), mergedParametersAndDefaultValues);
-            case WORD -> wordTemplateProcessor.process(decodeBase64(template.getContent()), mergedParametersAndDefaultValues);
-        };
-    }
+		// Process the template
+		return switch (template.getType()) {
+			case PEBBLE -> pebbleTemplateProcessor.process(template.getIdentifier() + ":" + template.getVersion(), mergedParametersAndDefaultValues);
+			case WORD -> wordTemplateProcessor.process(decodeBase64(template.getContent()), mergedParametersAndDefaultValues);
+		};
+	}
 
-    byte[] renderDirectInternal(final DirectRenderRequest request) {
-        var template = decodeBase64(request.getContent());
+	byte[] renderDirectInternal(final DirectRenderRequest request) {
+		var template = decodeBase64(request.getContent());
 
-        // Decode request parameters
-        var decodedRequestParameters = decodeRequestParameters(request.getParameters());
+		// Decode request parameters
+		var decodedRequestParameters = decodeRequestParameters(request.getParameters());
 
-        return switch (getTemplateType(template)) {
-            case PEBBLE -> pebbleTemplateProcessor.process(DelegatingLoader.DIRECT_PREFIX + request.getContent(), decodedRequestParameters);
-            case WORD -> wordTemplateProcessor.process(template, decodedRequestParameters);
-        };
-    }
+		return switch (getTemplateType(template)) {
+			case PEBBLE -> pebbleTemplateProcessor.process(DelegatingLoader.DIRECT_PREFIX + request.getContent(), decodedRequestParameters);
+			case WORD -> wordTemplateProcessor.process(template, decodedRequestParameters);
+		};
+	}
 
-    byte[] renderHtmlAsPdf(final byte[] document) {
-        try (var out = new ByteArrayOutputStream()) {
-            // Run the document through Jsoup to wrap it in a proper HTML/XML document in order to
-            // get OpenPDF to play nice
-            var doc = Jsoup.parse(bytesToString(document), "UTF-8");
-            doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
+	byte[] renderHtmlAsPdf(final byte[] document) {
+		try (var out = new ByteArrayOutputStream()) {
+			// Run the document through Jsoup to wrap it in a proper HTML/XML document in order to
+			// get OpenPDF to play nice
+			var doc = Jsoup.parse(bytesToString(document), "UTF-8");
+			doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
 
-            iTextRenderer.setDocumentFromString(doc.html());
-            iTextRenderer.layout();
-            iTextRenderer.createPDF(out);
-            iTextRenderer.finishPDF();
+			iTextRenderer.setDocumentFromString(doc.html());
+			iTextRenderer.layout();
+			iTextRenderer.createPDF(out);
+			iTextRenderer.finishPDF();
 
-            return out.toByteArray();
-        } catch (IOException e) {
-            throw new TemplateException("Unable to render PDF", e);
-        }
-    }
+			return out.toByteArray();
+		} catch (IOException e) {
+			throw new TemplateException("Unable to render PDF", e);
+		}
+	}
 
-    byte[] renderWordAsPdf(final byte[] document) {
-        try (var in = new ByteArrayInputStream(document);
-             var doc = new XWPFDocument(in);
-             var out = new ByteArrayOutputStream()) {
-            PdfConverter.getInstance().convert(doc, out, PdfOptions.getDefault());
+	byte[] renderWordAsPdf(final byte[] document) {
+		try (var in = new ByteArrayInputStream(document);
+			var doc = new XWPFDocument(in);
+			var out = new ByteArrayOutputStream()) {
+			PdfConverter.getInstance().convert(doc, out, PdfOptions.getDefault());
 
-            return out.toByteArray();
-        } catch (IOException e) {
-            throw new TemplateException("Unable to render PDF", e);
-        }
-    }
+			return out.toByteArray();
+		} catch (IOException e) {
+			throw new TemplateException("Unable to render PDF", e);
+		}
+	}
 
-    TemplateEntity getTemplate(final String municipalityId, final RenderRequest request) {
-        var template = ofNullable(request.getIdentifier())
-            .flatMap(identifier -> dbIntegration.getTemplate(municipalityId, identifier, request.getVersion()))
-            .orElseGet(() -> ofNullable(request.getMetadata())
-                .filter(not(List::isEmpty))
-                .flatMap(map -> dbIntegration.findTemplate(municipalityId, map))
-                .orElse(null));
+	TemplateEntity getTemplate(final String municipalityId, final RenderRequest request) {
+		var template = ofNullable(request.getIdentifier())
+			.flatMap(identifier -> dbIntegration.getTemplate(municipalityId, identifier, request.getVersion()))
+			.orElseGet(() -> ofNullable(request.getMetadata())
+				.filter(not(List::isEmpty))
+				.flatMap(map -> dbIntegration.findTemplate(municipalityId, map))
+				.orElse(null));
 
-        if (null == template) {
-            var message = ofNullable(request.getIdentifier())
-                .map(ignored -> format("Unable to find template using identifier: '%s'", request.getIdentifier()))
-                .orElseGet(() -> format("Unable to find template using metadata: %s", request.getMetadata()));
+		if (null == template) {
+			var message = ofNullable(request.getIdentifier())
+				.map(ignored -> format("Unable to find template using identifier: '%s'", request.getIdentifier()))
+				.orElseGet(() -> format("Unable to find template using metadata: %s", request.getMetadata()));
 
-            throw Problem.valueOf(Status.NOT_FOUND, message);
-        }
+			throw Problem.valueOf(Status.NOT_FOUND, message);
+		}
 
-        return template;
-    }
+		return template;
+	}
 
-    /**
-     * Decodes any parameter value that is a string and is prefixed with "BASE64:".
-     *
-     * @param requestParameters the original request parameters
-     * @return the request parameters with any BASE64-encoded values decoded
-     */
-    Map<String, Object> decodeRequestParameters(final Map<String, Object> requestParameters) {
-        return ofNullable(requestParameters)
-            .map(parameters -> parameters.entrySet().stream()
-                .map(entry -> {
-                    var value = entry.getValue();
-                    if (value instanceof String stringValue && stringValue.startsWith(BASE64_VALUE_PREFIX)) {
-                        value = bytesToString(decodeBase64(stringValue.substring(BASE64_VALUE_PREFIX.length())));
-                    }
-                    return new AbstractMap.SimpleEntry<>(entry.getKey(), value);
-                })
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))).orElse(Map.of());
-    }
+	/**
+	 * Decodes any parameter value that is a string and is prefixed with "BASE64:".
+	 *
+	 * @param  requestParameters the original request parameters
+	 * @return                   the request parameters with any BASE64-encoded values decoded
+	 */
+	Map<String, Object> decodeRequestParameters(final Map<String, Object> requestParameters) {
+		return ofNullable(requestParameters)
+			.map(parameters -> parameters.entrySet().stream()
+				.map(entry -> {
+					var value = entry.getValue();
+					if (value instanceof String stringValue && stringValue.startsWith(BASE64_VALUE_PREFIX)) {
+						value = bytesToString(decodeBase64(stringValue.substring(BASE64_VALUE_PREFIX.length())));
+					}
+					return new AbstractMap.SimpleEntry<>(entry.getKey(), value);
+				})
+				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue))).orElse(Map.of());
+	}
 }

@@ -7,19 +7,19 @@ import org.junit.jupiter.api.Test;
 
 class TemplateEntityTests {
 
-    @Test
-    void getContentBytes() {
-        var content = "someContent";
+	@Test
+	void getContentBytes() {
+		var content = "someContent";
 
-        var templateEntity = TemplateEntity.builder()
-            .withContent(content)
-            .build();
+		var templateEntity = TemplateEntity.builder()
+			.withContent(content)
+			.build();
 
-        assertThat(templateEntity.getContentBytes()).isEqualTo(content.getBytes(UTF_8));
-    }
+		assertThat(templateEntity.getContentBytes()).isEqualTo(content.getBytes(UTF_8));
+	}
 
-    @Test
-    void getContentBytesWhenContentIsNull() {
-        assertThat(new TemplateEntity().getContentBytes()).isNull();
-    }
+	@Test
+	void getContentBytesWhenContentIsNull() {
+		assertThat(new TemplateEntity().getContentBytes()).isNull();
+	}
 }

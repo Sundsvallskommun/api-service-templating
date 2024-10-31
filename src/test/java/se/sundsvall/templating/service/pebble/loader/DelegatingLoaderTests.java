@@ -24,107 +24,107 @@ import io.pebbletemplates.pebble.loader.StringLoader;
 @ExtendWith(MockitoExtension.class)
 class DelegatingLoaderTests {
 
-    private static final String MUNICIPALITY_ID = "municipalityId";
+	private static final String MUNICIPALITY_ID = "municipalityId";
 
-    @Mock
-    private DatabaseLoader mockDatabaseLoader;
-    @Mock
-    private StringLoader mockStringLoader;
-    @Mock
-    private ContextMunicipalityId mockContextMunicipalityId;
+	@Mock
+	private DatabaseLoader mockDatabaseLoader;
+	@Mock
+	private StringLoader mockStringLoader;
+	@Mock
+	private ContextMunicipalityId mockContextMunicipalityId;
 
-    private DelegatingLoader loader;
+	private DelegatingLoader loader;
 
-    @BeforeEach
-    void setUp() {
-        loader = new DelegatingLoader(mockDatabaseLoader, mockStringLoader, mockContextMunicipalityId);
-    }
+	@BeforeEach
+	void setUp() {
+		loader = new DelegatingLoader(mockDatabaseLoader, mockStringLoader, mockContextMunicipalityId);
+	}
 
-    @Test
-    void test_getReader() {
-        when(mockDatabaseLoader.getReader(any(IdentifierAndVersion.class))).thenReturn(new StringReader(""));
+	@Test
+	void test_getReader() {
+		when(mockDatabaseLoader.getReader(any(IdentifierAndVersion.class))).thenReturn(new StringReader(""));
 
-        var reader = loader.getReader(new IdentifierAndVersion(MUNICIPALITY_ID, "someTemplateId"));
-        assertThat(reader).isNotNull();
+		var reader = loader.getReader(new IdentifierAndVersion(MUNICIPALITY_ID, "someTemplateId"));
+		assertThat(reader).isNotNull();
 
-        verify(mockStringLoader, never()).getReader(any(String.class));
-        verify(mockDatabaseLoader, times(1)).getReader(any(IdentifierAndVersion.class));
-    }
+		verify(mockStringLoader, never()).getReader(any(String.class));
+		verify(mockDatabaseLoader, times(1)).getReader(any(IdentifierAndVersion.class));
+	}
 
-    @Test
-    void test_getReader_directRendering() {
-        when(mockStringLoader.getReader(any(String.class))).thenReturn(new StringReader(""));
+	@Test
+	void test_getReader_directRendering() {
+		when(mockStringLoader.getReader(any(String.class))).thenReturn(new StringReader(""));
 
-        var reader = loader.getReader(new IdentifierAndVersion(MUNICIPALITY_ID,"DIRECT:someTemplate"));
-        assertThat(reader).isNotNull();
+		var reader = loader.getReader(new IdentifierAndVersion(MUNICIPALITY_ID, "DIRECT:someTemplate"));
+		assertThat(reader).isNotNull();
 
-        verify(mockStringLoader, times(1)).getReader(any(String.class));
-        verify(mockDatabaseLoader, never()).getReader(any(IdentifierAndVersion.class));
-    }
+		verify(mockStringLoader, times(1)).getReader(any(String.class));
+		verify(mockDatabaseLoader, never()).getReader(any(IdentifierAndVersion.class));
+	}
 
-    @Test
-    void test_setCharset() {
-        assertThatNoException().isThrownBy(() -> loader.setCharset("someCharset"));
-    }
+	@Test
+	void test_setCharset() {
+		assertThatNoException().isThrownBy(() -> loader.setCharset("someCharset"));
+	}
 
-    @Test
-    void test_setPrefix() {
-        assertThatNoException().isThrownBy(() -> loader.setPrefix("somePrefix"));
-    }
+	@Test
+	void test_setPrefix() {
+		assertThatNoException().isThrownBy(() -> loader.setPrefix("somePrefix"));
+	}
 
-    @Test
-    void test_setSuffix() {
-        assertThatNoException().isThrownBy(() -> loader.setSuffix("someSuffix"));
-    }
+	@Test
+	void test_setSuffix() {
+		assertThatNoException().isThrownBy(() -> loader.setSuffix("someSuffix"));
+	}
 
-    @Test
-    void test_resolveRelativePath() {
-        when(mockDatabaseLoader.resolveRelativePath(any(String.class), any(String.class)))
-            .thenReturn("someResolvedTemplateId");
+	@Test
+	void test_resolveRelativePath() {
+		when(mockDatabaseLoader.resolveRelativePath(any(String.class), any(String.class)))
+			.thenReturn("someResolvedTemplateId");
 
-        assertThat(loader.resolveRelativePath("someTemplateId", "someOtherTemplateId"))
-            .isEqualTo("someResolvedTemplateId");
+		assertThat(loader.resolveRelativePath("someTemplateId", "someOtherTemplateId"))
+			.isEqualTo("someResolvedTemplateId");
 
-        verify(mockStringLoader, never()).resolveRelativePath(any(String.class), any(String.class));
-        verify(mockDatabaseLoader, times(1)).resolveRelativePath(any(String.class), any(String.class));
-    }
+		verify(mockStringLoader, never()).resolveRelativePath(any(String.class), any(String.class));
+		verify(mockDatabaseLoader, times(1)).resolveRelativePath(any(String.class), any(String.class));
+	}
 
-    @Test
-    void test_resolveRelativePath_directRendering() {
-        assertThat(loader.resolveRelativePath("someTemplateId", DelegatingLoader.DIRECT_PREFIX + ":" + "someOtherTemplateId"))
-            .isNull();
+	@Test
+	void test_resolveRelativePath_directRendering() {
+		assertThat(loader.resolveRelativePath("someTemplateId", DelegatingLoader.DIRECT_PREFIX + ":" + "someOtherTemplateId"))
+			.isNull();
 
-        verify(mockStringLoader, times(1)).resolveRelativePath(any(String.class), any(String.class));
-        verify(mockDatabaseLoader, never()).resolveRelativePath(any(String.class), any(String.class));
-    }
+		verify(mockStringLoader, times(1)).resolveRelativePath(any(String.class), any(String.class));
+		verify(mockDatabaseLoader, never()).resolveRelativePath(any(String.class), any(String.class));
+	}
 
-    @Test
-    void test_createCacheKey() {
-        when(mockContextMunicipalityId.getValue()).thenReturn(MUNICIPALITY_ID);
-        assertThat(loader.createCacheKey("someTemplateId")).satisfies(identifierAndVersion -> {
-            assertThat(identifierAndVersion.getIdentifier()).isEqualTo("someTemplateId");
-            assertThat(identifierAndVersion.getVersion()).isNull();
-            assertThat(identifierAndVersion.getMunicipalityId()).isEqualTo(MUNICIPALITY_ID);
-        });
-    }
+	@Test
+	void test_createCacheKey() {
+		when(mockContextMunicipalityId.getValue()).thenReturn(MUNICIPALITY_ID);
+		assertThat(loader.createCacheKey("someTemplateId")).satisfies(identifierAndVersion -> {
+			assertThat(identifierAndVersion.getIdentifier()).isEqualTo("someTemplateId");
+			assertThat(identifierAndVersion.getVersion()).isNull();
+			assertThat(identifierAndVersion.getMunicipalityId()).isEqualTo(MUNICIPALITY_ID);
+		});
+	}
 
-    @Test
-    void test_resourceExists() {
-        when(mockDatabaseLoader.resourceExists(any(String.class))).thenReturn(true);
+	@Test
+	void test_resourceExists() {
+		when(mockDatabaseLoader.resourceExists(any(String.class))).thenReturn(true);
 
-        assertThat(loader.resourceExists("someTemplateId")).isTrue();
+		assertThat(loader.resourceExists("someTemplateId")).isTrue();
 
-        verify(mockStringLoader, never()).resourceExists(any(String.class));
-        verify(mockDatabaseLoader, times(1)).resourceExists(any(String.class));
-    }
+		verify(mockStringLoader, never()).resourceExists(any(String.class));
+		verify(mockDatabaseLoader, times(1)).resourceExists(any(String.class));
+	}
 
-    @Test
-    void test_resourceExists_directRendering() {
-        when(mockStringLoader.resourceExists(any(String.class))).thenReturn(true);
+	@Test
+	void test_resourceExists_directRendering() {
+		when(mockStringLoader.resourceExists(any(String.class))).thenReturn(true);
 
-        assertThat(loader.resourceExists(DelegatingLoader.DIRECT_PREFIX + ":" + "someTemplateId")).isTrue();
+		assertThat(loader.resourceExists(DelegatingLoader.DIRECT_PREFIX + ":" + "someTemplateId")).isTrue();
 
-        verify(mockStringLoader, times(1)).resourceExists(any(String.class));
-        verify(mockDatabaseLoader, never()).resourceExists(any(String.class));
-    }
+		verify(mockStringLoader, times(1)).resourceExists(any(String.class));
+		verify(mockDatabaseLoader, never()).resourceExists(any(String.class));
+	}
 }

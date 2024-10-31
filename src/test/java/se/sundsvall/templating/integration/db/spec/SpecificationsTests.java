@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 
 class SpecificationsTests {
 
-    @Test
-    void test_hasMetadata_generatesSpecificationOk() {
-        assertThat(Specifications.hasMetadata("someKey", "someValue")).isNotNull();
-    }
+	@Test
+	void test_hasMetadata_generatesSpecificationOk() {
+		assertThat(Specifications.hasMetadata("someKey", "someValue")).isNotNull();
+	}
 }

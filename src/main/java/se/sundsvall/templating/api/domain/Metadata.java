@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Metadata {
 
-    private String key;
-    private String value;
+	private String key;
+	private String value;
 }

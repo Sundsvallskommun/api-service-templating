@@ -6,13 +6,13 @@ import se.sundsvall.templating.api.domain.filter.expression.Expression;
 
 abstract class Junction implements Expression {
 
-    protected final List<Expression> expressions;
+	protected final List<Expression> expressions;
 
-    protected Junction(final List<Expression> expressions) {
-        this.expressions = expressions;
-    }
+	protected Junction(final List<Expression> expressions) {
+		this.expressions = expressions;
+	}
 
-    public List<Expression> getExpressions() {
-        return expressions;
-    }
+	public List<Expression> getExpressions() {
+		return expressions;
+	}
 }

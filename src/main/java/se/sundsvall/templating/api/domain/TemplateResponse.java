@@ -20,30 +20,30 @@ import lombok.experimental.SuperBuilder;
 @Schema(description = "Template")
 public class TemplateResponse {
 
-    @Schema(description = "Identifier")
-    private String identifier;
+	@Schema(description = "Identifier")
+	private String identifier;
 
-    @Schema(description = "Version")
-    private String version;
+	@Schema(description = "Version")
+	private String version;
 
-    @Schema(description = "Type")
-    private TemplateType type;
+	@Schema(description = "Type")
+	private TemplateType type;
 
-    @Schema(description = "Name")
-    private String name;
+	@Schema(description = "Name")
+	private String name;
 
-    @Schema(description = "Description")
-    private String description;
+	@Schema(description = "Description")
+	private String description;
 
-    @ArraySchema(schema = @Schema(description = "Metadata"))
-    private List<Metadata> metadata;
+	@ArraySchema(schema = @Schema(description = "Metadata"))
+	private List<Metadata> metadata;
 
-    @ArraySchema(schema = @Schema(description = "Default values"))
-    private List<DefaultValue> defaultValues;
+	@ArraySchema(schema = @Schema(description = "Default values"))
+	private List<DefaultValue> defaultValues;
 
-    @Schema(description = "Changelog")
-    private String changeLog;
+	@Schema(description = "Changelog")
+	private String changeLog;
 
-    @Schema(description = "Last modification timestamp")
-    private LocalDateTime lastModifiedAt;
+	@Schema(description = "Last modification timestamp")
+	private LocalDateTime lastModifiedAt;
 }

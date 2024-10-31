@@ -14,6 +14,6 @@ import lombok.experimental.SuperBuilder;
 @Schema(description = "Detailed template")
 public class DetailedTemplateResponse extends TemplateResponse {
 
-    @Schema(description = "Content, as a BASE64-encoded string")
-    private String content;
+	@Schema(description = "Content, as a BASE64-encoded string")
+	private String content;
 }

@@ -1,13 +1,11 @@
-[
-  {
-    "identifier": "first.template",
-    "version": "1.0",
-    "type": "PEBBLE",
-    "name": "First template",
-    "description": "Some description from other municipality",
-    "metadata": [],
-    "defaultValues": [],
-    "changeLog": "Initial version",
-    "lastModifiedAt": "${json-unit.ignore}"
-  }
-]
+[{
+	"identifier": "first.template",
+	"metadata": [],
+	"lastModifiedAt": "${json-unit.ignore}",
+	"name": "First template",
+	"description": "Some description from other municipality",
+	"defaultValues": [],
+	"changeLog": "Initial version",
+	"type": "PEBBLE",
+	"version": "1.0"
+}]

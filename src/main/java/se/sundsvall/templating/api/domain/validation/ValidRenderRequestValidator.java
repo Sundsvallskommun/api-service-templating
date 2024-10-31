@@ -10,11 +10,11 @@ import se.sundsvall.templating.api.domain.RenderRequest;
 
 public class ValidRenderRequestValidator implements ConstraintValidator<ValidRenderRequest, RenderRequest> {
 
-    @Override
-    public boolean isValid(final RenderRequest request, final ConstraintValidatorContext context) {
-        var identifierSet = isNotBlank(request.getIdentifier());
-        var metadataSet = !isEmpty(request.getMetadata());
+	@Override
+	public boolean isValid(final RenderRequest request, final ConstraintValidatorContext context) {
+		var identifierSet = isNotBlank(request.getIdentifier());
+		var metadataSet = !isEmpty(request.getMetadata());
 
-        return identifierSet ^ metadataSet;
-    }
+		return identifierSet ^ metadataSet;
+	}
 }

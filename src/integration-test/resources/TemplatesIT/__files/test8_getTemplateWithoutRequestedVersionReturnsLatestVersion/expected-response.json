@@ -1,12 +1,12 @@
 {
-  "identifier": "third.template",
-  "version": "1.1",
-  "type": "PEBBLE",
-  "name": "Third template",
-  "description": "Some description",
-  "metadata": [],
-  "defaultValues": [],
-  "changeLog": "Updated version",
-  "lastModifiedAt": "${json-unit.ignore}",
-  "content": "amEgamEga8OkcmEgYmFybg=="
+	"identifier": "third.template",
+	"metadata": [],
+	"lastModifiedAt": "${json-unit.ignore}",
+	"name": "Third template",
+	"description": "Some description",
+	"defaultValues": [],
+	"changeLog": "Updated version",
+	"type": "PEBBLE",
+	"version": "1.1",
+	"content": "amEgamEga8OkcmEgYmFybg=="
 }
