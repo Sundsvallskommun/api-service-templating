@@ -3,7 +3,6 @@ package se.sundsvall.templating.domain;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Generated;

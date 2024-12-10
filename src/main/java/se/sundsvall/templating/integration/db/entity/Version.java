@@ -1,10 +1,8 @@
 package se.sundsvall.templating.integration.db.entity;
 
-import java.util.regex.Pattern;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-
+import java.util.regex.Pattern;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

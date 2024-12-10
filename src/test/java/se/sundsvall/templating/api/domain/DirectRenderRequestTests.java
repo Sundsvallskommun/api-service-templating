@@ -3,7 +3,6 @@ package se.sundsvall.templating.api.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-
 import org.junit.jupiter.api.Test;
 
 class DirectRenderRequestTests {

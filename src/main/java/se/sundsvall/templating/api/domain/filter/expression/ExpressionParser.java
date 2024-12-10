@@ -1,12 +1,10 @@
 package se.sundsvall.templating.api.domain.filter.expression;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-
+import java.io.IOException;
 import se.sundsvall.templating.api.domain.filter.expression.logic.And;
 import se.sundsvall.templating.api.domain.filter.expression.logic.Not;
 import se.sundsvall.templating.api.domain.filter.expression.logic.Or;

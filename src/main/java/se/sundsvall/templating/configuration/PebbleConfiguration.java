@@ -1,19 +1,17 @@
 package se.sundsvall.templating.configuration;
 
+import io.pebbletemplates.pebble.PebbleEngine;
+import io.pebbletemplates.pebble.lexer.Syntax;
+import io.pebbletemplates.pebble.loader.StringLoader;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import se.sundsvall.templating.configuration.properties.PebbleProperties;
 import se.sundsvall.templating.domain.ContextMunicipalityId;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.service.pebble.loader.DatabaseLoader;
 import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
-
-import io.pebbletemplates.pebble.PebbleEngine;
-import io.pebbletemplates.pebble.lexer.Syntax;
-import io.pebbletemplates.pebble.loader.StringLoader;
 
 @Configuration
 @EnableConfigurationProperties(PebbleProperties.class)

@@ -1,11 +1,10 @@
 package se.sundsvall.templating.api.domain.filter.specification.value;
 
-import org.springframework.data.jpa.domain.Specification;
-
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.springframework.data.jpa.domain.Specification;
 import se.sundsvall.templating.api.domain.filter.expression.value.In;
 
 public class InSpecification<T> implements Specification<T> {

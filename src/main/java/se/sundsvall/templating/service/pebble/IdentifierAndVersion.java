@@ -5,12 +5,9 @@ import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
-
-import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
-
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
+import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
 
 @Getter
 public class IdentifierAndVersion {

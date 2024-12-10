@@ -1,17 +1,15 @@
 package se.sundsvall.templating.api.domain;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import se.sundsvall.templating.domain.TemplateType;
-
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import se.sundsvall.templating.domain.TemplateType;
 
 @Getter
 @SuperBuilder(setterPrefix = "with")

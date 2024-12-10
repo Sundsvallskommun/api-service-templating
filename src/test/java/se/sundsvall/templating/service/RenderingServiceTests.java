@@ -16,10 +16,10 @@ import static org.mockito.Mockito.when;
 import static se.sundsvall.templating.domain.TemplateType.PEBBLE;
 import static se.sundsvall.templating.domain.TemplateType.WORD;
 
+import io.pebbletemplates.pebble.template.PebbleTemplate;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,7 +29,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.zalando.problem.ThrowableProblem;
-
 import se.sundsvall.templating.api.domain.DirectRenderRequest;
 import se.sundsvall.templating.api.domain.RenderRequest;
 import se.sundsvall.templating.configuration.properties.PebbleProperties;
@@ -40,8 +39,6 @@ import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.service.processor.PebbleTemplateProcessor;
 import se.sundsvall.templating.service.processor.WordTemplateProcessor;
 import se.sundsvall.templating.util.TemplateUtil;
-
-import io.pebbletemplates.pebble.template.PebbleTemplate;
 
 @ExtendWith(MockitoExtension.class)
 class RenderingServiceTests {

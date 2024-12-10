@@ -5,9 +5,7 @@ import static se.sundsvall.templating.util.TemplateUtil.encodeBase64;
 
 import java.util.List;
 import java.util.Set;
-
 import org.junit.jupiter.api.Test;
-
 import se.sundsvall.templating.api.domain.DefaultValue;
 import se.sundsvall.templating.api.domain.Metadata;
 import se.sundsvall.templating.api.domain.TemplateRequest;

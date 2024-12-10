@@ -3,7 +3,6 @@ package se.sundsvall.templating.api.domain.filter.expression.logic;
 import static java.util.stream.Collectors.joining;
 
 import java.util.List;
-
 import se.sundsvall.templating.api.domain.filter.expression.Expression;
 
 public class Or extends Junction {

@@ -1,9 +1,8 @@
 package se.sundsvall.templating.api.domain.validation;
 
-import java.util.regex.Pattern;
-
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import java.util.regex.Pattern;
 
 public class ValidTemplateVersionValidator implements ConstraintValidator<ValidTemplateVersion, String> {
 

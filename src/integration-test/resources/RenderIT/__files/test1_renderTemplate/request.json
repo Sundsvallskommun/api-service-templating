@@ -1,4 +1,6 @@
 {
 	"identifier": "second.template",
-	"parameters": {"ending": ". that's it!"}
+	"parameters": {
+		"ending": ". that's it!"
+	}
 }

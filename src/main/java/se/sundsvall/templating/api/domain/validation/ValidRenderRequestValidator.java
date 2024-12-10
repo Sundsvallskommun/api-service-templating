@@ -5,7 +5,6 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
 import se.sundsvall.templating.api.domain.RenderRequest;
 
 public class ValidRenderRequestValidator implements ConstraintValidator<ValidRenderRequest, RenderRequest> {
