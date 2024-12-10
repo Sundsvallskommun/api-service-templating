@@ -1,7 +1,6 @@
 package se.sundsvall.templating.api.domain.filter;
 
 import org.springframework.data.jpa.domain.Specification;
-
 import se.sundsvall.templating.api.domain.filter.expression.EmptyExpression;
 import se.sundsvall.templating.api.domain.filter.expression.Expression;
 import se.sundsvall.templating.api.domain.filter.expression.logic.And;

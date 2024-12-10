@@ -6,9 +6,7 @@ import static se.sundsvall.templating.util.TemplateUtil.getTemplateType;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.stereotype.Component;
-
 import se.sundsvall.templating.api.domain.DefaultValue;
 import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
 import se.sundsvall.templating.api.domain.Metadata;

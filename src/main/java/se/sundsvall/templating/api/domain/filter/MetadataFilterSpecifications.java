@@ -1,12 +1,11 @@
 package se.sundsvall.templating.api.domain.filter;
 
-import org.springframework.data.jpa.domain.Specification;
-
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.springframework.data.jpa.domain.Specification;
 import se.sundsvall.templating.api.domain.filter.expression.EmptyExpression;
 import se.sundsvall.templating.api.domain.filter.expression.Expression;
 import se.sundsvall.templating.api.domain.filter.expression.logic.And;

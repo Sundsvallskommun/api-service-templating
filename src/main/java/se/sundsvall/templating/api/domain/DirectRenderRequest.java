@@ -1,10 +1,8 @@
 package se.sundsvall.templating.api.domain;
 
-import java.util.Map;
-
-import jakarta.validation.constraints.NotBlank;
-
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 

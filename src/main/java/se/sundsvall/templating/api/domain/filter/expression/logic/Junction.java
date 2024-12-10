@@ -1,7 +1,6 @@
 package se.sundsvall.templating.api.domain.filter.expression.logic;
 
 import java.util.List;
-
 import se.sundsvall.templating.api.domain.filter.expression.Expression;
 
 abstract class Junction implements Expression {

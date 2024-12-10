@@ -2,10 +2,9 @@ package se.sundsvall.templating.api.domain;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
-import java.util.List;
-
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import se.sundsvall.templating.api.domain.validation.ValidTemplateId;

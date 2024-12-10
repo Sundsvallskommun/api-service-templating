@@ -8,18 +8,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.pebbletemplates.pebble.loader.StringLoader;
 import java.io.StringReader;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import se.sundsvall.templating.domain.ContextMunicipalityId;
 import se.sundsvall.templating.service.pebble.IdentifierAndVersion;
-
-import io.pebbletemplates.pebble.loader.StringLoader;
 
 @ExtendWith(MockitoExtension.class)
 class DelegatingLoaderTests {

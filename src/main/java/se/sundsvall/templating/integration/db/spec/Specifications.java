@@ -1,9 +1,7 @@
 package se.sundsvall.templating.integration.db.spec;
 
 import jakarta.persistence.criteria.JoinType;
-
 import org.springframework.data.jpa.domain.Specification;
-
 import se.sundsvall.templating.integration.db.entity.MetadataEntity_;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity_;

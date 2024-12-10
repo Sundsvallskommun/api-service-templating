@@ -3,16 +3,14 @@ package se.sundsvall.templating.service.pebble.loader;
 import static se.sundsvall.templating.util.TemplateUtil.bytesToString;
 import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
 
+import io.pebbletemplates.pebble.error.LoaderException;
+import io.pebbletemplates.pebble.loader.Loader;
 import java.io.BufferedReader;
 import java.io.Reader;
 import java.io.StringReader;
-
 import se.sundsvall.templating.domain.ContextMunicipalityId;
 import se.sundsvall.templating.integration.db.DbIntegration;
 import se.sundsvall.templating.service.pebble.IdentifierAndVersion;
-
-import io.pebbletemplates.pebble.error.LoaderException;
-import io.pebbletemplates.pebble.loader.Loader;
 
 public class DatabaseLoader implements Loader<IdentifierAndVersion> {
 
