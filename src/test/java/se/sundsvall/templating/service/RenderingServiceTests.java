@@ -1,11 +1,8 @@
 package se.sundsvall.templating.service;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.Mockito.doAnswer;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
@@ -16,9 +13,9 @@ import static org.mockito.Mockito.when;
 import static se.sundsvall.templating.domain.TemplateType.PEBBLE;
 import static se.sundsvall.templating.domain.TemplateType.WORD;
 
-import io.pebbletemplates.pebble.template.PebbleTemplate;
+import com.itextpdf.html2pdf.HtmlConverter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +24,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.zalando.problem.ThrowableProblem;
 import se.sundsvall.templating.api.domain.DirectRenderRequest;
 import se.sundsvall.templating.api.domain.RenderRequest;
@@ -47,8 +43,6 @@ class RenderingServiceTests {
 	public static final String IDENTIFIER = "someTemplateId";
 
 	@Mock
-	private ITextRenderer mockITextRenderer;
-	@Mock
 	private PebbleProperties mockPebbleProperties;
 	@Mock
 	private PebbleTemplateProcessor mockPebbleTemplateProcessor;
@@ -57,8 +51,6 @@ class RenderingServiceTests {
 	@Mock
 	private DbIntegration mockDbIntegration;
 
-	@Mock
-	private PebbleTemplate mockPebbleTemplate;
 	@Mock
 	private RenderRequest mockRenderRequest;
 	@Mock
@@ -151,24 +143,29 @@ class RenderingServiceTests {
 
 	@Test
 	void renderHtmlAsPdf() {
-		var document = "someTemplateContent";
+		var document = "someTemplateContent".getBytes(UTF_8);
 
-		service.renderHtmlAsPdf(document.getBytes(UTF_8));
+		try (var mockHtmlConverter = mockStatic(HtmlConverter.class)) {
+			service.renderHtmlAsPdf(document);
 
-		verify(mockITextRenderer, times(1)).setDocumentFromString("<html>\n <head></head>\n <body>\n  " + document + "\n </body>\n</html>");
-		verify(mockITextRenderer, times(1)).layout();
-		verify(mockITextRenderer, times(1)).createPDF(any(OutputStream.class));
-		verify(mockITextRenderer, times(1)).finishPDF();
+			mockHtmlConverter.verify(() -> HtmlConverter.convertToPdf(any(String.class), any(ByteArrayOutputStream.class)));
+		}
 	}
 
 	@Test
 	void renderHtmlAsPdf_whenExceptionIsThrown() {
-		var template = "someTemplateContent".getBytes(UTF_8);
+		var document = "someTemplateContent".getBytes(UTF_8);
 
-		doAnswer(invocation -> { throw new IOException("dummy"); }).when(mockITextRenderer).createPDF(any(OutputStream.class));
+		try (var mockHtmlConverter = mockStatic(HtmlConverter.class)) {
+			mockHtmlConverter.when(() -> HtmlConverter.convertToPdf(any(String.class), any(ByteArrayOutputStream.class))).thenAnswer(invocationOnMock -> {
+				throw new IOException("dummy");
+			});
 
-		assertThatExceptionOfType(TemplateException.class)
-			.isThrownBy(() -> service.renderHtmlAsPdf(template))
-			.withMessage("Unable to render PDF");
+			assertThatExceptionOfType(TemplateException.class)
+				.isThrownBy(() -> service.renderHtmlAsPdf(document))
+				.withMessage("Unable to render PDF");
+
+			mockHtmlConverter.verify(() -> HtmlConverter.convertToPdf(any(String.class), any(ByteArrayOutputStream.class)));
+		}
 	}
 }

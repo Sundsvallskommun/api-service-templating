@@ -16,7 +16,7 @@ import se.sundsvall.templating.Application;
 	classes = Application.class
 )
 @Sql({"/db/truncate.sql", "/db/data.sql"})
-public class RenderIT extends AbstractAppTest {
+class RenderIT extends AbstractAppTest {
 
 	private static final String PATH_2281 = "/2281/render";
 	private static final String PATH_2282 = "/2282/render";

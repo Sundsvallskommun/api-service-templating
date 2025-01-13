@@ -9,20 +9,20 @@ import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
 import static se.sundsvall.templating.util.TemplateUtil.encodeBase64;
 import static se.sundsvall.templating.util.TemplateUtil.getTemplateType;
 
+import com.itextpdf.html2pdf.HtmlConverter;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
-import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 import se.sundsvall.templating.api.domain.DirectRenderRequest;
@@ -44,18 +44,15 @@ public class RenderingService {
 	private final PebbleProperties pebbleProperties;
 	private final PebbleTemplateProcessor pebbleTemplateProcessor;
 	private final WordTemplateProcessor wordTemplateProcessor;
-	private final ITextRenderer iTextRenderer;
 	private final DbIntegration dbIntegration;
 
 	public RenderingService(final PebbleProperties pebbleProperties,
 		final PebbleTemplateProcessor pebbleTemplateProcessor,
 		final WordTemplateProcessor wordTemplateProcessor,
-		final ITextRenderer iTextRenderer,
 		final DbIntegration dbIntegration) {
 		this.pebbleProperties = pebbleProperties;
 		this.pebbleTemplateProcessor = pebbleTemplateProcessor;
 		this.wordTemplateProcessor = wordTemplateProcessor;
-		this.iTextRenderer = iTextRenderer;
 		this.dbIntegration = dbIntegration;
 	}
 
@@ -146,15 +143,11 @@ public class RenderingService {
 
 	byte[] renderHtmlAsPdf(final byte[] document) {
 		try (var out = new ByteArrayOutputStream()) {
-			// Run the document through Jsoup to wrap it in a proper HTML/XML document in order to
-			// get OpenPDF to play nice
+			// Run the document through Jsoup to wrap it in a proper HTML/XML document
 			var doc = Jsoup.parse(bytesToString(document), "UTF-8");
 			doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
 
-			iTextRenderer.setDocumentFromString(doc.html());
-			iTextRenderer.layout();
-			iTextRenderer.createPDF(out);
-			iTextRenderer.finishPDF();
+			HtmlConverter.convertToPdf(doc.html(), out);
 
 			return out.toByteArray();
 		} catch (IOException e) {

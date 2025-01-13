@@ -33,7 +33,7 @@ public class NotSpecification<T> extends ExpressionSpecification<T> {
 	public Predicate toPredicate(final Root<T> root, final CriteriaQuery<?> query,
 		final CriteriaBuilder criteriaBuilder) {
 		return criteriaBuilder.not(
-			expressionMapper.apply(getEntityClass(), expression.getExpression())
+			expressionMapper.apply(getEntityClass(), expression.expression())
 				.toPredicate(root, query, criteriaBuilder));
 	}
 }
