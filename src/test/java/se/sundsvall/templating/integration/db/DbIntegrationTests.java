@@ -88,8 +88,10 @@ class DbIntegrationTests {
 		when(mockTemplateRepository.findOne(ArgumentMatchers.<Specification<TemplateEntity>>any()))
 			.thenThrow(new IncorrectResultSizeDataAccessException(2));
 
+		var metadata = List.of(KeyValue.of("someKey", "someValue"));
+
 		assertThatExceptionOfType(ThrowableProblem.class)
-			.isThrownBy(() -> dbIntegration.findTemplate(MUNICIPALITY_ID, List.of(KeyValue.of("someKey", "someValue"))));
+			.isThrownBy(() -> dbIntegration.findTemplate(MUNICIPALITY_ID, metadata));
 	}
 
 	@Test

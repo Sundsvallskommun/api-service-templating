@@ -109,7 +109,7 @@ public class TemplateEntity {
 
 	@Transient
 	public byte[] getContentBytes() {
-		return ofNullable(content).map(content -> content.getBytes(UTF_8)).orElse(null);
+		return ofNullable(content).map(actualContent -> actualContent.getBytes(UTF_8)).orElse(null);
 	}
 
 	@PrePersist
