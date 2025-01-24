@@ -34,6 +34,7 @@ import se.sundsvall.templating.integration.db.entity.DefaultValueEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
 import se.sundsvall.templating.service.processor.PebbleTemplateProcessor;
+import se.sundsvall.templating.service.processor.WebbleTemplateProcessor;
 import se.sundsvall.templating.service.processor.WordTemplateProcessor;
 
 @Service
@@ -44,15 +45,18 @@ public class RenderingService {
 	private final PebbleProperties pebbleProperties;
 	private final PebbleTemplateProcessor pebbleTemplateProcessor;
 	private final WordTemplateProcessor wordTemplateProcessor;
+	private final WebbleTemplateProcessor webbleTemplateProcessor;
 	private final DbIntegration dbIntegration;
 
 	public RenderingService(final PebbleProperties pebbleProperties,
 		final PebbleTemplateProcessor pebbleTemplateProcessor,
 		final WordTemplateProcessor wordTemplateProcessor,
+		final WebbleTemplateProcessor webbleTemplateProcessor,
 		final DbIntegration dbIntegration) {
 		this.pebbleProperties = pebbleProperties;
 		this.pebbleTemplateProcessor = pebbleTemplateProcessor;
 		this.wordTemplateProcessor = wordTemplateProcessor;
+		this.webbleTemplateProcessor = webbleTemplateProcessor;
 		this.dbIntegration = dbIntegration;
 	}
 
@@ -125,7 +129,8 @@ public class RenderingService {
 		// Process the template
 		return switch (template.getType()) {
 			case PEBBLE -> pebbleTemplateProcessor.process(template.getIdentifier() + ":" + template.getVersion(), mergedParametersAndDefaultValues);
-			case WORD -> wordTemplateProcessor.process(decodeBase64(template.getContent()), mergedParametersAndDefaultValues);
+			// case WORD -> wordTemplateProcessor.process(decodeBase64(template.getContent()), mergedParametersAndDefaultValues);
+			case WORD -> webbleTemplateProcessor.process(decodeBase64(template.getContent()), mergedParametersAndDefaultValues);
 		};
 	}
 

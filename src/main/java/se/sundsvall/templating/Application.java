@@ -8,6 +8,9 @@ import se.sundsvall.dept44.ServiceApplication;
 public class Application {
 
 	public static void main(String[] args) {
+		System.setProperty("javax.xml.transform.TransformerFactory",
+			"com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
+
 		run(Application.class, args);
 	}
 }

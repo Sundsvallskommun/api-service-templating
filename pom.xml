@@ -11,10 +11,10 @@
 	<groupId>se.sundsvall</groupId>
 	<artifactId>api-service-templating</artifactId>
 	<version>2.0</version>
-
 	<properties>
 		<json-patch.version>1.13</json-patch.version>
 		<pebble.version>3.2.2</pebble.version>
+		<jdom2.version>2.0.6</jdom2.version>
 		<jsoup.version>1.18.3</jsoup.version>
 		<openpdf.version>9.3.2</openpdf.version>
 		<docx4j.version>11.4.11</docx4j.version>
@@ -22,7 +22,6 @@
 		<poi-pdf-converter.version>2.1.0</poi-pdf-converter.version>
 		<itext-html2pdf.version>6.0.0</itext-html2pdf.version>
 	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>se.sundsvall.dept44</groupId>
@@ -33,6 +32,27 @@
 			<groupId>se.sundsvall.dept44</groupId>
 			<artifactId>dept44-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.docx4j</groupId>
+			<artifactId>docx4j-core</artifactId>
+			<version>11.4.8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.docx4j</groupId>
+			<artifactId>docx4j-ImportXHTML</artifactId>
+			<version>11.4.8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-core</artifactId>
+			<version>4.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-ri</artifactId>
+			<version>4.0.5</version>
+			<type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -49,7 +69,6 @@
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<!-- JPA/JDBC -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -64,20 +83,23 @@
 			<artifactId>mariadb-java-client</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-
 		<!-- Flyway -->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-mysql</artifactId>
 		</dependency>
-
 		<!-- Pebble template engine -->
 		<dependency>
 			<groupId>io.pebbletemplates</groupId>
 			<artifactId>pebble</artifactId>
 			<version>${pebble.version}</version>
 		</dependency>
-
+		<!-- JDOM -->
+		<dependency>
+			<groupId>org.jdom</groupId>
+			<artifactId>jdom2</artifactId>
+			<version>${jdom2.version}</version>
+		</dependency>
 		<!-- OpenPDF -->
 		<dependency>
 			<groupId>org.jsoup</groupId>
@@ -89,7 +111,6 @@
 			<artifactId>flying-saucer-pdf-openpdf</artifactId>
 			<version>${openpdf.version}</version>
 		</dependency>
-
 		<!-- Apache POI -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -101,14 +122,12 @@
 			<artifactId>fr.opensagres.poi.xwpf.converter.pdf</artifactId>
 			<version>${poi-pdf-converter.version}</version>
 		</dependency>
-
 		<!-- iText -->
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>html2pdf</artifactId>
 			<version>${itext-html2pdf.version}</version>
 		</dependency>
-
 		<!-- Other -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -127,7 +146,6 @@
 			<version>${json-patch.version}</version>
 		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
