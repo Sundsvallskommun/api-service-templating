@@ -40,6 +40,7 @@ import se.sundsvall.templating.service.processor.WordTemplateProcessor;
 public class RenderingService {
 
 	private static final String BASE64_VALUE_PREFIX = "BASE64:";
+	private static final String HTML_VALUE_PREFIX = "HTML:";
 
 	private final PebbleProperties pebbleProperties;
 	private final PebbleTemplateProcessor pebbleTemplateProcessor;
@@ -204,4 +205,24 @@ public class RenderingService {
 				})
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue))).orElse(Map.of());
 	}
+	/*
+	 * void streamDocxResponse(final HttpServletResponse response, final byte[] data) {
+	 * if (data == null || data.length == 0) {
+	 * throw Problem.valueOf(INTERNAL_SERVER_ERROR, "Unable to stream DOCX data as it is empty");
+	 * }
+	 * 
+	 * try (var stream = new ByteArrayInputStream(data)) {
+	 * response.addHeader(CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+	 * response.addHeader(CONTENT_DISPOSITION, "attachment; filename=\"" + attachment.getFileName() + "\"");
+	 * response.setContentLength(data.length);
+	 * 
+	 * StreamUtils.copy(stream, response.getOutputStream());
+	 * } catch (IOException | SQLException e) {
+	 * throw Problem.valueOf(INTERNAL_SERVER_ERROR,
+	 * "%s occurred when copying DOCX to response: %s".formatted(e.getClass().getSimpleName(), e.getMessage()));
+	 * } catch (InterruptedException e) {
+	 * Thread.currentThread().interrupt();
+	 * }
+	 * }
+	 */
 }
