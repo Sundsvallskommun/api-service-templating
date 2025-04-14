@@ -22,11 +22,15 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSdtBlock;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STLineSpacingRule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import se.sundsvall.templating.exception.TemplateException;
 
 @Component
 public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(WordTemplateProcessor.class);
 
 	private static final String[] PLACEHOLDER_VARIANTS = {
 		"{{%s}}", "{{ %s }}", "{{ %s}}", "{{%s }}"
@@ -108,8 +112,7 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 				}
 			}
 		} catch (Exception e) {
-			// TODO: handle properly
-			e.printStackTrace(System.err);
+			LOG.warn("Unable to replace body elements", e);
 		}
 	}
 

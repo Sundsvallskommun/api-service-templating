@@ -40,8 +40,6 @@ final class WordTemplateUtil {
 			if (bodyElement instanceof XWPFParagraph paragraph) {
 				var text = paragraph.getText();
 				if (text != null && text.contains(textToFind)) {
-					System.err.println("Found \"" + textToFind + "\" in paragraph text \"" + text + "\"\n");
-
 					// Create an XmlCursor at this paragraph
 					try (var xmlCursor = paragraph.getCTP().newCursor()) {
 						var textValue = xmlCursor.getTextValue();
