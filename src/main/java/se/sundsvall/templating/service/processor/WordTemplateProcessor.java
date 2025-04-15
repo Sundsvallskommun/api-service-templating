@@ -1,6 +1,5 @@
 package se.sundsvall.templating.service.processor;
 
-import static se.sundsvall.templating.service.processor.WordTemplateUtil.createHtmlDocumentPart;
 import static se.sundsvall.templating.service.processor.WordTemplateUtil.replaceBodyElement;
 import static se.sundsvall.templating.service.processor.WordTemplateUtil.replaceTextSegment;
 
@@ -108,7 +107,10 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 			for (var replacement : parameters.entrySet()) {
 				// Naively "guess" the placeholder formatting with regard to spacing
 				for (var placeholderFormat : PLACEHOLDER_VARIANTS) {
-					replaceBodyElement(document, placeholderFormat.formatted(replacement.getKey()), createHtmlDocumentPart(document, replacement.getKey(), replacement.getValue().toString()));
+					// Don't try any other placeholder variant if the current one results in something being replaced
+					if (replaceBodyElement(document, placeholderFormat.formatted(replacement.getKey()), replacement.getKey(), replacement.getValue().toString())) {
+						break;
+					}
 				}
 			}
 		} catch (Exception e) {

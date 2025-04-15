@@ -24,16 +24,7 @@ final class WordTemplateUtil {
 
 	private WordTemplateUtil() {}
 
-	static XWPFHtmlDocumentPart createHtmlDocumentPart(final XWPFDocument document, final String id, final String html) throws InvalidFormatException {
-		var oPCPackage = document.getPackage();
-		var packagePartName = PackagingURIHelper.createPartName("/word/%s.html".formatted(id));
-		var packagePart = oPCPackage.createPart(packagePartName, TEXT_HTML_VALUE);
-		var xwpfHtmlDocument = new XWPFHtmlDocumentPart(packagePart, id, html);
-		document.addRelation(id, new XWPFHtmlRelation(), xwpfHtmlDocument);
-		return xwpfHtmlDocument;
-	}
-
-	static void replaceBodyElement(final XWPFDocument document, final String textToFind, final XWPFHtmlDocumentPart htmlDocumentPart) {
+	static boolean replaceBodyElement(final XWPFDocument document, final String textToFind, final String id, final String replacement) throws InvalidFormatException {
 		var pos = 0;
 
 		for (var bodyElement : document.getBodyElements()) {
@@ -46,8 +37,9 @@ final class WordTemplateUtil {
 						// Extract text before and after the placeholder
 						var before = textValue.substring(0, textValue.indexOf(textToFind));
 						var after = textValue.substring(textValue.indexOf(textToFind) + textToFind.length());
-						// Update the HTML document part
-						htmlDocumentPart.setContent(before + htmlDocumentPart.getContent() + after);
+
+						// Create the HTML document part
+						var htmlDocumentPart = createHtmlDocumentPart(document, id, before + replacement + after);
 						// Move to the end of the paragraph
 						xmlCursor.toEndToken();
 						// There must always be a next start token. Either a p or at least sectPr
@@ -64,12 +56,25 @@ final class WordTemplateUtil {
 						cTAltChunk.setId(htmlDocumentPart.getId());
 						// Now remove the matched IBodyElement
 						document.removeBodyElement(pos);
-						break;
+
+						return true;
 					}
 				}
 			}
 			pos++;
 		}
+
+		return false;
+
+	}
+
+	private static XWPFHtmlDocumentPart createHtmlDocumentPart(final XWPFDocument document, final String id, final String html) throws InvalidFormatException {
+		var oPCPackage = document.getPackage();
+		var packagePartName = PackagingURIHelper.createPartName("/word/%s.html".formatted(id));
+		var packagePart = oPCPackage.createPart(packagePartName, TEXT_HTML_VALUE);
+		var xwpfHtmlDocument = new XWPFHtmlDocumentPart(packagePart, id, html);
+		document.addRelation(id, new XWPFHtmlRelation(), xwpfHtmlDocument);
+		return xwpfHtmlDocument;
 	}
 
 	static final class XWPFHtmlDocumentPart extends POIXMLDocumentPart {
@@ -81,7 +86,7 @@ final class WordTemplateUtil {
 			super(part);
 
 			this.id = id;
-			this.content = content;
+			this.content = wrapContentIfRequired(content);
 		}
 
 		String getId() {
