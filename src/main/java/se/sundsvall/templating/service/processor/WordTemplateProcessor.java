@@ -1,5 +1,9 @@
 package se.sundsvall.templating.service.processor;
 
+import static se.sundsvall.templating.service.processor.WordTemplateUtil.createHtmlDocumentPart;
+import static se.sundsvall.templating.service.processor.WordTemplateUtil.replaceBodyElement;
+import static se.sundsvall.templating.service.processor.WordTemplateUtil.replaceTextSegment;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,21 +17,20 @@ import javax.xml.namespace.QName;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
-import org.apache.poi.xwpf.usermodel.PositionInParagraph;
-import org.apache.poi.xwpf.usermodel.TextSegment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTProofErr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRPr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSdtBlock;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTText;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STLineSpacingRule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import se.sundsvall.templating.exception.TemplateException;
 
 @Component
 public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(WordTemplateProcessor.class);
 
 	private static final String[] PLACEHOLDER_VARIANTS = {
 		"{{%s}}", "{{ %s }}", "{{ %s}}", "{{%s }}"
@@ -44,6 +47,7 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 		try (var in = new ByteArrayInputStream(template);
 			var document = new XWPFDocument(in);
 			var out = new ByteArrayOutputStream()) {
+
 			// Process document header(s), if any
 			for (var header : document.getHeaderList()) {
 				// Process document header body, if any
@@ -51,6 +55,9 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 				// Process document header table cells, if any
 				replaceInTables(header.getTables(), flattenedParameters);
 			}
+
+			// First run - process placeholders trying to handle HTML
+			replaceBodyElements(document, flattenedParameters);
 
 			// Process the document body
 			replaceInParagraphs(document.getParagraphs(), flattenedParameters);
@@ -96,6 +103,19 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 		return CONTENT_TYPE_TEMPLATE.equals(contentType) || CONTENT_TYPE_MACRO_ENABLED_TEMPLATE.equals(contentType);
 	}
 
+	private static void replaceBodyElements(final XWPFDocument document, final Map<String, Object> parameters) {
+		try {
+			for (var replacement : parameters.entrySet()) {
+				// Naively "guess" the placeholder formatting with regard to spacing
+				for (var placeholderFormat : PLACEHOLDER_VARIANTS) {
+					replaceBodyElement(document, placeholderFormat.formatted(replacement.getKey()), createHtmlDocumentPart(document, replacement.getKey(), replacement.getValue().toString()));
+				}
+			}
+		} catch (Exception e) {
+			LOG.warn("Unable to replace body elements", e);
+		}
+	}
+
 	private static void replaceInParagraphs(final List<XWPFParagraph> paragraphs, final Map<String, Object> parameters) {
 		for (var paragraph : paragraphs) {
 			for (var replacement : parameters.entrySet()) {
@@ -127,110 +147,6 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 				}
 			}
 		}
-	}
-
-	private static void replaceTextSegment(final XWPFParagraph paragraph, final String textToFind, final Object replacement) {
-		TextSegment foundTextSegment;
-
-		while ((foundTextSegment = searchText(paragraph, textToFind)) != null) {
-			// There may be text before textToFind in the begin run
-			var beginRun = paragraph.getRuns().get(foundTextSegment.getBeginRun());
-			var beginRunText = beginRun.getText(foundTextSegment.getBeginText());
-			// We only need the text before
-			var textBeforeBeginRunText = beginRunText.substring(0, foundTextSegment.getBeginChar());
-			// There may be text after textToFind in end the run
-			var endRun = paragraph.getRuns().get(foundTextSegment.getEndRun());
-			var endRunText = endRun.getText(foundTextSegment.getEndText());
-			// We only need the text after
-			var textAfterEndRunText = endRunText.substring(foundTextSegment.getEndChar() + 1);
-
-			if (foundTextSegment.getEndRun() == foundTextSegment.getBeginRun()) {
-				// If we have a single run, we need the text before, the replacement, and the text after
-				beginRunText = textBeforeBeginRunText + replacement + textAfterEndRunText;
-			} else {
-				// If not, we need the text before followed by the replacement in the begin run...
-				beginRunText = textBeforeBeginRunText + replacement;
-				// ...and the text after in the end run
-				endRun.setText(textAfterEndRunText, foundTextSegment.getEndText());
-			}
-
-			beginRun.setText(beginRunText, foundTextSegment.getBeginText());
-
-			// Remove runs between begin and end runs
-			for (var runBetween = foundTextSegment.getEndRun() - 1; runBetween > foundTextSegment.getBeginRun(); runBetween--) {
-				paragraph.removeRun(runBetween);
-			}
-		}
-	}
-
-	private static TextSegment searchText(final XWPFParagraph paragraph, final String textToFind) {
-		var startingPosition = new PositionInParagraph(0, 0, 0);
-		var startRun = startingPosition.getRun();
-		var startText = startingPosition.getText();
-		var startChar = startingPosition.getChar();
-		var beginRunPos = 0;
-		var candidateCharPos = 0;
-		var beginTextPos = 0;
-		var beginCharPos = 0;
-		var newList = false;
-
-		var runs = paragraph.getRuns();
-		for (var runPos = startRun; runPos < runs.size(); runPos++) {
-			var textPos = 0;
-			int charPos;
-			var ctRun = runs.get(runPos).getCTR();
-			try (var c = ctRun.newCursor()) {
-				c.selectPath("./*");
-				while (c.toNextSelection()) {
-					var o = c.getObject();
-					switch (o) {
-						case CTText ignored -> {
-							if (textPos >= startText) {
-								var candidate = ((CTText) o).getStringValue();
-								if (runPos == startRun) {
-									charPos = startChar;
-								} else {
-									charPos = 0;
-								}
-
-								for (; charPos < candidate.length(); charPos++) {
-									if ((candidate.charAt(charPos) == textToFind.charAt(0)) && (candidateCharPos == 0)) {
-										beginTextPos = textPos;
-										beginCharPos = charPos;
-										beginRunPos = runPos;
-										newList = true;
-									}
-
-									if (candidate.charAt(charPos) == textToFind.charAt(candidateCharPos)) {
-										if (candidateCharPos + 1 < textToFind.length()) {
-											candidateCharPos++;
-										} else if (newList) {
-											var segment = new TextSegment();
-											segment.setBeginRun(beginRunPos);
-											segment.setBeginText(beginTextPos);
-											segment.setBeginChar(beginCharPos);
-											segment.setEndRun(runPos);
-											segment.setEndText(textPos);
-											segment.setEndChar(charPos);
-											return segment;
-										}
-									} else {
-										candidateCharPos = 0;
-									}
-								}
-							}
-							textPos++;
-						}
-						case CTProofErr ignored -> c.removeXml();
-						case CTRPr ignored -> {
-							// Do nothing
-						}
-						case null, default -> candidateCharPos = 0;
-					}
-				}
-			}
-		}
-		return null;
 	}
 
 	private static void replaceInContentControls(final XWPFDocument document, final Map<String, Object> parameters) {
