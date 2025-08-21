@@ -12,8 +12,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -79,9 +79,8 @@ public class TemplateEntity {
 	@JoinColumn(name = "template_id", referencedColumnName = "id")
 	private Set<DefaultValueEntity> defaultValues;
 
-	@Lob
-	@Column(name = "content", nullable = false, columnDefinition = "LONGTEXT")
-	private String content;
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	private TemplateContentEntity content;
 
 	@Column(name = "changelog")
 	private String changeLog;
@@ -101,15 +100,25 @@ public class TemplateEntity {
 		this.type = type;
 		this.name = name;
 		this.description = description;
-		this.content = content;
+		this.content = TemplateContentEntity.builder()
+			.withTemplate(this)
+			.withContent(content)
+			.build();
 		this.changeLog = changeLog;
 		this.metadata = metadata;
 		this.defaultValues = defaultValues;
 	}
 
 	@Transient
+	public String getContent() {
+		return ofNullable(content)
+			.map(TemplateContentEntity::getContent)
+			.orElse(null);
+	}
+
+	@Transient
 	public byte[] getContentBytes() {
-		return ofNullable(content).map(actualContent -> actualContent.getBytes(UTF_8)).orElse(null);
+		return ofNullable(getContent()).map(actualContent -> actualContent.getBytes(UTF_8)).orElse(null);
 	}
 
 	@PrePersist
