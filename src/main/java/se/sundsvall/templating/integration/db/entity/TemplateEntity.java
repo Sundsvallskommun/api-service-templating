@@ -79,7 +79,7 @@ public class TemplateEntity {
 	@JoinColumn(name = "template_id", referencedColumnName = "id")
 	private Set<DefaultValueEntity> defaultValues;
 
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToOne(mappedBy = "template", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	private TemplateContentEntity content;
 
 	@Column(name = "changelog")
