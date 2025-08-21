@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>se.sundsvall.dept44</groupId>
 		<artifactId>dept44-service-parent</artifactId>
-		<version>6.0.8</version>
+		<version>6.0.12</version>
 		<relativePath />
 		<!-- lookup parent from repository -->
 	</parent>
@@ -15,12 +15,12 @@
 	<properties>
 		<json-patch.version>1.13</json-patch.version>
 		<pebble.version>3.2.4</pebble.version>
-		<jsoup.version>1.19.1</jsoup.version>
+		<jsoup.version>1.21.1</jsoup.version>
 		<openpdf.version>9.3.2</openpdf.version>
 		<docx4j.version>11.4.11</docx4j.version>
 		<poi.version>5.4.1</poi.version>
 		<poi-pdf-converter.version>2.1.0</poi-pdf-converter.version>
-		<itext-html2pdf.version>6.1.0</itext-html2pdf.version>
+		<itext-html2pdf.version>6.2.0</itext-html2pdf.version>
 	</properties>
 
 	<dependencies>
