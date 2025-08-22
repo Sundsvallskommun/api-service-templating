@@ -1,10 +1,10 @@
-INSERT INTO `templates` (`municipality_id`, `id`, `identifier`, `name`, `description`, `major`, `minor`, `content`, `changelog`)
-VALUES ('2281', '852d055a-4ebc-4141-a6e7-530c55cf9bbb', 'first.template', 'First template', 'Some description', 1, 0, 'YsOkIGLDpCB2aXRhIGxhbW0=', 'Initial version'),
-       ('2282', 'c13e28b7-c39d-4c58-b264-a5086659386b', 'first.template', 'First template', 'Some description from other municipality', 1, 0, 'YsOkYsOkIHZpdGEgbGFtbSBmcsOlbiAyMjgyCg==', 'Initial version'),
-       ('2281', 'df21b2c9-ddbf-4b4d-bdac-207b29216c60', 'second.template', 'Second template', 'Some description', 1, 0, 'eyUgaW5jbHVkZSAiZmlyc3QudGVtcGxhdGUiICV9IGhhciBkdSBuw6Vnb24gdWxse3tlbmRpbmd9fQ==', 'Initial version'),
-       ('2281', 'a9b98ede-4475-49a4-ad31-6607fb154544', 'third.template', 'Third template', 'Some description', 1, 0, 'amEgamEga8OkcmEgdW5nZQ==', 'Initial version'),
-       ('2281', '72eac1d7-2767-4642-84ab-f9786de7fe63', 'third.template', 'Third template', 'Some description', 1, 1, 'amEgamEga8OkcmEgYmFybg==', 'Updated version'),
-       ('2281', 'd0339b9d-392a-44c9-8038-7480edd471af', 'fourth.template', 'Fourth template', 'Some description', 1, 0, 'amFnIGhhciBoZWxhIHPDpGNrasOkdmVsbiBmdWxs', 'Initial version');
+INSERT INTO `templates` (`municipality_id`, `id`, `identifier`, `name`, `description`, `major`, `minor`, `changelog`)
+VALUES ('2281', '852d055a-4ebc-4141-a6e7-530c55cf9bbb', 'first.template', 'First template', 'Some description', 1, 0, 'Initial version'),
+       ('2282', 'c13e28b7-c39d-4c58-b264-a5086659386b', 'first.template', 'First template', 'Some description from other municipality', 1, 0, 'Initial version'),
+       ('2281', 'df21b2c9-ddbf-4b4d-bdac-207b29216c60', 'second.template', 'Second template', 'Some description', 1, 0, 'Initial version'),
+       ('2281', 'a9b98ede-4475-49a4-ad31-6607fb154544', 'third.template', 'Third template', 'Some description', 1, 0, 'Initial version'),
+       ('2281', '72eac1d7-2767-4642-84ab-f9786de7fe63', 'third.template', 'Third template', 'Some description', 1, 1, 'Updated version'),
+       ('2281', 'd0339b9d-392a-44c9-8038-7480edd471af', 'fourth.template', 'Fourth template', 'Some description', 1, 0, 'Initial version');
 
 INSERT INTO `template_content` (`id`, `content`)
 VALUES ('852d055a-4ebc-4141-a6e7-530c55cf9bbb', 'YsOkIGLDpCB2aXRhIGxhbW0='),
