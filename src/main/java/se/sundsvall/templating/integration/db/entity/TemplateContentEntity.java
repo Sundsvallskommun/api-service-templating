@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 public class TemplateContentEntity {
 
 	@Id
-	@Column(name = "id", nullable = false, unique = true)
+	@Column(name = "id")
 	private String id;
 
 	@OneToOne
