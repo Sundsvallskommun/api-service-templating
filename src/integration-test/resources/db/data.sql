@@ -6,6 +6,14 @@ VALUES ('2281', '852d055a-4ebc-4141-a6e7-530c55cf9bbb', 'first.template', 'First
        ('2281', '72eac1d7-2767-4642-84ab-f9786de7fe63', 'third.template', 'Third template', 'Some description', 1, 1, 'amEgamEga8OkcmEgYmFybg==', 'Updated version'),
        ('2281', 'd0339b9d-392a-44c9-8038-7480edd471af', 'fourth.template', 'Fourth template', 'Some description', 1, 0, 'amFnIGhhciBoZWxhIHPDpGNrasOkdmVsbiBmdWxs', 'Initial version');
 
+INSERT INTO `template_content` (`id`, `content`)
+VALUES ('852d055a-4ebc-4141-a6e7-530c55cf9bbb', 'YsOkIGLDpCB2aXRhIGxhbW0='),
+       ('c13e28b7-c39d-4c58-b264-a5086659386b', 'YsOkYsOkIHZpdGEgbGFtbSBmcsOlbiAyMjgyCg=='),
+       ('df21b2c9-ddbf-4b4d-bdac-207b29216c60', 'eyUgaW5jbHVkZSAiZmlyc3QudGVtcGxhdGUiICV9IGhhciBkdSBuw6Vnb24gdWxse3tlbmRpbmd9fQ=='),
+       ('a9b98ede-4475-49a4-ad31-6607fb154544', 'amEgamEga8OkcmEgdW5nZQ=='),
+       ('72eac1d7-2767-4642-84ab-f9786de7fe63', 'amEgamEga8OkcmEgYmFybg=='),
+       ('d0339b9d-392a-44c9-8038-7480edd471af', 'amFnIGhhciBoZWxhIHPDpGNrasOkdmVsbiBmdWxs');
+
 INSERT INTO `templates_metadata` (`id`, `template_id`, `metadata_key`, `value`)
 VALUES ('6a4f8f00-29fa-4dc2-951b-1a71d617e8b3', 'df21b2c9-ddbf-4b4d-bdac-207b29216c60', 'verksamhet', 'SBK'),
        ('0d39d9a9-d769-4425-a1d9-01e0503132fb', 'df21b2c9-ddbf-4b4d-bdac-207b29216c60', 'process', 'PRH'),
