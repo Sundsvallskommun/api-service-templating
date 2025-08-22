@@ -15,7 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "templates")
+@Table(name = "template_content")
 @Data
 @Builder(setterPrefix = "with")
 @NoArgsConstructor
