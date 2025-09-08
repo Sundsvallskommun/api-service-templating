@@ -20,7 +20,7 @@
 		<docx4j.version>11.4.11</docx4j.version>
 		<poi.version>5.4.1</poi.version>
 		<poi-pdf-converter.version>2.1.0</poi-pdf-converter.version>
-		<itext-html2pdf.version>6.2.0</itext-html2pdf.version>
+		<itext-html2pdf.version>6.2.1</itext-html2pdf.version>
 	</properties>
 
 	<dependencies>
