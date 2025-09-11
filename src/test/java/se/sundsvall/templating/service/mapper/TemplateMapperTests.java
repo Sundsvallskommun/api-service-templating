@@ -11,6 +11,7 @@ import se.sundsvall.templating.api.domain.Metadata;
 import se.sundsvall.templating.api.domain.TemplateRequest;
 import se.sundsvall.templating.integration.db.entity.DefaultValueEntity;
 import se.sundsvall.templating.integration.db.entity.MetadataEntity;
+import se.sundsvall.templating.integration.db.entity.TemplateContentEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 
 class TemplateMapperTests {
@@ -31,7 +32,6 @@ class TemplateMapperTests {
 		assertThat(templateEntity).isNotNull();
 		assertThat(templateEntity.getName()).isEqualTo("someName");
 		assertThat(templateEntity.getDescription()).isEqualTo("someDescription");
-		assertThat(templateEntity.getContent()).isEqualTo("someContent");
 		assertThat(templateEntity.getMetadata()).hasSameSizeAs(request.getMetadata());
 		assertThat(templateEntity.getDefaultValues()).hasSameSizeAs(request.getDefaultValues());
 	}
@@ -43,13 +43,14 @@ class TemplateMapperTests {
 
 	@Test
 	void test_toTemplateResponse() {
+		var templateContentEntity = new TemplateContentEntity();
 		var templateEntity = TemplateEntity.builder()
 			.withIdentifier("someIdentifier")
 			.withName("someName")
 			.withDescription("someDescription")
 			.withMetadata(List.of(MetadataEntity.builder().build()))
 			.withDefaultValues(Set.of(DefaultValueEntity.builder().build()))
-			.withContent("someContent")
+			.withTemplateContentEntity(templateContentEntity)
 			.build();
 
 		var templateResponse = mapper.toTemplateResponse(templateEntity);
@@ -70,13 +71,16 @@ class TemplateMapperTests {
 
 	@Test
 	void test_toDetailedTemplateResponse() {
+		var templateContentEntity = TemplateContentEntity.builder()
+			.withContent(encodeBase64("someContent"))
+			.build();
 		var templateEntity = TemplateEntity.builder()
 			.withIdentifier("someIdentifier")
 			.withName("someName")
 			.withDescription("someDescription")
 			.withMetadata(List.of(MetadataEntity.builder().build()))
 			.withDefaultValues(Set.of(DefaultValueEntity.builder().build()))
-			.withContent(encodeBase64("someContent"))
+			.withTemplateContentEntity(templateContentEntity)
 			.build();
 
 		var detailedTemplateResponse = mapper.toDetailedTemplateResponse(templateEntity);

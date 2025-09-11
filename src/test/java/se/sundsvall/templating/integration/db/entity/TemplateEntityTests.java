@@ -10,9 +10,12 @@ class TemplateEntityTests {
 	@Test
 	void getContentBytes() {
 		var content = "someContent";
+		var contentEntity = TemplateContentEntity.builder()
+			.withContent(content)
+			.build();
 
 		var templateEntity = TemplateEntity.builder()
-			.withContent(content)
+			.withTemplateContentEntity(contentEntity)
 			.build();
 
 		assertThat(templateEntity.getContentBytes()).isEqualTo(content.getBytes(UTF_8));

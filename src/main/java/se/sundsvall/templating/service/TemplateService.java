@@ -17,6 +17,7 @@ import se.sundsvall.templating.api.domain.TemplateRequest;
 import se.sundsvall.templating.api.domain.TemplateResponse;
 import se.sundsvall.templating.domain.KeyValue;
 import se.sundsvall.templating.integration.db.DbIntegration;
+import se.sundsvall.templating.integration.db.entity.TemplateContentEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.integration.db.entity.Version;
 import se.sundsvall.templating.service.mapper.TemplateMapper;
@@ -72,6 +73,12 @@ public class TemplateService {
 
 		var templateEntity = mapper.toTemplateEntity(templateRequest, municipalityId)
 			.withVersion(version);
+		var templateContentEntity = TemplateContentEntity.builder()
+			.withId(templateEntity.getId())
+			.withTemplate(templateEntity)
+			.withContent(templateRequest.getContent())
+			.build();
+		templateEntity.setContent(templateContentEntity);
 
 		return mapper.toTemplateResponse(dbIntegration.saveTemplate(templateEntity));
 	}
