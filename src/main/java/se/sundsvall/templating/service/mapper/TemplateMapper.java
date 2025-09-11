@@ -30,7 +30,6 @@ public class TemplateMapper {
 			.withType(getTemplateType(decodeBase64(templateRequest.getContent())))
 			.withName(templateRequest.getName())
 			.withDescription(templateRequest.getDescription())
-			.withContent(templateRequest.getContent())
 			.withChangeLog(templateRequest.getChangeLog())
 			.withMetadata(Optional.ofNullable(templateRequest.getMetadata()).orElse(List.of()).stream()
 				.map(metadata -> MetadataEntity.builder()

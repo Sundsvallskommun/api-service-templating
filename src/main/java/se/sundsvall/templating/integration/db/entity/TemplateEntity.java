@@ -10,6 +10,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
@@ -22,7 +24,6 @@ import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,7 +49,8 @@ public class TemplateEntity {
 
 	@Id
 	@Column(name = "id", nullable = false, unique = true)
-	private final String id = UUID.randomUUID().toString();
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private String id;
 
 	@Column(name = "identifier", nullable = false)
 	private String identifier;
@@ -79,7 +81,7 @@ public class TemplateEntity {
 	@JoinColumn(name = "template_id", referencedColumnName = "id")
 	private Set<DefaultValueEntity> defaultValues;
 
-	@OneToOne(mappedBy = "template", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToOne(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
 	private TemplateContentEntity content;
 
 	@Column(name = "changelog")
@@ -93,17 +95,14 @@ public class TemplateEntity {
 	 */
 	@Builder(setterPrefix = "with")
 	TemplateEntity(final String identifier, final String municipalityId, final TemplateType type, final String name,
-		final String description, final String content, final String changeLog,
+		final String description, final String changeLog, final TemplateContentEntity templateContentEntity,
 		final List<MetadataEntity> metadata, final Set<DefaultValueEntity> defaultValues) {
 		this.identifier = identifier;
 		this.municipalityId = municipalityId;
 		this.type = type;
 		this.name = name;
 		this.description = description;
-		this.content = TemplateContentEntity.builder()
-			.withTemplate(this)
-			.withContent(content)
-			.build();
+		this.content = templateContentEntity;
 		this.changeLog = changeLog;
 		this.metadata = metadata;
 		this.defaultValues = defaultValues;
