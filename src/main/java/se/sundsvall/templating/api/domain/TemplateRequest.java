@@ -25,7 +25,9 @@ public class TemplateRequest {
 	@Schema(description = "Name", requiredMode = REQUIRED)
 	private String name;
 
-	@Schema(description = "Description", nullable = true)
+	@Schema(description = "Description", types = {
+		"string", "null"
+	})
 	private String description;
 
 	@Schema(description = "Content, as a BASE64-encoded string", requiredMode = REQUIRED)

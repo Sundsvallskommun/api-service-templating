@@ -24,16 +24,22 @@ import se.sundsvall.templating.domain.KeyValue;
 @Schema(description = "Request to render a template")
 public class RenderRequest {
 
-	@Schema(description = "Template identifier", nullable = true)
+	@Schema(description = "Template identifier", types = {
+		"string", "null"
+	})
 	private String identifier;
 
 	@ValidTemplateVersion
-	@Schema(description = "Template version", nullable = true)
+	@Schema(description = "Template version", types = {
+		"string", "null"
+	})
 	private String version;
 
 	@ArraySchema(schema = @Schema(description = "Template metadata"))
 	private List<@Valid KeyValue> metadata;
 
-	@Schema(description = "Parameters (string values may be BASE64-encoded, and in that case they should be on the form \"BASE64:<base64-encoded-value>\")", nullable = true, example = OpenApiExamples.PARAMETERS)
+	@Schema(description = "Parameters (string values may be BASE64-encoded, and in that case they should be on the form \"BASE64:<base64-encoded-value>\")", types = {
+		"string", "null"
+	}, examples = OpenApiExamples.PARAMETERS)
 	private Map<String, Object> parameters;
 }

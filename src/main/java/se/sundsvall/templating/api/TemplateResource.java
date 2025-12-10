@@ -159,7 +159,7 @@ class TemplateResource {
 		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
 		@PathVariable("identifier") @ValidTemplateId final String identifier,
 		@PathVariable("version") @ValidTemplateVersion final String version,
-		@RequestBody @Schema(example = OpenApiExamples.UPDATE) final JsonPatch jsonPatch) {
+		@RequestBody @Schema(examples = OpenApiExamples.UPDATE) final JsonPatch jsonPatch) {
 		final var template = templatingService.updateTemplate(municipalityId, identifier, version, jsonPatch);
 
 		return ResponseEntity.ok(template);
