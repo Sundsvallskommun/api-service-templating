@@ -1,12 +1,15 @@
 # Templating
 
-_This service provides functionality for storing and rendering templates. It supports rendering templates into various text-based formats such as HTML and plain text, as well as converting them into PDF documents. The service is designed to handle different types of templates, including Pebble and Word templates, and offers a flexible API for rendering templates with dynamic data._
+_This service provides functionality for storing and rendering templates. It supports rendering templates into various
+text-based formats such as HTML and plain text, as well as converting them into PDF documents. The service is designed
+to handle different types of templates, including Pebble and Word templates, and offers a flexible API for rendering
+templates with dynamic data._
 
 ## Getting Started
 
 ### Prerequisites
 
-- **Java 21 or higher**
+- **Java 25 or higher**
 - **Maven**
 - **MariaDB**
 - **Git**
@@ -27,7 +30,8 @@ _This service provides functionality for storing and rendering templates. It sup
 
 3. **Ensure dependent services are running:**
 
-   If this microservice depends on other services, make sure they are up and accessible. See [Dependencies](#dependencies) for more details.
+   If this microservice depends on other services, make sure they are up and accessible.
+   See [Dependencies](#dependencies) for more details.
 
 4. **Build and run the application:**
 
@@ -55,7 +59,8 @@ curl -X GET http://localhost:8080/api/2281/templates
 
 ## Configuration
 
-Configuration is crucial for the application to run successfully. Ensure all necessary settings are configured in `application.yml`.
+Configuration is crucial for the application to run successfully. Ensure all necessary settings are configured in
+`application.yml`.
 
 ### Key Configuration Parameters
 
@@ -77,7 +82,8 @@ Configuration is crucial for the application to run successfully. Ensure all nec
 
 ### Database Initialization
 
-The project is set up with [Flyway](https://github.com/flyway/flyway) for database migrations. Flyway is disabled by default so you will have to enable it to automatically populate the database schema upon application startup.
+The project is set up with [Flyway](https://github.com/flyway/flyway) for database migrations. Flyway is disabled by
+default so you will have to enable it to automatically populate the database schema upon application startup.
 
 ```yaml
 spring:
@@ -85,7 +91,8 @@ spring:
     enabled: true
 ```
 
-- **No additional setup is required** for database initialization, as long as the database connection settings are correctly configured.
+- **No additional setup is required** for database initialization, as long as the database connection settings are
+  correctly configured.
 
 ### Additional Notes
 
@@ -99,7 +106,8 @@ spring:
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](https://github.com/Sundsvallskommun/.github/blob/main/.github/CONTRIBUTING.md) for guidelines.
+Contributions are welcome! Please
+see [CONTRIBUTING.md](https://github.com/Sundsvallskommun/.github/blob/main/.github/CONTRIBUTING.md) for guidelines.
 
 ## License
 
