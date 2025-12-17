@@ -4,6 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.pebbletemplates.pebble.PebbleEngine;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Map;
 import org.springframework.stereotype.Component;
 import se.sundsvall.templating.exception.TemplateException;
@@ -19,7 +20,8 @@ public class PebbleTemplateProcessor implements TemplateProcessor<String> {
 	}
 
 	@Override
-	public byte[] process(final String template, final Map<String, Object> parameters) {
+	public byte[] process(final String template, final Map<String, Object> stringParameters) {
+		Map<String, Object> parameters = new HashMap<>(stringParameters);
 		try (var writer = new StringWriter()) {
 			pebbleEngine.getTemplate(template).evaluate(writer, parameters);
 

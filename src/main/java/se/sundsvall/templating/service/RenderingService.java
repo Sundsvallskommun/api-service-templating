@@ -114,7 +114,7 @@ public class RenderingService {
 		// Add identifier and version as extra template parameters (prefixed with underscore to
 		// minimize the risk of name clashes)
 		mergedParametersAndDefaultValues.put("_identifier", template.getIdentifier());
-		mergedParametersAndDefaultValues.put("_version", template.getVersion());
+		mergedParametersAndDefaultValues.put("_version", String.valueOf(template.getVersion()));
 		// Add default values
 		mergedParametersAndDefaultValues.putAll(defaultValues);
 		// Decode request parameters
