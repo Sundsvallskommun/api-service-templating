@@ -1,5 +1,7 @@
 package se.sundsvall.templating.service.processor;
 
+import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -9,16 +11,22 @@ import java.util.regex.Pattern;
 import org.docx4j.Docx4J;
 import org.docx4j.TextUtils;
 import org.docx4j.convert.in.xhtml.XHTMLImporterImpl;
+import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.P;
 import org.docx4j.wml.PPr;
 import org.docx4j.wml.SectPr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.zalando.problem.Problem;
 
 @Component
 public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(WordTemplateProcessor.class);
 
 	@Override
 	public byte[] process(final byte[] template, final Map<String, Object> parameters) {
@@ -36,7 +44,8 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 			Docx4J.save(wordMLPackage, outputStream);
 			return outputStream.toByteArray();
 		} catch (Exception e) {
-			throw new RuntimeException("Failed to process Word template", e);
+			LOGGER.error(e.getMessage(), e);
+			throw Problem.valueOf(INTERNAL_SERVER_ERROR, "Failed to process Word template");
 		}
 	}
 
@@ -51,7 +60,7 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 		return Pattern.compile("\\{\\{\\s*" + Pattern.quote(key) + "\\s*}}");
 	}
 
-	private void replacePlaceholderWithHtml(final WordprocessingMLPackage wordMLPackage, final MainDocumentPart mainDocumentPart, final String key, final String value) throws Exception {
+	private void replacePlaceholderWithHtml(final WordprocessingMLPackage wordMLPackage, final MainDocumentPart mainDocumentPart, final String key, final String value) throws Docx4JException {
 		var paragraphs = getAllParagraphs(mainDocumentPart);
 
 		var pattern = placeholderPattern(key);
