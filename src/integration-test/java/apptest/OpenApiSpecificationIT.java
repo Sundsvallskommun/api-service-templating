@@ -5,6 +5,7 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import configuration.TestContainersConfiguration;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -15,12 +16,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.util.UriComponentsBuilder;
 import se.sundsvall.dept44.util.ResourceUtils;
 import se.sundsvall.templating.Application;
 
+@Import(TestContainersConfiguration.class)
 @ActiveProfiles("it")
 @SpringBootTest(
 	webEnvironment = WebEnvironment.RANDOM_PORT,

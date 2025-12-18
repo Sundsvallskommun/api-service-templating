@@ -1,11 +1,13 @@
 spring:
   application:
     name: api-templating
-
   flyway:
     enabled: true
     group: true
-
+logging:
+  level:
+    org.docx4j: ERROR
+    com.openhtmltopdf: ERROR
   jpa:
     hibernate:
       ddl-auto: validate
@@ -22,3 +24,4 @@ springdoc:
 
 rendering:
   direct-output-as-base64: true
+

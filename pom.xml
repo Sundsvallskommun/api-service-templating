@@ -11,7 +11,6 @@
 	<groupId>se.sundsvall</groupId>
 	<artifactId>api-service-templating</artifactId>
 	<version>2.0</version>
-
 	<properties>
 		<json-patch.version>1.13</json-patch.version>
 		<pebble.version>4.1.0</pebble.version>
@@ -22,11 +21,26 @@
 		<poi-pdf-converter.version>2.1.0</poi-pdf-converter.version>
 		<itext-html2pdf.version>6.3.0</itext-html2pdf.version>
 	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>se.sundsvall.dept44</groupId>
 			<artifactId>dept44-common-validators</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.docx4j</groupId>
+			<artifactId>docx4j-JAXB-ReferenceImpl</artifactId>
+			<version>${docx4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.docx4j</groupId>
+			<artifactId>docx4j-ImportXHTML</artifactId>
+			<version>11.4.8</version>
+		</dependency>
+		<!-- Lägg till denna explicit -->
+		<dependency>
+			<groupId>org.docx4j</groupId>
+			<artifactId>docx4j-openxml-objects</artifactId>
+			<version>${docx4j.version}</version>
 		</dependency>
 		<!-- Test -->
 		<dependency>
@@ -49,7 +63,6 @@
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<!-- JPA/JDBC -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -64,20 +77,17 @@
 			<artifactId>mariadb-java-client</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-
 		<!-- Flyway -->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-mysql</artifactId>
 		</dependency>
-
 		<!-- Pebble template engine -->
 		<dependency>
 			<groupId>io.pebbletemplates</groupId>
 			<artifactId>pebble</artifactId>
 			<version>${pebble.version}</version>
 		</dependency>
-
 		<!-- OpenPDF -->
 		<dependency>
 			<groupId>org.jsoup</groupId>
@@ -89,7 +99,6 @@
 			<artifactId>flying-saucer-pdf-openpdf</artifactId>
 			<version>${openpdf.version}</version>
 		</dependency>
-
 		<!-- Apache POI -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -101,14 +110,12 @@
 			<artifactId>fr.opensagres.poi.xwpf.converter.pdf</artifactId>
 			<version>${poi-pdf-converter.version}</version>
 		</dependency>
-
 		<!-- iText -->
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>html2pdf</artifactId>
 			<version>${itext-html2pdf.version}</version>
 		</dependency>
-
 		<!-- Other -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -127,7 +134,6 @@
 			<version>${json-patch.version}</version>
 		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
