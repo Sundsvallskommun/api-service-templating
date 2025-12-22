@@ -16,7 +16,7 @@
 		<pebble.version>4.1.0</pebble.version>
 		<jsoup.version>1.21.2</jsoup.version>
 		<openpdf.version>9.3.2</openpdf.version>
-		<docx4j.version>11.4.11</docx4j.version>
+		<docx4j.version>11.5.9</docx4j.version>
 		<poi.version>5.5.1</poi.version>
 		<poi-pdf-converter.version>2.1.0</poi-pdf-converter.version>
 		<itext-html2pdf.version>6.3.0</itext-html2pdf.version>
