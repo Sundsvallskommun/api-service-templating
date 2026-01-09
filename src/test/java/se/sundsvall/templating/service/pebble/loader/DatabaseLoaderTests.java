@@ -28,8 +28,10 @@ class DatabaseLoaderTests {
 
 	@Mock
 	private DbIntegration mockDbIntegration;
+
 	@Mock
 	private TemplateEntity mockTemplateEntity;
+
 	@Mock
 	private ContextMunicipalityId mockContextMunicipalityId;
 
