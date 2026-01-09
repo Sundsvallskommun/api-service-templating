@@ -88,17 +88,15 @@ public class DbIntegration {
 		Optional.ofNullable(version)
 			.map(Version::parse)
 			.ifPresentOrElse(parsedVersion -> {
-				if (!templateRepository.existsByIdentifierAndVersionAndMunicipalityId(identifier, parsedVersion, municipalityId)) {
-					throw Problem.valueOf(Status.NOT_FOUND, "Unable to find template '" + identifier + ":" + parsedVersion + "'");
-				}
-
-				templateRepository.deleteByIdentifierAndVersionAndMunicipalityId(identifier, parsedVersion, municipalityId);
+				var templateEntity = templateRepository.findByIdentifierAndVersionAndMunicipalityId(identifier, parsedVersion, municipalityId)
+					.orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "Unable to find template '" + identifier + ":" + parsedVersion + "'"));
+				templateRepository.delete(templateEntity);
 			}, () -> {
 				if (!templateRepository.existsByIdentifierAndMunicipalityId(identifier, municipalityId)) {
 					throw Problem.valueOf(Status.NOT_FOUND, "Unable to find template '" + identifier + "'");
 				}
-
-				templateRepository.deleteByIdentifierAndMunicipalityId(identifier, municipalityId);
+				templateRepository.findByIdentifierAndMunicipalityId(identifier, municipalityId)
+					.forEach(templateRepository::delete);
 			});
 	}
 }

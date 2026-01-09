@@ -3,6 +3,7 @@ package se.sundsvall.templating.integration.db;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -120,22 +121,26 @@ class DbIntegrationTests {
 
 	@Test
 	void test_deleteTemplate() {
+		var templateEntity = TemplateEntity.builder().build();
 		when(mockTemplateRepository.existsByIdentifierAndMunicipalityId(any(), any())).thenReturn(true);
+		when(mockTemplateRepository.findByIdentifierAndMunicipalityId(any(), any())).thenReturn(List.of(templateEntity));
 
 		dbIntegration.deleteTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
 
-		verify(mockTemplateRepository, times(1)).existsByIdentifierAndMunicipalityId(IDENTIFIER, MUNICIPALITY_ID);
-		verify(mockTemplateRepository, times(1)).deleteByIdentifierAndMunicipalityId(IDENTIFIER, MUNICIPALITY_ID);
+		verify(mockTemplateRepository).existsByIdentifierAndMunicipalityId(IDENTIFIER, MUNICIPALITY_ID);
+		verify(mockTemplateRepository).findByIdentifierAndMunicipalityId(IDENTIFIER, MUNICIPALITY_ID);
+		verify(mockTemplateRepository).delete(same(templateEntity));
 	}
 
 	@Test
 	void test_deleteTemplateForProvidedVersion() {
-		when(mockTemplateRepository.existsByIdentifierAndVersionAndMunicipalityId(any(), any(), any())).thenReturn(true);
+		var templateEntity = TemplateEntity.builder().build();
+		when(mockTemplateRepository.findByIdentifierAndVersionAndMunicipalityId(any(), any(), any())).thenReturn(Optional.of(templateEntity));
 
 		dbIntegration.deleteTemplate(MUNICIPALITY_ID, IDENTIFIER, "1.0");
 
-		verify(mockTemplateRepository, times(1)).existsByIdentifierAndVersionAndMunicipalityId(IDENTIFIER, new Version(1, 0), MUNICIPALITY_ID);
-		verify(mockTemplateRepository, times(1)).deleteByIdentifierAndVersionAndMunicipalityId(IDENTIFIER, new Version(1, 0), MUNICIPALITY_ID);
+		verify(mockTemplateRepository).findByIdentifierAndVersionAndMunicipalityId(IDENTIFIER, new Version(1, 0), MUNICIPALITY_ID);
+		verify(mockTemplateRepository).delete(same(templateEntity));
 	}
 
 	@Test
@@ -148,10 +153,13 @@ class DbIntegrationTests {
 
 	@Test
 	void test_deleteTemplate_whenTemplateDoesNotExistForProvidedVersion() {
-		when(mockTemplateRepository.existsByIdentifierAndVersionAndMunicipalityId(any(), any(), any())).thenReturn(false);
+		when(mockTemplateRepository.findByIdentifierAndVersionAndMunicipalityId(any(), any(), any())).thenReturn(Optional.empty());
 
 		assertThatExceptionOfType(ThrowableProblem.class)
-			.isThrownBy(() -> dbIntegration.deleteTemplate(MUNICIPALITY_ID, IDENTIFIER, "1.0"));
+			.isThrownBy(() -> dbIntegration.deleteTemplate(MUNICIPALITY_ID, IDENTIFIER, "1.0"))
+			.withMessage("Not Found: Unable to find template 'someTemplateId:1.0'");
+
+		verify(mockTemplateRepository).findByIdentifierAndVersionAndMunicipalityId(IDENTIFIER, Version.parse("1.0"), MUNICIPALITY_ID);
 	}
 
 	@Test
