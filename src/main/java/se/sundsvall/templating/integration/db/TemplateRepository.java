@@ -19,6 +19,8 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, String
 
 	boolean existsByIdentifierAndMunicipalityId(String identifier, String municipalityId);
 
+	List<TemplateEntity> findByIdentifierAndMunicipalityId(String identifier, String municipalityId);
+
 	@Query("""
 		select case when count(t)> 0 then true else false end
 		from TemplateEntity t
