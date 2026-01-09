@@ -1,8 +1,10 @@
 package se.sundsvall.templating.service;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
@@ -40,14 +42,17 @@ import se.sundsvall.templating.util.TemplateUtil;
 class RenderingServiceTests {
 
 	private static final String MUNICIPALITY_ID = "municipalityId";
-	public static final String IDENTIFIER = "someTemplateId";
+	private static final String IDENTIFIER = "someTemplateId";
 
 	@Mock
 	private PebbleProperties mockPebbleProperties;
+
 	@Mock
 	private PebbleTemplateProcessor mockPebbleTemplateProcessor;
+
 	@Mock
 	private WordTemplateProcessor mockWordTemplateProcessor;
+
 	@Mock
 	private DbIntegration mockDbIntegration;
 
@@ -74,9 +79,9 @@ class RenderingServiceTests {
 		var result = service.renderTemplate(MUNICIPALITY_ID, mockRenderRequest);
 		assertThat(result).isNotNull();
 
-		verify(mockRenderRequest, times(1)).getIdentifier();
-		verify(mockRenderRequest, times(1)).getParameters();
-		verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
+		verify(mockRenderRequest).getIdentifier();
+		verify(mockRenderRequest).getParameters();
+		verify(mockDbIntegration).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
 		verify(mockPebbleTemplateProcessor).process(any(String.class), anyMap());
 		verifyNoInteractions(mockWordTemplateProcessor);
 	}
@@ -102,7 +107,7 @@ class RenderingServiceTests {
 		assertThatExceptionOfType(ThrowableProblem.class)
 			.isThrownBy(() -> service.renderTemplate(MUNICIPALITY_ID, mockRenderRequest));
 
-		verify(mockDbIntegration, times(1)).getTemplate(MUNICIPALITY_ID, IDENTIFIER, "1.8");
+		verify(mockDbIntegration).getTemplate(MUNICIPALITY_ID, IDENTIFIER, "1.8");
 		verify(mockRenderRequest, times(3)).getIdentifier();
 	}
 
@@ -157,7 +162,7 @@ class RenderingServiceTests {
 		var document = "someTemplateContent".getBytes(UTF_8);
 
 		try (var mockHtmlConverter = mockStatic(HtmlConverter.class)) {
-			mockHtmlConverter.when(() -> HtmlConverter.convertToPdf(any(String.class), any(ByteArrayOutputStream.class))).thenAnswer(invocationOnMock -> {
+			mockHtmlConverter.when(() -> HtmlConverter.convertToPdf(any(String.class), any(ByteArrayOutputStream.class))).thenAnswer(_ -> {
 				throw new IOException("dummy");
 			});
 

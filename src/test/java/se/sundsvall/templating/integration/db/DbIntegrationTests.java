@@ -11,10 +11,10 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -33,12 +33,8 @@ class DbIntegrationTests {
 	@Mock
 	private TemplateRepository mockTemplateRepository;
 
+	@InjectMocks
 	private DbIntegration dbIntegration;
-
-	@BeforeEach
-	void setUp() {
-		dbIntegration = new DbIntegration(mockTemplateRepository);
-	}
 
 	@Test
 	void test_getAllTemplates() {
@@ -48,7 +44,7 @@ class DbIntegrationTests {
 		var templates = dbIntegration.getAllTemplates(MUNICIPALITY_ID);
 		assertThat(templates).hasSize(2);
 
-		verify(mockTemplateRepository, times(1)).findAllByMunicipalityId(MUNICIPALITY_ID);
+		verify(mockTemplateRepository).findAllByMunicipalityId(MUNICIPALITY_ID);
 	}
 
 	@Test
@@ -59,7 +55,7 @@ class DbIntegrationTests {
 		var optionalTemplate = dbIntegration.getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
 		assertThat(optionalTemplate).isPresent();
 
-		verify(mockTemplateRepository, times(1)).findLatestByIdentifierAndMunicipalityId(IDENTIFIER, MUNICIPALITY_ID);
+		verify(mockTemplateRepository).findLatestByIdentifierAndMunicipalityId(IDENTIFIER, MUNICIPALITY_ID);
 	}
 
 	@Test
@@ -70,7 +66,7 @@ class DbIntegrationTests {
 		var optionalTemplate = dbIntegration.getTemplate(MUNICIPALITY_ID, IDENTIFIER, "1.0");
 		assertThat(optionalTemplate).isPresent();
 
-		verify(mockTemplateRepository, times(1)).findByIdentifierAndVersionAndMunicipalityId(IDENTIFIER, new Version(1, 0), MUNICIPALITY_ID);
+		verify(mockTemplateRepository).findByIdentifierAndVersionAndMunicipalityId(IDENTIFIER, new Version(1, 0), MUNICIPALITY_ID);
 	}
 
 	@Test
@@ -81,7 +77,7 @@ class DbIntegrationTests {
 		var optionalTemplate = dbIntegration.findTemplate(MUNICIPALITY_ID, List.of(KeyValue.of("someKey", "someValue")));
 		assertThat(optionalTemplate).isPresent();
 
-		verify(mockTemplateRepository, times(1)).findOne(ArgumentMatchers.<Specification<TemplateEntity>>any());
+		verify(mockTemplateRepository).findOne(ArgumentMatchers.<Specification<TemplateEntity>>any());
 	}
 
 	@Test
@@ -105,7 +101,7 @@ class DbIntegrationTests {
 			.isNotNull()
 			.hasSize(1);
 
-		verify(mockTemplateRepository, times(1)).findAll(ArgumentMatchers.<Specification<TemplateEntity>>any());
+		verify(mockTemplateRepository).findAll(ArgumentMatchers.<Specification<TemplateEntity>>any());
 	}
 
 	@Test

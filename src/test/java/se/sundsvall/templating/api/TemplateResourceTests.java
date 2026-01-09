@@ -5,16 +5,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,15 +33,12 @@ class TemplateResourceTests {
 
 	@Mock
 	private TemplateService mockTemplatingService;
+
 	@Mock
 	private TemplateResponse mockTemplateResponse;
 
+	@InjectMocks
 	private TemplateResource resource;
-
-	@BeforeEach
-	void setUp() {
-		resource = new TemplateResource(mockTemplatingService);
-	}
 
 	@Test
 	void test_getAll() {
@@ -52,7 +48,7 @@ class TemplateResourceTests {
 		var result = resource.searchTemplates(MUNICIPALITY_ID, new EmptyExpression());
 		assertThat(result).hasSize(1);
 
-		verify(mockTemplatingService, times(1)).getTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<Specification<TemplateEntity>>any());
+		verify(mockTemplatingService).getTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<Specification<TemplateEntity>>any());
 	}
 
 	@Test
@@ -64,7 +60,7 @@ class TemplateResourceTests {
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getBody()).isNotNull();
 
-		verify(mockTemplatingService, times(1)).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
+		verify(mockTemplatingService).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
 	}
 
 	@Test
@@ -76,7 +72,7 @@ class TemplateResourceTests {
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 		assertThat(result.getBody()).isNull();
 
-		verify(mockTemplatingService, times(1)).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
+		verify(mockTemplatingService).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
 	}
 
 	@Test
@@ -89,7 +85,7 @@ class TemplateResourceTests {
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(result.getBody()).isNotNull();
 
-		verify(mockTemplatingService, times(1)).saveTemplate(eq(MUNICIPALITY_ID), same(request));
+		verify(mockTemplatingService).saveTemplate(eq(MUNICIPALITY_ID), same(request));
 	}
 
 	@Test
@@ -101,13 +97,13 @@ class TemplateResourceTests {
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getBody()).isNotNull();
 
-		verify(mockTemplatingService, times(1)).updateTemplate(MUNICIPALITY_ID, IDENTIFIER, null, null);
+		verify(mockTemplatingService).updateTemplate(MUNICIPALITY_ID, IDENTIFIER, null, null);
 	}
 
 	@Test
 	void test_deleteTemplate() {
 		resource.deleteTemplate(MUNICIPALITY_ID, IDENTIFIER);
 
-		verify(mockTemplatingService, times(1)).deleteTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
+		verify(mockTemplatingService).deleteTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
 	}
 }

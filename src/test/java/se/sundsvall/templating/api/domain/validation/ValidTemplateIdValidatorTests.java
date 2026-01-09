@@ -24,7 +24,7 @@ class ValidTemplateIdValidatorTests {
 	@ValueSource(strings = {
 		"lower", "upper", "with.dot", "with-dash", "number-123", "aaa-123.BBB"
 	})
-	void test_validInput_isValid(final String s) {
-		assertThat(validator.isValid(s, null)).isTrue();
+	void test_validInput_isValid(final String string) {
+		assertThat(validator.isValid(string, null)).isTrue();
 	}
 }

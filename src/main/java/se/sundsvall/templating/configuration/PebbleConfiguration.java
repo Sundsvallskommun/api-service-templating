@@ -24,8 +24,8 @@ class PebbleConfiguration {
 	}
 
 	@Bean("pebble.database-loader")
-	DatabaseLoader pebbleDatabaseLoader(final DbIntegration dbIntegration, final ContextMunicipalityId requestScropedMunicipalityId) {
-		return new DatabaseLoader(dbIntegration, requestScropedMunicipalityId);
+	DatabaseLoader pebbleDatabaseLoader(final DbIntegration dbIntegration, final ContextMunicipalityId requestScopedMunicipalityId) {
+		return new DatabaseLoader(dbIntegration, requestScopedMunicipalityId);
 	}
 
 	@Bean("pebble.string-loader")

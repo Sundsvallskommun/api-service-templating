@@ -36,7 +36,7 @@ class KeyValueTests {
 		var constraints = copyOf(validator.validate(keyValue));
 
 		assertThat(constraints).hasSize(1);
-		assertThat(constraints.get(0)).satisfies(constraintViolation -> {
+		assertThat(constraints.getFirst()).satisfies(constraintViolation -> {
 			if (isBlank(keyValue.getKey())) {
 				assertThat(constraintViolation.getPropertyPath()).hasToString("key");
 			} else {

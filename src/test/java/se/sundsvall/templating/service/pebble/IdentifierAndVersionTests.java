@@ -32,13 +32,13 @@ class IdentifierAndVersionTests {
 
 	@Test
 	void testEquals() {
-		assertThat(new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.0").equals(new Date())).isFalse();
-		assertThat(new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.0").equals(new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.0"))).isTrue();
-		assertThat(new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.0").equals(new IdentifierAndVersion("other", "something:1.0"))).isFalse();
-		assertThat(new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.0").equals(new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.1"))).isFalse();
+		assertThat(new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.0")).isNotEqualTo(new Date());
+		assertThat(new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.0")).isEqualTo(new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.0"));
+		assertThat(new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.0")).isNotEqualTo(new IdentifierAndVersion("other", "something:1.0"));
+		assertThat(new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.0")).isNotEqualTo(new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.1"));
 
-		var v = new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.0");
+		var identifierAndVersion = new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.0");
 
-		assertThat(v.equals(v)).isTrue();
+		assertThat(identifierAndVersion.equals(new IdentifierAndVersion(MUNICIPALITY_ID, "something:1.0"))).isTrue();
 	}
 }
