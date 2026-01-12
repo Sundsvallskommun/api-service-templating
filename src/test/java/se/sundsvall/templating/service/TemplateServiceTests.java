@@ -20,10 +20,10 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
@@ -42,24 +42,22 @@ import se.sundsvall.templating.service.mapper.TemplateMapper;
 class TemplateServiceTests {
 
 	private static final String MUNICIPALITY_ID = "municipalityId";
-	public static final String IDENTIFIER = "someTemplateId";
+	private static final String IDENTIFIER = "someTemplateId";
 
 	@Mock
 	private ObjectMapper mockObjectMapper;
+
 	@Mock
 	private DbIntegration mockDbIntegration;
+
 	@Mock
 	private TemplateMapper mockTemplateMapper;
 
 	@Mock
 	private JsonPatch mockJsonPatch;
 
+	@InjectMocks
 	private TemplateService service;
-
-	@BeforeEach
-	void setUp() {
-		service = new TemplateService(mockObjectMapper, mockDbIntegration, mockTemplateMapper);
-	}
 
 	@Test
 	void test_getAllTemplatesUsingFilterSpecification() {

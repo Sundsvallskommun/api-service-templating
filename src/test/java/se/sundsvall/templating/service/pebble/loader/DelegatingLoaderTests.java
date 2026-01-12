@@ -25,8 +25,10 @@ class DelegatingLoaderTests {
 
 	@Mock
 	private DatabaseLoader mockDatabaseLoader;
+
 	@Mock
 	private StringLoader mockStringLoader;
+
 	@Mock
 	private ContextMunicipalityId mockContextMunicipalityId;
 

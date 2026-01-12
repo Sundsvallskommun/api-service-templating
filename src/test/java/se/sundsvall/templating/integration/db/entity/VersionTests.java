@@ -44,13 +44,13 @@ class VersionTests {
 
 	@Test
 	void testEquals() {
-		assertThat(Version.parse("1.0").equals(new Date())).isFalse();
-		assertThat(Version.parse("1.0").equals(Version.parse("1.0"))).isTrue();
-		assertThat(Version.parse("1.0").equals(Version.parse("1.1"))).isFalse();
+		assertThat(Version.parse("1.0")).isNotEqualTo(new Date());
+		assertThat(Version.parse("1.0")).isEqualTo(Version.parse("1.0"));
+		assertThat(Version.parse("1.0")).isNotEqualTo(Version.parse("1.1"));
 
-		var v = Version.parse("11.11");
+		var version = Version.parse("11.11");
 
-		assertThat(v.equals(v)).isTrue();
+		assertThat(version.equals(Version.parse("11.11"))).isTrue();
 	}
 
 	@Test
