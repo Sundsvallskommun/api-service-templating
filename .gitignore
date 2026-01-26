@@ -53,3 +53,6 @@ application-default.properties
 application-default.yml
 application-default.yaml
 
+# Claude Code
+.claude/
+CLAUDE.md
