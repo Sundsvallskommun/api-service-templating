@@ -20,7 +20,27 @@
 		<poi.version>5.5.1</poi.version>
 		<poi-pdf-converter.version>2.1.0</poi-pdf-converter.version>
 		<itext-html2pdf.version>6.3.1</itext-html2pdf.version>
+		<pdfbox.version>2.0.24</pdfbox.version>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.apache.pdfbox</groupId>
+				<artifactId>pdfbox</artifactId>
+				<version>${pdfbox.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.pdfbox</groupId>
+				<artifactId>fontbox</artifactId>
+				<version>${pdfbox.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.pdfbox</groupId>
+				<artifactId>xmpbox</artifactId>
+				<version>${pdfbox.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>se.sundsvall.dept44</groupId>
@@ -30,6 +50,12 @@
 			<groupId>org.docx4j</groupId>
 			<artifactId>docx4j-JAXB-ReferenceImpl</artifactId>
 			<version>${docx4j.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.pdfbox</groupId>
+					<artifactId>pdfbox-io</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.docx4j</groupId>
