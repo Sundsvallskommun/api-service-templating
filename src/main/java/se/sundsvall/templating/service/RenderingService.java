@@ -58,20 +58,20 @@ public class RenderingService {
 
 	public String renderTemplate(final String municipalityId, final RenderRequest request) {
 		// Get the template
-		var template = getTemplate(municipalityId, request);
+		final var template = getTemplate(municipalityId, request);
 		// Render it
-		var output = renderTemplateInternal(template, request.getParameters());
+		final var output = renderTemplateInternal(template, request.getParameters());
 
 		return encodeBase64(output);
 	}
 
 	public String renderTemplateAsPdf(final String municipalityId, final RenderRequest request) {
 		// Get the template
-		var template = getTemplate(municipalityId, request);
+		final var template = getTemplate(municipalityId, request);
 		// Pre-render it
-		var output = renderTemplateInternal(template, request.getParameters());
+		final var output = renderTemplateInternal(template, request.getParameters());
 		// Render it as a PDF
-		var renderedPdf = switch (template.getType()) {
+		final var renderedPdf = switch (template.getType()) {
 			case PEBBLE -> renderHtmlAsPdf(output);
 			case WORD -> renderWordAsPdf(output);
 		};
@@ -81,18 +81,18 @@ public class RenderingService {
 
 	public String renderDirect(final DirectRenderRequest request) {
 		// Render the provided template
-		var output = renderDirectInternal(request);
+		final var output = renderDirectInternal(request);
 
 		return encodeBase64(output);
 	}
 
 	public String renderDirectAsPdf(final DirectRenderRequest request) {
 		// Render the provided template
-		var output = renderDirectInternal(request);
-		// Decode the provided template content, to be able to guess the type
-		var content = decodeBase64(request.getContent());
+		final var output = renderDirectInternal(request);
+		// Decode the provided template content to be able to guess the type
+		final var content = decodeBase64(request.getContent());
 		// Render it as a PDF
-		var renderedPdf = switch (getTemplateType(content)) {
+		final var renderedPdf = switch (getTemplateType(content)) {
 			case PEBBLE -> renderHtmlAsPdf(output);
 			case WORD -> renderWordAsPdf(output);
 		};
@@ -102,13 +102,13 @@ public class RenderingService {
 
 	byte[] renderTemplateInternal(final TemplateEntity template, final Map<String, Object> requestParameters) {
 		// Extract template default values
-		var defaultValues = template.getDefaultValues().stream()
+		final var defaultValues = template.getDefaultValues().stream()
 			.collect(toMap(DefaultValueEntity::getFieldName, DefaultValueEntity::getValue));
 
 		// Merge default values and request parameters, default values first, allowing for request
 		// parameters to override any matching default value. Also, (configurable) use a TreeMap
-		// with a case-insensitive comparator, to allow the use of case-insensitive keys
-		var mergedParametersAndDefaultValues = new TreeMap<>(
+		// with a case-insensitive comparator to allow the use of case-insensitive keys
+		final var mergedParametersAndDefaultValues = new TreeMap<>(
 			pebbleProperties.isUseCaseInsensitiveKeys() ? String.CASE_INSENSITIVE_ORDER : null);
 
 		// Add identifier and version as extra template parameters (prefixed with underscore to
@@ -118,7 +118,7 @@ public class RenderingService {
 		// Add default values
 		mergedParametersAndDefaultValues.putAll(defaultValues);
 		// Decode request parameters
-		var decodedRequestParameters = decodeRequestParameters(requestParameters);
+		final var decodedRequestParameters = decodeRequestParameters(requestParameters);
 		// Add request parameters
 		mergedParametersAndDefaultValues.putAll(decodedRequestParameters);
 
@@ -130,10 +130,10 @@ public class RenderingService {
 	}
 
 	byte[] renderDirectInternal(final DirectRenderRequest request) {
-		var template = decodeBase64(request.getContent());
+		final var template = decodeBase64(request.getContent());
 
 		// Decode request parameters
-		var decodedRequestParameters = decodeRequestParameters(request.getParameters());
+		final var decodedRequestParameters = decodeRequestParameters(request.getParameters());
 
 		return switch (getTemplateType(template)) {
 			case PEBBLE -> pebbleTemplateProcessor.process(DelegatingLoader.DIRECT_PREFIX + request.getContent(), decodedRequestParameters);
@@ -142,33 +142,33 @@ public class RenderingService {
 	}
 
 	byte[] renderHtmlAsPdf(final byte[] document) {
-		try (var out = new ByteArrayOutputStream()) {
+		try (final var out = new ByteArrayOutputStream()) {
 			// Run the document through Jsoup to wrap it in a proper HTML/XML document
-			var doc = Jsoup.parse(bytesToString(document), "UTF-8");
+			final var doc = Jsoup.parse(bytesToString(document), "UTF-8");
 			doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
 
 			HtmlConverter.convertToPdf(doc.html(), out);
 
 			return out.toByteArray();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new TemplateException("Unable to render PDF", e);
 		}
 	}
 
 	byte[] renderWordAsPdf(final byte[] document) {
-		try (var in = new ByteArrayInputStream(document);
-			var doc = new XWPFDocument(in);
-			var out = new ByteArrayOutputStream()) {
+		try (final var in = new ByteArrayInputStream(document);
+			final var doc = new XWPFDocument(in);
+			final var out = new ByteArrayOutputStream()) {
 			PdfConverter.getInstance().convert(doc, out, PdfOptions.getDefault());
 
 			return out.toByteArray();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new TemplateException("Unable to render PDF", e);
 		}
 	}
 
 	TemplateEntity getTemplate(final String municipalityId, final RenderRequest request) {
-		var template = ofNullable(request.getIdentifier())
+		final var template = ofNullable(request.getIdentifier())
 			.flatMap(identifier -> dbIntegration.getTemplate(municipalityId, identifier, request.getVersion()))
 			.orElseGet(() -> ofNullable(request.getMetadata())
 				.filter(not(List::isEmpty))
@@ -176,7 +176,7 @@ public class RenderingService {
 				.orElse(null));
 
 		if (null == template) {
-			var message = ofNullable(request.getIdentifier())
+			final var message = ofNullable(request.getIdentifier())
 				.map(ignored -> format("Unable to find template using identifier: '%s'", request.getIdentifier()))
 				.orElseGet(() -> format("Unable to find template using metadata: %s", request.getMetadata()));
 
@@ -197,7 +197,7 @@ public class RenderingService {
 			.map(parameters -> parameters.entrySet().stream()
 				.map(entry -> {
 					var value = entry.getValue();
-					if (value instanceof String stringValue && stringValue.startsWith(BASE64_VALUE_PREFIX)) {
+					if (value instanceof final String stringValue && stringValue.startsWith(BASE64_VALUE_PREFIX)) {
 						value = bytesToString(decodeBase64(stringValue.substring(BASE64_VALUE_PREFIX.length())));
 					}
 					return new AbstractMap.SimpleEntry<>(entry.getKey(), value);

@@ -2,6 +2,7 @@ package se.sundsvall.templating.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.same;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,14 +43,47 @@ class TemplateResourceTests {
 	private TemplateResource resource;
 
 	@Test
-	void test_getAll() {
-		when(mockTemplatingService.getTemplates(any(), ArgumentMatchers.<Specification<TemplateEntity>>any()))
+	void test_searchTemplates() {
+		when(mockTemplatingService.getTemplates(any(), ArgumentMatchers.<Specification<TemplateEntity>>any(), anyBoolean()))
 			.thenReturn(List.of(mockTemplateResponse));
 
-		var result = resource.searchTemplates(MUNICIPALITY_ID, new EmptyExpression());
+		var result = resource.searchTemplates(MUNICIPALITY_ID, false, new EmptyExpression());
 		assertThat(result).hasSize(1);
 
-		verify(mockTemplatingService).getTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<Specification<TemplateEntity>>any());
+		verify(mockTemplatingService).getTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<Specification<TemplateEntity>>any(), eq(false));
+	}
+
+	@Test
+	void test_searchTemplatesWithShowOnlyLatest() {
+		when(mockTemplatingService.getTemplates(any(), ArgumentMatchers.<Specification<TemplateEntity>>any(), anyBoolean()))
+			.thenReturn(List.of(mockTemplateResponse));
+
+		var result = resource.searchTemplates(MUNICIPALITY_ID, true, new EmptyExpression());
+		assertThat(result).hasSize(1);
+
+		verify(mockTemplatingService).getTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<Specification<TemplateEntity>>any(), eq(true));
+	}
+
+	@Test
+	void test_getAllTemplates() {
+		when(mockTemplatingService.getTemplates(any(), ArgumentMatchers.<List<se.sundsvall.templating.domain.KeyValue>>any(), anyBoolean()))
+			.thenReturn(List.of(mockTemplateResponse));
+
+		var result = resource.getAllTemplates(MUNICIPALITY_ID, false, Map.of());
+		assertThat(result).hasSize(1);
+
+		verify(mockTemplatingService).getTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<List<se.sundsvall.templating.domain.KeyValue>>any(), eq(false));
+	}
+
+	@Test
+	void test_getAllTemplatesWithShowOnlyLatest() {
+		when(mockTemplatingService.getTemplates(any(), ArgumentMatchers.<List<se.sundsvall.templating.domain.KeyValue>>any(), anyBoolean()))
+			.thenReturn(List.of(mockTemplateResponse));
+
+		var result = resource.getAllTemplates(MUNICIPALITY_ID, true, Map.of());
+		assertThat(result).hasSize(1);
+
+		verify(mockTemplatingService).getTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<List<se.sundsvall.templating.domain.KeyValue>>any(), eq(true));
 	}
 
 	@Test

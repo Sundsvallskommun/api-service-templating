@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.util.UriComponentsBuilder.fromPath;
@@ -55,7 +56,7 @@ class TemplatesIT extends AbstractAppTest {
 
 	@Test
 	void test3_getAllTemplatesWithMetadataFilters() {
-		var path = fromPath(PATH_2281)
+		final var path = fromPath(PATH_2281)
 			.queryParam("verksamhet", "SBK")
 			.queryParam("process", "PRH")
 			.build()
@@ -156,5 +157,89 @@ class TemplatesIT extends AbstractAppTest {
 			.sendRequestAndVerifyResponse();
 
 		assertThat(templateRepository.findByIdentifierAndMunicipalityId("second.template", "2281")).isEmpty();
+	}
+
+	@Test
+	void test12_getAllTemplatesOnlyLatest() {
+		final var path = fromPath(PATH_2281)
+			.queryParam("showOnlyLatest", "true")
+			.build()
+			.toString();
+
+		setupCall()
+			.withServicePath(path)
+			.withHttpMethod(GET)
+			.withExpectedResponseStatus(OK)
+			.withExpectedResponse(RESPONSE)
+			.sendRequestAndVerifyResponse();
+	}
+
+	@Test
+	void test13_searchTemplatesOnlyLatest() {
+		final var path = fromPath(PATH_2281 + "/search")
+			.queryParam("showOnlyLatest", "true")
+			.build()
+			.toString();
+
+		setupCall()
+			.withServicePath(path)
+			.withHttpMethod(POST)
+			.withRequest("{}")
+			.withExpectedResponseStatus(OK)
+			.withExpectedResponse(RESPONSE)
+			.sendRequestAndVerifyResponse();
+	}
+
+	@Test
+	@Sql("/db/truncate.sql")
+	void test14_createNewVersionMovesLatestFlag() {
+		// Create the first version (1.0)
+		setupCall()
+			.withServicePath(PATH_2281)
+			.withHttpMethod(POST)
+			.withRequest("""
+				{
+					"identifier": "latest.test.template",
+					"name": "Latest Test Template",
+					"content": "dGVzdA==",
+					"changeLog": "First version"
+				}
+				""")
+			.withExpectedResponseStatus(CREATED)
+			.sendRequest();
+
+		// Verify version 1.0 exists with latest=true
+		final var v1 = templateRepository.findByIdentifierAndVersionAndMunicipalityId(
+			"latest.test.template", new Version(1, 0), "2281");
+		assertThat(v1).isPresent();
+		assertThat(v1.get().isLatest()).isTrue();
+
+		// Create the second version (2.0) with MAJOR increment
+		setupCall()
+			.withServicePath(PATH_2281)
+			.withHttpMethod(POST)
+			.withRequest("""
+				{
+					"identifier": "latest.test.template",
+					"name": "Latest Test Template",
+					"content": "dGVzdDI=",
+					"versionIncrement": "MAJOR",
+					"changeLog": "Second version"
+				}
+				""")
+			.withExpectedResponseStatus(CREATED)
+			.sendRequest();
+
+		// Verify version 2.0 exists with latest=true
+		final var v2 = templateRepository.findByIdentifierAndVersionAndMunicipalityId(
+			"latest.test.template", new Version(2, 0), "2281");
+		assertThat(v2).isPresent();
+		assertThat(v2.get().isLatest()).isTrue();
+
+		// Verify version 1.0 no longer has latest=true
+		final var v1After = templateRepository.findByIdentifierAndVersionAndMunicipalityId(
+			"latest.test.template", new Version(1, 0), "2281");
+		assertThat(v1After).isPresent();
+		assertThat(v1After.get().isLatest()).isFalse();
 	}
 }

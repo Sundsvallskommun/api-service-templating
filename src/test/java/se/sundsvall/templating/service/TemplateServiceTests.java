@@ -3,6 +3,7 @@ package se.sundsvall.templating.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -22,7 +23,9 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -56,6 +59,9 @@ class TemplateServiceTests {
 	@Mock
 	private JsonPatch mockJsonPatch;
 
+	@Captor
+	private ArgumentCaptor<TemplateEntity> templateEntityCaptor;
+
 	@InjectMocks
 	private TemplateService service;
 
@@ -64,17 +70,32 @@ class TemplateServiceTests {
 		var templateEntities = List.of(TemplateEntity.builder().build(),
 			TemplateEntity.builder().build(), TemplateEntity.builder().build());
 
-		when(mockDbIntegration.findTemplates(any(), ArgumentMatchers.<Specification<TemplateEntity>>any()))
+		when(mockDbIntegration.findTemplates(any(), ArgumentMatchers.<Specification<TemplateEntity>>any(), anyBoolean()))
 			.thenReturn(templateEntities);
 		when(mockTemplateMapper.toTemplateResponse(any(TemplateEntity.class)))
 			.thenReturn(TemplateResponse.builder().build());
 
-		var templates = service.getTemplates(MUNICIPALITY_ID, FilterSpecifications.createEmptySpecification(TemplateEntity.class));
+		var templates = service.getTemplates(MUNICIPALITY_ID, FilterSpecifications.createEmptySpecification(TemplateEntity.class), false);
 		assertThat(templates).hasSize(templateEntities.size());
 
-		verify(mockDbIntegration, times(1)).findTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<Specification<TemplateEntity>>any());
+		verify(mockDbIntegration, times(1)).findTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<Specification<TemplateEntity>>any(), eq(false));
 		verify(mockTemplateMapper, times(templateEntities.size()))
 			.toTemplateResponse(any(TemplateEntity.class));
+	}
+
+	@Test
+	void test_getAllTemplatesUsingFilterSpecificationWithShowOnlyLatest() {
+		var templateEntities = List.of(TemplateEntity.builder().withLatest(true).build());
+
+		when(mockDbIntegration.findTemplates(any(), ArgumentMatchers.<Specification<TemplateEntity>>any(), anyBoolean()))
+			.thenReturn(templateEntities);
+		when(mockTemplateMapper.toTemplateResponse(any(TemplateEntity.class)))
+			.thenReturn(TemplateResponse.builder().build());
+
+		var templates = service.getTemplates(MUNICIPALITY_ID, FilterSpecifications.createEmptySpecification(TemplateEntity.class), true);
+		assertThat(templates).hasSize(1);
+
+		verify(mockDbIntegration, times(1)).findTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<Specification<TemplateEntity>>any(), eq(true));
 	}
 
 	@Test
@@ -86,7 +107,7 @@ class TemplateServiceTests {
 		when(mockTemplateMapper.toTemplateResponse(any(TemplateEntity.class)))
 			.thenReturn(TemplateResponse.builder().build());
 
-		var templates = service.getTemplates(MUNICIPALITY_ID, List.of());
+		var templates = service.getTemplates(MUNICIPALITY_ID, List.of(), false);
 		assertThat(templates).hasSize(templateEntities.size());
 
 		verify(mockDbIntegration, times(1)).getAllTemplates(MUNICIPALITY_ID);
@@ -95,21 +116,51 @@ class TemplateServiceTests {
 	}
 
 	@Test
+	void test_getAllTemplatesUsingEmptyKeyValueListWithShowOnlyLatest() {
+		var templateEntities = List.of(TemplateEntity.builder().withLatest(true).build());
+
+		when(mockDbIntegration.getAllLatestTemplates(any())).thenReturn(templateEntities);
+		when(mockTemplateMapper.toTemplateResponse(any(TemplateEntity.class)))
+			.thenReturn(TemplateResponse.builder().build());
+
+		var templates = service.getTemplates(MUNICIPALITY_ID, List.of(), true);
+		assertThat(templates).hasSize(1);
+
+		verify(mockDbIntegration, times(1)).getAllLatestTemplates(MUNICIPALITY_ID);
+		verify(mockDbIntegration, never()).getAllTemplates(any());
+	}
+
+	@Test
 	void test_getAllTemplatesUsingKeyValueList() {
 		var templateEntities = List.of(TemplateEntity.builder().build(),
 			TemplateEntity.builder().build());
 
-		when(mockDbIntegration.findTemplates(any(), ArgumentMatchers.<List<KeyValue>>any()))
+		when(mockDbIntegration.findTemplates(any(), ArgumentMatchers.<List<KeyValue>>any(), anyBoolean()))
 			.thenReturn(templateEntities);
 		when(mockTemplateMapper.toTemplateResponse(any(TemplateEntity.class)))
 			.thenReturn(TemplateResponse.builder().build());
 
-		var templates = service.getTemplates(MUNICIPALITY_ID, List.of(KeyValue.of("someKey", "someValue")));
+		var templates = service.getTemplates(MUNICIPALITY_ID, List.of(KeyValue.of("someKey", "someValue")), false);
 		assertThat(templates).hasSize(templateEntities.size());
 
-		verify(mockDbIntegration, times(1)).findTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<List<KeyValue>>any());
+		verify(mockDbIntegration, times(1)).findTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<List<KeyValue>>any(), eq(false));
 		verify(mockTemplateMapper, times(templateEntities.size()))
 			.toTemplateResponse(any(TemplateEntity.class));
+	}
+
+	@Test
+	void test_getAllTemplatesUsingKeyValueListWithShowOnlyLatest() {
+		var templateEntities = List.of(TemplateEntity.builder().withLatest(true).build());
+
+		when(mockDbIntegration.findTemplates(any(), ArgumentMatchers.<List<KeyValue>>any(), anyBoolean()))
+			.thenReturn(templateEntities);
+		when(mockTemplateMapper.toTemplateResponse(any(TemplateEntity.class)))
+			.thenReturn(TemplateResponse.builder().build());
+
+		var templates = service.getTemplates(MUNICIPALITY_ID, List.of(KeyValue.of("someKey", "someValue")), true);
+		assertThat(templates).hasSize(1);
+
+		verify(mockDbIntegration, times(1)).findTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<List<KeyValue>>any(), eq(true));
 	}
 
 	@Test
@@ -164,7 +215,28 @@ class TemplateServiceTests {
 		verify(mockVersion, times(1)).apply(any(Version.IncrementMode.class));
 		verify(mockTemplateMapper, times(1)).toTemplateEntity(any(TemplateRequest.class), anyString());
 		verify(mockTemplateMapper, times(1)).toTemplateResponse(any(TemplateEntity.class));
-		verify(mockDbIntegration, times(1)).saveTemplate(any(TemplateEntity.class));
+		verify(mockDbIntegration, times(1)).saveTemplate(templateEntityCaptor.capture());
+		assertThat(templateEntityCaptor.getValue().isLatest()).isTrue();
+	}
+
+	@Test
+	void test_saveTemplate_whenTemplateDoesNotExist_setsLatestTrue() {
+		when(mockDbIntegration.getTemplate(any(), any(), eq(null)))
+			.thenReturn(Optional.empty());
+		when(mockTemplateMapper.toTemplateEntity(any(TemplateRequest.class), anyString()))
+			.thenReturn(TemplateEntity.builder().build());
+		when(mockTemplateMapper.toTemplateResponse(any(TemplateEntity.class)))
+			.thenReturn(TemplateResponse.builder().build());
+		when(mockDbIntegration.saveTemplate(any(TemplateEntity.class)))
+			.thenReturn(TemplateEntity.builder().build());
+
+		var request = new TemplateRequest();
+		request.setIdentifier(IDENTIFIER);
+
+		service.saveTemplate(MUNICIPALITY_ID, request);
+
+		verify(mockDbIntegration, times(1)).saveTemplate(templateEntityCaptor.capture());
+		assertThat(templateEntityCaptor.getValue().isLatest()).isTrue();
 	}
 
 	@Test
