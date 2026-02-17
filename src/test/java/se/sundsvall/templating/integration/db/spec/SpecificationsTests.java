@@ -10,4 +10,9 @@ class SpecificationsTests {
 	void test_hasMetadata_generatesSpecificationOk() {
 		assertThat(Specifications.hasMetadata("someKey", "someValue")).isNotNull();
 	}
+
+	@Test
+	void test_isLatest_generatesSpecificationOk() {
+		assertThat(Specifications.isLatest()).isNotNull();
+	}
 }

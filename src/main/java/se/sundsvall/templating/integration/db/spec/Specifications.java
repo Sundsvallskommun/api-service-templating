@@ -10,6 +10,10 @@ public final class Specifications {
 
 	private Specifications() {}
 
+	public static Specification<TemplateEntity> isLatest() {
+		return (root, query, cb) -> cb.isTrue(root.get(TemplateEntity_.latest));
+	}
+
 	public static Specification<TemplateEntity> hasMetadata(final String key, final String value) {
 		return (root, query, cb) -> {
 			var join = root.join(TemplateEntity_.metadata, JoinType.LEFT);

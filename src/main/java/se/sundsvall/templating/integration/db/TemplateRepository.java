@@ -35,6 +35,10 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, String
 
 	List<TemplateEntity> findAllByMunicipalityId(@Param("municipalityId") String municipalityId);
 
+	List<TemplateEntity> findAllByMunicipalityIdAndLatestTrue(String municipalityId);
+
+	Optional<TemplateEntity> findByIdentifierAndMunicipalityIdAndLatestTrue(String identifier, String municipalityId);
+
 	default Optional<TemplateEntity> findLatestByIdentifierAndMunicipalityId(@Param("identifier") final String identifier, @Param("municipalityId") final String municipalityId) {
 		return findLatestByIdentifierAndMunicipalityId(identifier, municipalityId, PageRequest.of(0, 1)).stream().findFirst();
 	}

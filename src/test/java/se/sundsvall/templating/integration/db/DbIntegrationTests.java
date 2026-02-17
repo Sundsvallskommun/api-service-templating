@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,6 +46,17 @@ class DbIntegrationTests {
 		assertThat(templates).hasSize(2);
 
 		verify(mockTemplateRepository).findAllByMunicipalityId(MUNICIPALITY_ID);
+	}
+
+	@Test
+	void test_getAllLatestTemplates() {
+		when(mockTemplateRepository.findAllByMunicipalityIdAndLatestTrue(any()))
+			.thenReturn(List.of(TemplateEntity.builder().build()));
+
+		var templates = dbIntegration.getAllLatestTemplates(MUNICIPALITY_ID);
+		assertThat(templates).hasSize(1);
+
+		verify(mockTemplateRepository).findAllByMunicipalityIdAndLatestTrue(MUNICIPALITY_ID);
 	}
 
 	@Test
@@ -96,7 +108,48 @@ class DbIntegrationTests {
 		when(mockTemplateRepository.findAll(ArgumentMatchers.<Specification<TemplateEntity>>any()))
 			.thenReturn(List.of(TemplateEntity.builder().build()));
 
-		var result = dbIntegration.findTemplates(MUNICIPALITY_ID, List.of(KeyValue.of("someKey", "someValue")));
+		var result = dbIntegration.findTemplates(MUNICIPALITY_ID, List.of(KeyValue.of("someKey", "someValue")), false);
+		assertThat(result)
+			.isNotNull()
+			.hasSize(1);
+
+		verify(mockTemplateRepository).findAll(ArgumentMatchers.<Specification<TemplateEntity>>any());
+	}
+
+	@Test
+	void test_findTemplatesWithShowOnlyLatest() {
+		when(mockTemplateRepository.findAll(ArgumentMatchers.<Specification<TemplateEntity>>any()))
+			.thenReturn(List.of(TemplateEntity.builder().withLatest(true).build()));
+
+		var result = dbIntegration.findTemplates(MUNICIPALITY_ID, List.of(KeyValue.of("someKey", "someValue")), true);
+		assertThat(result)
+			.isNotNull()
+			.hasSize(1);
+
+		verify(mockTemplateRepository).findAll(ArgumentMatchers.<Specification<TemplateEntity>>any());
+	}
+
+	@Test
+	void test_findTemplatesWithSpecification() {
+		when(mockTemplateRepository.findAll(ArgumentMatchers.<Specification<TemplateEntity>>any()))
+			.thenReturn(List.of(TemplateEntity.builder().build()));
+
+		Specification<TemplateEntity> spec = Specification.where(null);
+		var result = dbIntegration.findTemplates(MUNICIPALITY_ID, spec, false);
+		assertThat(result)
+			.isNotNull()
+			.hasSize(1);
+
+		verify(mockTemplateRepository).findAll(ArgumentMatchers.<Specification<TemplateEntity>>any());
+	}
+
+	@Test
+	void test_findTemplatesWithSpecificationAndShowOnlyLatest() {
+		when(mockTemplateRepository.findAll(ArgumentMatchers.<Specification<TemplateEntity>>any()))
+			.thenReturn(List.of(TemplateEntity.builder().withLatest(true).build()));
+
+		Specification<TemplateEntity> spec = Specification.where(null);
+		var result = dbIntegration.findTemplates(MUNICIPALITY_ID, spec, true);
 		assertThat(result)
 			.isNotNull()
 			.hasSize(1);
@@ -116,6 +169,82 @@ class DbIntegrationTests {
 	}
 
 	@Test
+	void test_saveTemplate_unmarksOldLatest() {
+		var existingLatest = TemplateEntity.builder()
+			.withIdentifier(IDENTIFIER)
+			.withMunicipalityId(MUNICIPALITY_ID)
+			.withLatest(true)
+			.build();
+		existingLatest.setId("existing-id");
+
+		when(mockTemplateRepository.findByIdentifierAndMunicipalityIdAndLatestTrue(IDENTIFIER, MUNICIPALITY_ID))
+			.thenReturn(Optional.of(existingLatest));
+		when(mockTemplateRepository.save(any(TemplateEntity.class)))
+			.thenAnswer(invocation -> invocation.getArgument(0));
+
+		var newTemplate = TemplateEntity.builder()
+			.withIdentifier(IDENTIFIER)
+			.withMunicipalityId(MUNICIPALITY_ID)
+			.withLatest(true)
+			.build();
+		newTemplate.setId("new-id");
+
+		dbIntegration.saveTemplate(newTemplate);
+
+		assertThat(existingLatest.isLatest()).isFalse();
+		verify(mockTemplateRepository).findByIdentifierAndMunicipalityIdAndLatestTrue(IDENTIFIER, MUNICIPALITY_ID);
+		verify(mockTemplateRepository, times(2)).save(any(TemplateEntity.class));
+	}
+
+	@Test
+	void test_saveTemplate_skipsUnmarkWhenUpdatingSameEntity() {
+		var existingLatest = TemplateEntity.builder()
+			.withIdentifier(IDENTIFIER)
+			.withMunicipalityId(MUNICIPALITY_ID)
+			.withLatest(true)
+			.build();
+		existingLatest.setId("same-id");
+
+		when(mockTemplateRepository.findByIdentifierAndMunicipalityIdAndLatestTrue(IDENTIFIER, MUNICIPALITY_ID))
+			.thenReturn(Optional.of(existingLatest));
+		when(mockTemplateRepository.save(any(TemplateEntity.class)))
+			.thenAnswer(invocation -> invocation.getArgument(0));
+
+		var updatedTemplate = TemplateEntity.builder()
+			.withIdentifier(IDENTIFIER)
+			.withMunicipalityId(MUNICIPALITY_ID)
+			.withLatest(true)
+			.build();
+		updatedTemplate.setId("same-id");
+
+		dbIntegration.saveTemplate(updatedTemplate);
+
+		assertThat(existingLatest.isLatest()).isTrue();
+		verify(mockTemplateRepository).findByIdentifierAndMunicipalityIdAndLatestTrue(IDENTIFIER, MUNICIPALITY_ID);
+		verify(mockTemplateRepository, times(1)).save(any(TemplateEntity.class));
+	}
+
+	@Test
+	void test_saveTemplate_noOldLatestToUnmark() {
+		when(mockTemplateRepository.findByIdentifierAndMunicipalityIdAndLatestTrue(IDENTIFIER, MUNICIPALITY_ID))
+			.thenReturn(Optional.empty());
+		when(mockTemplateRepository.save(any(TemplateEntity.class)))
+			.thenAnswer(invocation -> invocation.getArgument(0));
+
+		var newTemplate = TemplateEntity.builder()
+			.withIdentifier(IDENTIFIER)
+			.withMunicipalityId(MUNICIPALITY_ID)
+			.withLatest(true)
+			.build();
+		newTemplate.setId("new-id");
+
+		dbIntegration.saveTemplate(newTemplate);
+
+		verify(mockTemplateRepository).findByIdentifierAndMunicipalityIdAndLatestTrue(IDENTIFIER, MUNICIPALITY_ID);
+		verify(mockTemplateRepository, times(1)).save(any(TemplateEntity.class));
+	}
+
+	@Test
 	void test_deleteTemplate() {
 		var templateEntity = TemplateEntity.builder().build();
 		when(mockTemplateRepository.existsByIdentifierAndMunicipalityId(any(), any())).thenReturn(true);
@@ -125,7 +254,7 @@ class DbIntegrationTests {
 
 		verify(mockTemplateRepository).existsByIdentifierAndMunicipalityId(IDENTIFIER, MUNICIPALITY_ID);
 		verify(mockTemplateRepository).findByIdentifierAndMunicipalityId(IDENTIFIER, MUNICIPALITY_ID);
-		verify(mockTemplateRepository).delete(same(templateEntity));
+		verify(mockTemplateRepository).deleteAll(List.of(templateEntity));
 	}
 
 	@Test
@@ -137,6 +266,46 @@ class DbIntegrationTests {
 
 		verify(mockTemplateRepository).findByIdentifierAndVersionAndMunicipalityId(IDENTIFIER, new Version(1, 0), MUNICIPALITY_ID);
 		verify(mockTemplateRepository).delete(same(templateEntity));
+	}
+
+	@Test
+	void test_deleteTemplateForProvidedVersion_promotesNextWhenLatestDeleted() {
+		var latestEntity = TemplateEntity.builder()
+			.withIdentifier(IDENTIFIER)
+			.withMunicipalityId(MUNICIPALITY_ID)
+			.withLatest(true)
+			.build();
+		var nextEntity = TemplateEntity.builder()
+			.withIdentifier(IDENTIFIER)
+			.withMunicipalityId(MUNICIPALITY_ID)
+			.build();
+
+		when(mockTemplateRepository.findByIdentifierAndVersionAndMunicipalityId(any(), any(), any()))
+			.thenReturn(Optional.of(latestEntity));
+		when(mockTemplateRepository.findLatestByIdentifierAndMunicipalityId(IDENTIFIER, MUNICIPALITY_ID))
+			.thenReturn(Optional.of(nextEntity));
+
+		dbIntegration.deleteTemplate(MUNICIPALITY_ID, IDENTIFIER, "2.0");
+
+		verify(mockTemplateRepository).delete(same(latestEntity));
+		verify(mockTemplateRepository).flush();
+		verify(mockTemplateRepository).findLatestByIdentifierAndMunicipalityId(IDENTIFIER, MUNICIPALITY_ID);
+		assertThat(nextEntity.isLatest()).isTrue();
+		verify(mockTemplateRepository).save(same(nextEntity));
+	}
+
+	@Test
+	void test_deleteTemplateForProvidedVersion_noPromotionWhenNotLatest() {
+		var templateEntity = TemplateEntity.builder().build();
+		when(mockTemplateRepository.findByIdentifierAndVersionAndMunicipalityId(any(), any(), any()))
+			.thenReturn(Optional.of(templateEntity));
+
+		dbIntegration.deleteTemplate(MUNICIPALITY_ID, IDENTIFIER, "1.0");
+
+		verify(mockTemplateRepository).delete(same(templateEntity));
+		verify(mockTemplateRepository, never()).flush();
+		verify(mockTemplateRepository, never()).findLatestByIdentifierAndMunicipalityId(any(), any());
+		verify(mockTemplateRepository, never()).save(any());
 	}
 
 	@Test

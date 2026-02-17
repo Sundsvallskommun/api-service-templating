@@ -87,6 +87,10 @@ public class TemplateEntity {
 	@Column(name = "changelog")
 	private String changeLog;
 
+	@With
+	@Column(name = "latest", nullable = false)
+	private boolean latest;
+
 	@Column(name = "last_modified_at", nullable = false)
 	private LocalDateTime lastModifiedAt = LocalDateTime.now();
 
@@ -95,7 +99,7 @@ public class TemplateEntity {
 	 */
 	@Builder(setterPrefix = "with")
 	TemplateEntity(final String identifier, final String municipalityId, final TemplateType type, final String name,
-		final String description, final String changeLog, final TemplateContentEntity templateContentEntity,
+		final String description, final String changeLog, final boolean latest, final TemplateContentEntity templateContentEntity,
 		final List<MetadataEntity> metadata, final Set<DefaultValueEntity> defaultValues) {
 		this.identifier = identifier;
 		this.municipalityId = municipalityId;
@@ -104,6 +108,7 @@ public class TemplateEntity {
 		this.description = description;
 		this.content = templateContentEntity;
 		this.changeLog = changeLog;
+		this.latest = latest;
 		this.metadata = metadata;
 		this.defaultValues = defaultValues;
 	}

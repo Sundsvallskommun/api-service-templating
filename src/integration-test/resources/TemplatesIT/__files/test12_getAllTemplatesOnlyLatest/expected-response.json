@@ -1,0 +1,73 @@
+[
+	{
+		"identifier": "third.template",
+		"metadata": [],
+		"lastModifiedAt": "${json-unit.ignore}",
+		"name": "Third template",
+		"description": "Some description",
+		"defaultValues": [],
+		"changeLog": "Updated version",
+		"type": "PEBBLE",
+		"version": "1.1"
+	},
+	{
+		"identifier": "first.template",
+		"metadata": [],
+		"lastModifiedAt": "${json-unit.ignore}",
+		"name": "First template",
+		"description": "Some description",
+		"defaultValues": [],
+		"changeLog": "Initial version",
+		"type": "PEBBLE",
+		"version": "1.0"
+	},
+	{
+		"identifier": "fourth.template",
+		"metadata": [
+			{
+				"value": "SBK",
+				"key": "verksamhet"
+			},
+			{
+				"value": "MMU",
+				"key": "process"
+			}
+		],
+		"lastModifiedAt": "${json-unit.ignore}",
+		"name": "Fourth template",
+		"description": "Some description",
+		"defaultValues": [],
+		"changeLog": "Initial version",
+		"type": "PEBBLE",
+		"version": "1.0"
+	},
+	{
+		"identifier": "second.template",
+		"metadata": [
+			{
+				"value": "PRH",
+				"key": "process"
+			},
+			{
+				"value": "SBK",
+				"key": "verksamhet"
+			}
+		],
+		"lastModifiedAt": "${json-unit.ignore}",
+		"name": "Second template",
+		"description": "Some description",
+		"defaultValues": [
+			{
+				"fieldName": "last_name",
+				"value": "Brun"
+			},
+			{
+				"fieldName": "first_name",
+				"value": "Bobby"
+			}
+		],
+		"changeLog": "Initial version",
+		"type": "PEBBLE",
+		"version": "1.0"
+	}
+]

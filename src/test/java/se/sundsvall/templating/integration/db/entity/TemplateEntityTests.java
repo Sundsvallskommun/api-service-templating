@@ -25,4 +25,29 @@ class TemplateEntityTests {
 	void getContentBytesWhenContentIsNull() {
 		assertThat(new TemplateEntity().getContentBytes()).isNull();
 	}
+
+	@Test
+	void latestDefaultsToFalse() {
+		var entity = new TemplateEntity();
+		assertThat(entity.isLatest()).isFalse();
+	}
+
+	@Test
+	void latestDefaultsToFalseWhenUsingBuilder() {
+		var entity = TemplateEntity.builder().build();
+		assertThat(entity.isLatest()).isFalse();
+	}
+
+	@Test
+	void latestCanBeSetViaBuilder() {
+		var entity = TemplateEntity.builder().withLatest(true).build();
+		assertThat(entity.isLatest()).isTrue();
+	}
+
+	@Test
+	void latestCanBeSetViaSetter() {
+		var entity = new TemplateEntity();
+		entity.setLatest(true);
+		assertThat(entity.isLatest()).isTrue();
+	}
 }
