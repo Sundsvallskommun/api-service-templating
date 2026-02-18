@@ -1,8 +1,5 @@
 package se.sundsvall.templating.service.mapper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static se.sundsvall.templating.util.TemplateUtil.encodeBase64;
-
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -13,6 +10,9 @@ import se.sundsvall.templating.integration.db.entity.DefaultValueEntity;
 import se.sundsvall.templating.integration.db.entity.MetadataEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateContentEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static se.sundsvall.templating.util.TemplateUtil.encodeBase64;
 
 class TemplateMapperTests {
 

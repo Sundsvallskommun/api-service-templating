@@ -1,8 +1,5 @@
 package se.sundsvall.templating.integration.db.entity;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Optional.ofNullable;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -32,6 +29,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.With;
 import se.sundsvall.templating.domain.TemplateType;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Optional.ofNullable;
 
 @Entity
 @Table(

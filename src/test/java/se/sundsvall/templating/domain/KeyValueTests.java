@@ -1,9 +1,5 @@
 package se.sundsvall.templating.domain;
 
-import static java.util.List.copyOf;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.util.stream.Stream;
@@ -11,6 +7,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import static java.util.List.copyOf;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class KeyValueTests {
 

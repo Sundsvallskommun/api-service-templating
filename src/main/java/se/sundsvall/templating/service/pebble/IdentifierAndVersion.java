@@ -1,13 +1,13 @@
 package se.sundsvall.templating.service.pebble;
 
-import static se.sundsvall.templating.util.TemplateUtil.bytesToString;
-import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
-
 import java.util.Objects;
 import java.util.regex.Pattern;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
+
+import static se.sundsvall.templating.util.TemplateUtil.bytesToString;
+import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
 
 @Getter
 public class IdentifierAndVersion {

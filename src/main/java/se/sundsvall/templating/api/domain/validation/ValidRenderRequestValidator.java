@@ -1,11 +1,11 @@
 package se.sundsvall.templating.api.domain.validation;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.springframework.util.CollectionUtils.isEmpty;
-
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import se.sundsvall.templating.api.domain.RenderRequest;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 public class ValidRenderRequestValidator implements ConstraintValidator<ValidRenderRequest, RenderRequest> {
 

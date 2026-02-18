@@ -1,8 +1,5 @@
 package se.sundsvall.templating.service.processor;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
-
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import org.apache.poi.ooxml.POIXMLDocumentPart;
@@ -19,6 +16,9 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTAltChunk;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTProofErr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRPr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTText;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 
 final class WordTemplateUtil {
 

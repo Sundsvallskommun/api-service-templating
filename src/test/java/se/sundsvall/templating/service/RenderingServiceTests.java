@@ -1,20 +1,5 @@
 package se.sundsvall.templating.service;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static se.sundsvall.templating.domain.TemplateType.PEBBLE;
-import static se.sundsvall.templating.domain.TemplateType.WORD;
-
 import com.itextpdf.html2pdf.HtmlConverter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,6 +22,21 @@ import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.service.processor.PebbleTemplateProcessor;
 import se.sundsvall.templating.service.processor.WordTemplateProcessor;
 import se.sundsvall.templating.util.TemplateUtil;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static se.sundsvall.templating.domain.TemplateType.PEBBLE;
+import static se.sundsvall.templating.domain.TemplateType.WORD;
 
 @ExtendWith(MockitoExtension.class)
 class RenderingServiceTests {

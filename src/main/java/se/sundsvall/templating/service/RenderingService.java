@@ -1,14 +1,5 @@
 package se.sundsvall.templating.service;
 
-import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
-import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.toMap;
-import static se.sundsvall.templating.util.TemplateUtil.bytesToString;
-import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
-import static se.sundsvall.templating.util.TemplateUtil.encodeBase64;
-import static se.sundsvall.templating.util.TemplateUtil.getTemplateType;
-
 import com.itextpdf.html2pdf.HtmlConverter;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
@@ -35,6 +26,15 @@ import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
 import se.sundsvall.templating.service.processor.PebbleTemplateProcessor;
 import se.sundsvall.templating.service.processor.WordTemplateProcessor;
+
+import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
+import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toMap;
+import static se.sundsvall.templating.util.TemplateUtil.bytesToString;
+import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
+import static se.sundsvall.templating.util.TemplateUtil.encodeBase64;
+import static se.sundsvall.templating.util.TemplateUtil.getTemplateType;
 
 @Service
 public class RenderingService {
