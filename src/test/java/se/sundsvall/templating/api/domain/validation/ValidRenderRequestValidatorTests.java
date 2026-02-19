@@ -1,11 +1,11 @@
 package se.sundsvall.templating.api.domain.validation;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import se.sundsvall.templating.api.domain.RenderRequest;
 import se.sundsvall.templating.domain.KeyValue;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ValidRenderRequestValidatorTests {
 

@@ -1,9 +1,5 @@
 package se.sundsvall.templating.service.mapper;
 
-import static java.util.stream.Collectors.toSet;
-import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
-import static se.sundsvall.templating.util.TemplateUtil.getTemplateType;
-
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
@@ -15,6 +11,10 @@ import se.sundsvall.templating.api.domain.TemplateResponse;
 import se.sundsvall.templating.integration.db.entity.DefaultValueEntity;
 import se.sundsvall.templating.integration.db.entity.MetadataEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
+
+import static java.util.stream.Collectors.toSet;
+import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
+import static se.sundsvall.templating.util.TemplateUtil.getTemplateType;
 
 @Component
 public class TemplateMapper {

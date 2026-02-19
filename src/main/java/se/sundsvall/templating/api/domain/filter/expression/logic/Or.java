@@ -1,9 +1,9 @@
 package se.sundsvall.templating.api.domain.filter.expression.logic;
 
-import static java.util.stream.Collectors.joining;
-
 import java.util.List;
 import se.sundsvall.templating.api.domain.filter.expression.Expression;
+
+import static java.util.stream.Collectors.joining;
 
 public class Or extends Junction {
 

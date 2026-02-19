@@ -1,7 +1,5 @@
 package se.sundsvall.templating.service.processor;
 
-import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -22,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.zalando.problem.Problem;
+
+import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
 
 @Component
 public class WordTemplateProcessor implements TemplateProcessor<byte[]> {

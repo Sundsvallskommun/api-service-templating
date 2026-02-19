@@ -1,13 +1,13 @@
 package se.sundsvall.templating.domain;
 
-import static java.lang.String.format;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import static java.lang.String.format;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
