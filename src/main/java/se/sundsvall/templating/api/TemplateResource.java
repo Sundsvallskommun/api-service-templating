@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,8 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.zalando.problem.Problem;
 import se.sundsvall.dept44.common.validators.annotation.ValidMunicipalityId;
+import se.sundsvall.dept44.problem.Problem;
 import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
 import se.sundsvall.templating.api.domain.OpenApiExamples;
 import se.sundsvall.templating.api.domain.TemplateRequest;
@@ -37,9 +36,11 @@ import se.sundsvall.templating.api.domain.validation.ValidTemplateVersion;
 import se.sundsvall.templating.domain.KeyValue;
 import se.sundsvall.templating.service.TemplateService;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 @Validated
 @RestController
-@RequestMapping(value = "/{municipalityId}/templates", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/{municipalityId}/templates", produces = APPLICATION_JSON_VALUE)
 @Tag(name = "Template resources")
 @ApiResponse(
 	responseCode = "500",
@@ -130,7 +131,7 @@ class TemplateResource {
 		responseCode = "400",
 		description = "Bad Request",
 		content = @Content(schema = @Schema(implementation = Problem.class)))
-	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(consumes = APPLICATION_JSON_VALUE)
 	ResponseEntity<TemplateResponse> saveTemplate(
 		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
 		@Valid @RequestBody final TemplateRequest request) {

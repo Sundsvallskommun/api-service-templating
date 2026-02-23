@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>se.sundsvall.dept44</groupId>
 		<artifactId>dept44-service-parent</artifactId>
-		<version>7.0.1</version>
+		<version>8.0.0</version>
 		<relativePath />
 		<!-- lookup parent from repository -->
 	</parent>
@@ -12,7 +12,6 @@
 	<artifactId>api-service-templating</artifactId>
 	<version>2.1</version>
 	<properties>
-		<testcontainers.version>2.0.3</testcontainers.version>
 		<json-patch.version>1.13</json-patch.version>
 		<pebble.version>4.1.1</pebble.version>
 		<jsoup.version>1.22.1</jsoup.version>
@@ -27,13 +26,6 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>testcontainers-bom</artifactId>
-				<version>${testcontainers.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
 			<dependency>
 				<groupId>org.apache.pdfbox</groupId>
 				<artifactId>pdfbox</artifactId>
@@ -106,7 +98,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate.orm</groupId>
-			<artifactId>hibernate-jpamodelgen</artifactId>
+			<artifactId>hibernate-processor</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>
@@ -114,6 +106,10 @@
 			<scope>runtime</scope>
 		</dependency>
 		<!-- Flyway -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-flyway</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-mysql</artifactId>
