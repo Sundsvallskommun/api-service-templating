@@ -20,6 +20,6 @@ class NotTests {
 		var eq = new Eq("someKey", "someValue");
 		var not = new Not(eq);
 
-		assertThat(not.toString()).isEqualTo(String.format("NOT %s", eq));
+		assertThat(not.toString()).hasToString(String.format("NOT %s", eq));
 	}
 }

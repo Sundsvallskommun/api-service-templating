@@ -24,6 +24,6 @@ class EqTests {
 
 		var eq = new Eq(key, value);
 
-		assertThat(eq.toString()).isEqualTo(String.format("%s == %s", key, value));
+		assertThat(eq.toString()).hasToString(String.format("%s == %s", key, value));
 	}
 }

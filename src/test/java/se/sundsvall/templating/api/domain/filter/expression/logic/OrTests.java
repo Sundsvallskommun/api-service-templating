@@ -26,7 +26,7 @@ class OrTests {
 		var eq2 = new Eq("someOtherKey", "someOtherValue");
 		var or = new Or(List.of(eq1, eq2));
 
-		assertThat(or.toString()).isEqualTo(
+		assertThat(or.toString()).hasToString(
 			Stream.of(eq1, eq2).map(Expression::toString).collect(joining(" OR ", "(", ")")));
 	}
 }

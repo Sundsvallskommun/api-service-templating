@@ -26,7 +26,7 @@ class AndTests {
 		var eq2 = new Eq("someOtherKey", "someOtherValue");
 		var and = new And(List.of(eq1, eq2));
 
-		assertThat(and.toString()).isEqualTo(
+		assertThat(and.toString()).hasToString(
 			Stream.of(eq1, eq2).map(Expression::toString).collect(joining(" AND ", "(", ")")));
 	}
 }

@@ -21,7 +21,7 @@ class ValueExpressionTests {
 		var dummy1 = new Dummy(key, value);
 		var dummy2 = new Dummy(key, value);
 
-		assertThat(dummy1.hashCode()).isEqualTo(dummy2.hashCode());
+		assertThat(dummy1).hasSameHashCodeAs(dummy2);
 	}
 
 	@Test
@@ -34,9 +34,10 @@ class ValueExpressionTests {
 		var dummy3 = new Dummy(key, "someOtherValue");
 		var dummy4 = new Dummy("someOtherKey", value);
 
-		assertThat(dummy1).isEqualTo(dummy2);
-		assertThat(dummy1).isNotEqualTo(dummy3);
-		assertThat(dummy1).isNotEqualTo(dummy4);
-		assertThat(dummy1).isNotEqualTo(null);
+		assertThat(dummy1)
+			.isEqualTo(dummy2)
+			.isNotEqualTo(dummy3)
+			.isNotEqualTo(dummy4)
+			.isNotEqualTo(null);
 	}
 }

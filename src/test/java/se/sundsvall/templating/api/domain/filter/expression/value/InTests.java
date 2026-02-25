@@ -25,6 +25,6 @@ class InTests {
 
 		var in = new In(key, values);
 
-		assertThat(in.toString()).isEqualTo(String.format("%s IN %s", key, values));
+		assertThat(in.toString()).hasToString(String.format("%s IN %s", key, values));
 	}
 }

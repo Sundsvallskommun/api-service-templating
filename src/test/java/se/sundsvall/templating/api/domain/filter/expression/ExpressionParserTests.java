@@ -174,6 +174,7 @@ class ExpressionParserTests {
 			case "not" -> verify(mockParser).parseNot(mockNode);
 			case "eq" -> verify(mockParser).parseEq(mockNode);
 			case "in" -> verify(mockParser).parseIn(mockNode);
+			default -> { /* Make Sonar stop whining */ }
 		}
 		verifyNoMoreInteractions(mockParser);
 		verifyNoInteractions(mockNode);

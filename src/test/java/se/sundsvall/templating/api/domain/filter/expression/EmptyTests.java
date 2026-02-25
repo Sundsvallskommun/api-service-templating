@@ -8,6 +8,6 @@ class EmptyTests {
 
 	@Test
 	void testToString() {
-		assertThat(new Empty().toString()).isEqualTo("<EMPTY>");
+		assertThat(new Empty()).hasToString("<EMPTY>");
 	}
 }
