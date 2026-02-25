@@ -41,7 +41,6 @@ public class AndSpecification<T> extends ExpressionSpecification<T> {
 			.map(specification -> specification.toPredicate(root, query, criteriaBuilder))
 			.toList();
 
-		return criteriaBuilder
-			.and(clausePredicates.toArray(new Predicate[0]));
+		return criteriaBuilder.and(clausePredicates);
 	}
 }

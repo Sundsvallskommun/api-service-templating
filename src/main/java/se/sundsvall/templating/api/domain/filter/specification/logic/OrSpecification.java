@@ -41,7 +41,6 @@ public class OrSpecification<T> extends ExpressionSpecification<T> {
 			.map(specification -> specification.toPredicate(root, query.distinct(true), criteriaBuilder))
 			.toList();
 
-		return criteriaBuilder
-			.or(clausePredicates.toArray(new Predicate[0]));
+		return criteriaBuilder.or(clausePredicates);
 	}
 }

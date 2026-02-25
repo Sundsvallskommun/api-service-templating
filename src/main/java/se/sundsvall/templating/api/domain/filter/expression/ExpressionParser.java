@@ -1,6 +1,5 @@
 package se.sundsvall.templating.api.domain.filter.expression;
 
-import java.util.List;
 import se.sundsvall.templating.api.domain.filter.expression.logic.And;
 import se.sundsvall.templating.api.domain.filter.expression.logic.Not;
 import se.sundsvall.templating.api.domain.filter.expression.logic.Or;
@@ -22,8 +21,9 @@ final class ExpressionParser extends StdDeserializer<Expression> {
 	@Override
 	public Expression deserialize(final JsonParser jsonParser, final DeserializationContext ctx) {
 		JsonNode root;
+
+		// The object was serialized as an embedded JSON string — re-parse it
 		if (jsonParser.currentToken() == JsonToken.VALUE_STRING) {
-			// The object was serialized as an embedded JSON string — re-parse it
 			var rawJson = jsonParser.getString();
 
 			root = ctx.readTree(ctx.createParser(rawJson));
@@ -43,12 +43,11 @@ final class ExpressionParser extends StdDeserializer<Expression> {
 			throw new IllegalStateException("Object node expected");
 		}
 
-		final var children = List.copyOf(node.properties());
-		if (children.size() != 1) {
+		if (node.properties().size() != 1) {
 			throw new IllegalStateException("Node should contain a single entry");
 		}
 
-		final var firstChild = children.getFirst();
+		final var firstChild = node.properties().iterator().next();
 		final var name = firstChild.getKey();
 		final var value = firstChild.getValue();
 
@@ -62,7 +61,7 @@ final class ExpressionParser extends StdDeserializer<Expression> {
 			case "not" -> parseNot(node);
 			case "eq" -> parseEq(node);
 			case "in" -> parseIn(node);
-			default -> throw new IllegalStateException();
+			default -> throw new IllegalStateException("Unknown expression: \"" + name + "\"");
 		};
 	}
 
@@ -91,7 +90,7 @@ final class ExpressionParser extends StdDeserializer<Expression> {
 			throw new IllegalStateException("\"eq\" node is empty");
 		}
 
-		final var content = List.copyOf(node.properties()).getFirst();
+		final var content = node.properties().iterator().next();
 		final var key = content.getKey();
 		final var value = content.getValue().asString();
 
@@ -103,7 +102,7 @@ final class ExpressionParser extends StdDeserializer<Expression> {
 			throw new IllegalStateException("\"in\" node is empty");
 		}
 
-		final var content = List.copyOf(node.properties()).getFirst();
+		final var content = node.properties().iterator().next();
 		final var key = content.getKey();
 		final var values = content.getValue().values().stream()
 			.map(JsonNode::asString)

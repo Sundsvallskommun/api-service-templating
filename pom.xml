@@ -197,8 +197,6 @@
 						<exclude>**/se/sundsvall/templating/Application*</exclude>
 						<exclude>**/se/sundsvall/templating/LocalDataLoader*</exclude>
 						<exclude>**/se/sundsvall/templating/configuration/**/**</exclude>
-						<!-- Ignored, since JPA specifications are a pain to test. Covered by app tests instead -->
-						<exclude>**/se/sundsvall/templating/api/domain/filter/**/**</exclude>
 						<exclude>**/se/sundsvall/templating/api/domain/validation/**/**</exclude>
 						<exclude>**/se/sundsvall/templating/exception/**/**</exclude>
 						<exclude>**/se/sundsvall/templating/integration/**/**IntegrationConfiguration**</exclude>
