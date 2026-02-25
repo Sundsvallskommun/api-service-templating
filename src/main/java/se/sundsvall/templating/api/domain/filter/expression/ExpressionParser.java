@@ -26,7 +26,9 @@ final class ExpressionParser extends StdDeserializer<Expression> {
 		if (jsonParser.currentToken() == JsonToken.VALUE_STRING) {
 			var rawJson = jsonParser.getString();
 
-			root = ctx.readTree(ctx.createParser(rawJson));
+			try (var innerParser = ctx.createParser(rawJson)) {
+				root = ctx.readTree(innerParser);
+			}
 		} else {
 			root = ctx.readTree(jsonParser);
 		}
