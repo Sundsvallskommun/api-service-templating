@@ -20,8 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.zalando.problem.Problem;
+import org.zalando.problem.ThrowableProblem;
 
 import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
+import static se.sundsvall.templating.service.processor.HtmlValidator.validateHtml;
 
 @Component
 public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
@@ -31,19 +33,21 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 	@Override
 	public byte[] process(final byte[] template, final Map<String, Object> parameters) {
 		try {
-			var inputStream = new ByteArrayInputStream(template);
-			var wordMLPackage = WordprocessingMLPackage.load(inputStream);
-			var mainDocumentPart = wordMLPackage.getMainDocumentPart();
+			final var inputStream = new ByteArrayInputStream(template);
+			final var wordMLPackage = WordprocessingMLPackage.load(inputStream);
+			final var mainDocumentPart = wordMLPackage.getMainDocumentPart();
 
-			for (var entry : parameters.entrySet()) {
+			for (final var entry : parameters.entrySet()) {
 				if (entry.getValue() instanceof String stringValue)
 					replacePlaceholderWithHtml(wordMLPackage, mainDocumentPart, entry.getKey(), stringValue);
 			}
 
-			var outputStream = new ByteArrayOutputStream();
+			final var outputStream = new ByteArrayOutputStream();
 			Docx4J.save(wordMLPackage, outputStream);
 			return outputStream.toByteArray();
-		} catch (Exception e) {
+		} catch (final ThrowableProblem e) {
+			throw e;
+		} catch (final Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			throw Problem.valueOf(INTERNAL_SERVER_ERROR, "Failed to process Word template");
 		}
@@ -61,24 +65,25 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 	}
 
 	private void replacePlaceholderWithHtml(final WordprocessingMLPackage wordMLPackage, final MainDocumentPart mainDocumentPart, final String key, final String value) throws Docx4JException {
-		var paragraphs = getAllParagraphs(mainDocumentPart);
+		final var paragraphs = getAllParagraphs(mainDocumentPart);
 
-		var pattern = placeholderPattern(key);
+		final var pattern = placeholderPattern(key);
 
-		for (var paragraph : paragraphs) {
-			var text = getText(paragraph);
+		for (final var paragraph : paragraphs) {
+			final var text = getText(paragraph);
 
 			if (pattern.matcher(text).find()) {
 
-				var savedSectPr = extractSectPr(paragraph);
+				final var savedSectPr = extractSectPr(paragraph);
 
-				var wrappedHtml = wrapHtml(value);
-				var xhtmlImporter = new XHTMLImporterImpl(wordMLPackage);
-				var wordMLContent = xhtmlImporter.convert(wrappedHtml, null);
+				validateHtml(key, value);
+				final var wrappedHtml = wrapHtml(value);
+				final var xhtmlImporter = new XHTMLImporterImpl(wordMLPackage);
+				final var wordMLContent = xhtmlImporter.convert(wrappedHtml, null);
 
-				var parent = (ContentAccessor) paragraph.getParent();
-				var parentContent = parent.getContent();
-				var index = parentContent.indexOf(paragraph);
+				final var parent = (ContentAccessor) paragraph.getParent();
+				final var parentContent = parent.getContent();
+				final var index = parentContent.indexOf(paragraph);
 
 				parentContent.remove(index);
 				parentContent.addAll(index, wordMLContent);
@@ -101,7 +106,7 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 
 	private void applySectPrToLastParagraph(final List<Object> newContent, final SectPr sectPr) {
 		for (int i = newContent.size() - 1; i >= 0; i--) {
-			var object = newContent.get(i);
+			final var object = newContent.get(i);
 
 			if (object instanceof P p) {
 				if (p.getPPr() == null) {
@@ -119,7 +124,7 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 	 * @param  html given HTML string
 	 * @return      a formatted HTML document as a String
 	 */
-	private String wrapHtml(final String html) {
+	String wrapHtml(final String html) {
 		return """
 			<!DOCTYPE html>
 			<html>
@@ -166,10 +171,10 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 	 * @return          List with all requested elements from the given ContentAccessor
 	 */
 	private <T> List<T> getAllElementsFromObject(final Object obj, final Class<T> toSearch) {
-		var result = new ArrayList<T>();
+		final var result = new ArrayList<T>();
 
 		if (obj instanceof ContentAccessor contentAccessor) {
-			for (var child : contentAccessor.getContent()) {
+			for (final var child : contentAccessor.getContent()) {
 				if (toSearch.isInstance(child)) {
 					result.add(toSearch.cast(child));
 				}
