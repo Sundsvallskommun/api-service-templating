@@ -16,6 +16,9 @@ import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.P;
 import org.docx4j.wml.PPr;
 import org.docx4j.wml.SectPr;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Entities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -77,7 +80,8 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 				final var savedSectPr = extractSectPr(paragraph);
 
 				validateHtml(key, value);
-				final var wrappedHtml = wrapHtml(value);
+				final var sanitizedValue = sanitizeHtml(value);
+				final var wrappedHtml = wrapHtml(sanitizedValue);
 				final var xhtmlImporter = new XHTMLImporterImpl(wordMLPackage);
 				final var wordMLContent = xhtmlImporter.convert(wrappedHtml, null);
 
@@ -116,6 +120,16 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 				return;
 			}
 		}
+	}
+
+	String sanitizeHtml(final String html) {
+		final var document = Jsoup.parseBodyFragment(html);
+		document.outputSettings()
+			.syntax(Document.OutputSettings.Syntax.xml)
+			.escapeMode(Entities.EscapeMode.xhtml)
+			.charset("UTF-8")
+			.prettyPrint(false);
+		return document.body().html();
 	}
 
 	/**
