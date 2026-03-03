@@ -35,19 +35,23 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 
 	@Override
 	public byte[] process(final byte[] template, final Map<String, Object> parameters) {
-		try {
-			final var inputStream = new ByteArrayInputStream(template);
+		try (final var inputStream = new ByteArrayInputStream(template)) {
 			final var wordMLPackage = WordprocessingMLPackage.load(inputStream);
 			final var mainDocumentPart = wordMLPackage.getMainDocumentPart();
+			// Reuse a single XHTMLImporterImpl across all placeholders to avoid repeated heavy initialization
+			final var xhtmlImporter = new XHTMLImporterImpl(wordMLPackage);
 
 			for (final var entry : parameters.entrySet()) {
-				if (entry.getValue() instanceof String stringValue)
-					replacePlaceholderWithHtml(wordMLPackage, mainDocumentPart, entry.getKey(), stringValue);
+				if (entry.getValue() instanceof String stringValue) {
+					replacePlaceholderWithHtml(xhtmlImporter, mainDocumentPart, entry.getKey(), stringValue);
+				}
 			}
 
-			final var outputStream = new ByteArrayOutputStream();
-			Docx4J.save(wordMLPackage, outputStream);
-			return outputStream.toByteArray();
+			// Pre-size to template length to reduce internal buffer resizing
+			try (final var outputStream = new ByteArrayOutputStream(template.length)) {
+				Docx4J.save(wordMLPackage, outputStream);
+				return outputStream.toByteArray();
+			}
 		} catch (final ThrowableProblem e) {
 			throw e;
 		} catch (final Exception e) {
@@ -67,7 +71,7 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 		return Pattern.compile("\\{\\{\\s*" + Pattern.quote(key) + "\\s*}}");
 	}
 
-	private void replacePlaceholderWithHtml(final WordprocessingMLPackage wordMLPackage, final MainDocumentPart mainDocumentPart, final String key, final String value) throws Docx4JException {
+	private void replacePlaceholderWithHtml(final XHTMLImporterImpl xhtmlImporter, final MainDocumentPart mainDocumentPart, final String key, final String value) throws Docx4JException {
 		final var paragraphs = getAllParagraphs(mainDocumentPart);
 
 		final var pattern = placeholderPattern(key);
@@ -82,7 +86,6 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 				validateHtml(key, value);
 				final var sanitizedValue = sanitizeHtml(value);
 				final var wrappedHtml = wrapHtml(sanitizedValue);
-				final var xhtmlImporter = new XHTMLImporterImpl(wordMLPackage);
 				final var wordMLContent = xhtmlImporter.convert(wrappedHtml, null);
 
 				final var parent = (ContentAccessor) paragraph.getParent();
