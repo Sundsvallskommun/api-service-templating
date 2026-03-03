@@ -5,8 +5,9 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.io.Serial;
 import org.springframework.data.jpa.domain.Specification;
-import se.sundsvall.templating.api.domain.filter.expression.EmptyExpression;
+import se.sundsvall.templating.api.domain.filter.expression.Empty;
 import se.sundsvall.templating.api.domain.filter.expression.Expression;
 import se.sundsvall.templating.api.domain.filter.expression.logic.And;
 import se.sundsvall.templating.api.domain.filter.expression.logic.Not;
@@ -32,29 +33,22 @@ public final class MetadataFilterSpecifications {
 
 	public static Specification<TemplateEntity> toSpecification(final Class<TemplateEntity> entityClass,
 		final Expression expression) {
-		if (expression instanceof final And andExpression) {
-			return new AndSpecification<>(TemplateEntity.class, andExpression,
+		return switch (expression) {
+			case And andExpression -> new AndSpecification<>(TemplateEntity.class, andExpression,
 				MetadataFilterSpecifications::toSpecification);
-		}
-		if (expression instanceof final Or orExpression) {
-			return new OrSpecification<>(TemplateEntity.class, orExpression,
+			case Or orExpression -> new OrSpecification<>(TemplateEntity.class, orExpression,
 				MetadataFilterSpecifications::toSpecification);
-		}
-		if (expression instanceof final Not notExpression) {
-			return new NotSpecification<>(TemplateEntity.class, notExpression);
-		} else if (expression instanceof final Eq eqExpression) {
-			return new MetadataEqSpecification(eqExpression);
-		} else if (expression instanceof final In inExpression) {
-			return new MetadataInSpecification(inExpression);
-		} else if (expression instanceof EmptyExpression) {
-			return FilterSpecifications.createEmptySpecification(entityClass);
-		}
-
-		throw new IllegalArgumentException("Unknown expression type: " + expression.getClass().getSimpleName());
+			case Not notExpression -> new NotSpecification<>(TemplateEntity.class, notExpression);
+			case Eq eqExpression -> new MetadataEqSpecification(eqExpression);
+			case In inExpression -> new MetadataInSpecification(inExpression);
+			case Empty _ -> FilterSpecifications.createEmptySpecification(entityClass);
+			default -> throw new IllegalArgumentException("Unknown expression type: " + expression.getClass().getSimpleName());
+		};
 	}
 
 	static class MetadataEqSpecification extends EqSpecification<TemplateEntity> {
 
+		@Serial
 		private static final long serialVersionUID = 1408454748967470019L;
 
 		MetadataEqSpecification(final Eq expression) {
@@ -76,6 +70,7 @@ public final class MetadataFilterSpecifications {
 
 	static class MetadataInSpecification extends InSpecification<TemplateEntity> {
 
+		@Serial
 		private static final long serialVersionUID = 7794045931616835220L;
 
 		MetadataInSpecification(final In expression) {
@@ -88,7 +83,7 @@ public final class MetadataFilterSpecifications {
 			final var join = root.join(TemplateEntity_.metadata, JoinType.LEFT);
 
 			final var inClause = criteriaBuilder.in(join.get(MetadataEntity_.value));
-			getExpression().getValue().stream().forEach(inClause::value);
+			getExpression().getValue().forEach(inClause::value);
 
 			return query.where(
 				criteriaBuilder.isMember(join, root.get(TemplateEntity_.metadata)),

@@ -14,8 +14,7 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
+import se.sundsvall.dept44.problem.Problem;
 import se.sundsvall.templating.api.domain.DirectRenderRequest;
 import se.sundsvall.templating.api.domain.RenderRequest;
 import se.sundsvall.templating.configuration.properties.PebbleProperties;
@@ -31,6 +30,7 @@ import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toMap;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static se.sundsvall.templating.util.TemplateUtil.bytesToString;
 import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
 import static se.sundsvall.templating.util.TemplateUtil.encodeBase64;
@@ -180,7 +180,7 @@ public class RenderingService {
 				.map(ignored -> format("Unable to find template using identifier: '%s'", request.getIdentifier()))
 				.orElseGet(() -> format("Unable to find template using metadata: %s", request.getMetadata()));
 
-			throw Problem.valueOf(Status.NOT_FOUND, message);
+			throw Problem.valueOf(NOT_FOUND, message);
 		}
 
 		return template;

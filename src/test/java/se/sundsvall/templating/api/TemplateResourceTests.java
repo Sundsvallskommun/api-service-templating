@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
 import se.sundsvall.templating.api.domain.TemplateRequest;
 import se.sundsvall.templating.api.domain.TemplateResponse;
-import se.sundsvall.templating.api.domain.filter.expression.EmptyExpression;
+import se.sundsvall.templating.api.domain.filter.expression.Empty;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.service.TemplateService;
 
@@ -47,7 +47,7 @@ class TemplateResourceTests {
 		when(mockTemplatingService.getTemplates(any(), ArgumentMatchers.<Specification<TemplateEntity>>any(), anyBoolean()))
 			.thenReturn(List.of(mockTemplateResponse));
 
-		var result = resource.searchTemplates(MUNICIPALITY_ID, false, new EmptyExpression());
+		var result = resource.searchTemplates(MUNICIPALITY_ID, false, new Empty());
 		assertThat(result).hasSize(1);
 
 		verify(mockTemplatingService).getTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<Specification<TemplateEntity>>any(), eq(false));
@@ -58,7 +58,7 @@ class TemplateResourceTests {
 		when(mockTemplatingService.getTemplates(any(), ArgumentMatchers.<Specification<TemplateEntity>>any(), anyBoolean()))
 			.thenReturn(List.of(mockTemplateResponse));
 
-		var result = resource.searchTemplates(MUNICIPALITY_ID, true, new EmptyExpression());
+		var result = resource.searchTemplates(MUNICIPALITY_ID, true, new Empty());
 		assertThat(result).hasSize(1);
 
 		verify(mockTemplatingService).getTemplates(eq(MUNICIPALITY_ID), ArgumentMatchers.<Specification<TemplateEntity>>any(), eq(true));

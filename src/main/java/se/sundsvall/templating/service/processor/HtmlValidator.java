@@ -13,9 +13,9 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
-import org.zalando.problem.Problem;
+import se.sundsvall.dept44.problem.Problem;
 
-import static org.zalando.problem.Status.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 final class HtmlValidator {
 

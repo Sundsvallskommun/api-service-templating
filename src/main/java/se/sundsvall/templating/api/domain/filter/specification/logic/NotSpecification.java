@@ -4,7 +4,9 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.io.Serial;
 import java.util.function.BiFunction;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.domain.Specification;
 import se.sundsvall.templating.api.domain.filter.FilterSpecifications;
 import se.sundsvall.templating.api.domain.filter.expression.Expression;
@@ -13,7 +15,9 @@ import se.sundsvall.templating.api.domain.filter.specification.ExpressionSpecifi
 
 public class NotSpecification<T> extends ExpressionSpecification<T> {
 
+	@Serial
 	private static final long serialVersionUID = 2349969310918552422L;
+
 	private final transient Not expression;
 	private final transient BiFunction<Class<T>, Expression, Specification<T>> expressionMapper;
 
@@ -30,7 +34,7 @@ public class NotSpecification<T> extends ExpressionSpecification<T> {
 	}
 
 	@Override
-	public Predicate toPredicate(final Root<T> root, final CriteriaQuery<?> query,
+	public Predicate toPredicate(final @NonNull Root<T> root, final @NonNull CriteriaQuery<?> query,
 		final CriteriaBuilder criteriaBuilder) {
 		return criteriaBuilder.not(
 			expressionMapper.apply(getEntityClass(), expression.expression())

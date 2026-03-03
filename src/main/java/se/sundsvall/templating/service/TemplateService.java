@@ -10,8 +10,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
+import se.sundsvall.dept44.problem.Problem;
 import se.sundsvall.templating.api.domain.DetailedTemplateResponse;
 import se.sundsvall.templating.api.domain.TemplateRequest;
 import se.sundsvall.templating.api.domain.TemplateResponse;
@@ -21,6 +20,9 @@ import se.sundsvall.templating.integration.db.entity.TemplateContentEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.integration.db.entity.Version;
 import se.sundsvall.templating.service.mapper.TemplateMapper;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 public class TemplateService {
@@ -69,7 +71,7 @@ public class TemplateService {
 		final var version = dbIntegration.getTemplate(municipalityId, templateRequest.getIdentifier(), null)
 			.map(templateEntity -> {
 				if (null == templateRequest.getVersionIncrement()) {
-					throw Problem.valueOf(Status.BAD_REQUEST, "'versionIncrement' must be set, since template with identifier '" + templateRequest.getIdentifier() + "' already exists");
+					throw Problem.valueOf(BAD_REQUEST, "'versionIncrement' must be set, since template with identifier '" + templateRequest.getIdentifier() + "' already exists");
 				}
 
 				return templateEntity.getVersion().apply(templateRequest.getVersionIncrement());
@@ -94,7 +96,7 @@ public class TemplateService {
 			.map(templateEntity -> applyPatch(jsonPatch, TemplateEntity.class, templateEntity))
 			.map(dbIntegration::saveTemplate)
 			.map(mapper::toTemplateResponse)
-			.orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "Unable to find template '" + identifier + ":" + version + "'"));
+			.orElseThrow(() -> Problem.valueOf(NOT_FOUND, "Unable to find template '" + identifier + ":" + version + "'"));
 	}
 
 	public void deleteTemplate(final String municipalityId, final String identifier, final String version) {

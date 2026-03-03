@@ -7,13 +7,14 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
+import se.sundsvall.dept44.problem.Problem;
 import se.sundsvall.templating.domain.KeyValue;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity_;
 import se.sundsvall.templating.integration.db.entity.Version;
 import se.sundsvall.templating.integration.db.spec.Specifications;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Component
 @Transactional
@@ -48,7 +49,7 @@ public class DbIntegration {
 		try {
 			return templateRepository.findOne(toTemplateEntitySpecification(municipalityId, metadata));
 		} catch (final IncorrectResultSizeDataAccessException _) {
-			throw Problem.valueOf(Status.NOT_FOUND, "Metadata query resulted in multiple matching templates");
+			throw Problem.valueOf(NOT_FOUND, "Metadata query resulted in multiple matching templates");
 		}
 	}
 
@@ -105,7 +106,7 @@ public class DbIntegration {
 			.map(Version::parse)
 			.ifPresentOrElse(parsedVersion -> {
 				final var templateEntity = templateRepository.findByIdentifierAndVersionAndMunicipalityId(identifier, parsedVersion, municipalityId)
-					.orElseThrow(() -> Problem.valueOf(Status.NOT_FOUND, "Unable to find template '" + identifier + ":" + parsedVersion + "'"));
+					.orElseThrow(() -> Problem.valueOf(NOT_FOUND, "Unable to find template '" + identifier + ":" + parsedVersion + "'"));
 				final var wasLatest = templateEntity.isLatest();
 				templateRepository.delete(templateEntity);
 				if (wasLatest) {
@@ -118,7 +119,7 @@ public class DbIntegration {
 				}
 			}, () -> {
 				if (!templateRepository.existsByIdentifierAndMunicipalityId(identifier, municipalityId)) {
-					throw Problem.valueOf(Status.NOT_FOUND, "Unable to find template '" + identifier + "'");
+					throw Problem.valueOf(NOT_FOUND, "Unable to find template '" + identifier + "'");
 				}
 				templateRepository.deleteAll(templateRepository.findByIdentifierAndMunicipalityId(identifier, municipalityId));
 			});

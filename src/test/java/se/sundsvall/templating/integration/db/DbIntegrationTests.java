@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.jpa.domain.Specification;
-import org.zalando.problem.ThrowableProblem;
+import se.sundsvall.dept44.problem.ThrowableProblem;
 import se.sundsvall.templating.domain.KeyValue;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.integration.db.entity.Version;
@@ -134,7 +134,7 @@ class DbIntegrationTests {
 		when(mockTemplateRepository.findAll(ArgumentMatchers.<Specification<TemplateEntity>>any()))
 			.thenReturn(List.of(TemplateEntity.builder().build()));
 
-		Specification<TemplateEntity> spec = Specification.where(null);
+		var spec = Specification.<TemplateEntity>unrestricted();
 		var result = dbIntegration.findTemplates(MUNICIPALITY_ID, spec, false);
 		assertThat(result)
 			.isNotNull()
@@ -148,7 +148,7 @@ class DbIntegrationTests {
 		when(mockTemplateRepository.findAll(ArgumentMatchers.<Specification<TemplateEntity>>any()))
 			.thenReturn(List.of(TemplateEntity.builder().withLatest(true).build()));
 
-		Specification<TemplateEntity> spec = Specification.where(null);
+		var spec = Specification.<TemplateEntity>unrestricted();
 		var result = dbIntegration.findTemplates(MUNICIPALITY_ID, spec, true);
 		assertThat(result)
 			.isNotNull()

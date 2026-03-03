@@ -4,12 +4,15 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.io.Serial;
 import org.springframework.data.jpa.domain.Specification;
 import se.sundsvall.templating.api.domain.filter.expression.value.In;
 
 public class InSpecification<T> implements Specification<T> {
 
+	@Serial
 	private static final long serialVersionUID = -2759064320535918913L;
+
 	private final transient In expression;
 
 	public InSpecification(final In expression) {
