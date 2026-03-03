@@ -38,11 +38,11 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 		try (final var inputStream = new ByteArrayInputStream(template)) {
 			final var wordMLPackage = WordprocessingMLPackage.load(inputStream);
 			final var mainDocumentPart = wordMLPackage.getMainDocumentPart();
-			// Reuse a single XHTMLImporterImpl across all placeholders to avoid repeated heavy initialization
-			final var xhtmlImporter = new XHTMLImporterImpl(wordMLPackage);
 
 			for (final var entry : parameters.entrySet()) {
 				if (entry.getValue() instanceof String stringValue) {
+					// Create a new XHTMLImporterImpl per placeholder since it accumulates state between convert() calls
+					final var xhtmlImporter = new XHTMLImporterImpl(wordMLPackage);
 					replacePlaceholderWithHtml(xhtmlImporter, mainDocumentPart, entry.getKey(), stringValue);
 				}
 			}
