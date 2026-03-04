@@ -35,12 +35,14 @@ public class WordTemplateProcessor implements TemplateProcessor<byte[]> {
 
 	@Override
 	public byte[] process(final byte[] template, final Map<String, Object> parameters) {
+		LOGGER.info("Processing Word template with {} parameters", parameters.size());
 		try (final var inputStream = new ByteArrayInputStream(template)) {
 			final var wordMLPackage = WordprocessingMLPackage.load(inputStream);
 			final var mainDocumentPart = wordMLPackage.getMainDocumentPart();
 
 			for (final var entry : parameters.entrySet()) {
 				if (entry.getValue() instanceof String stringValue) {
+					LOGGER.debug("Replacing placeholder '{}'", entry.getKey());
 					// Create a new XHTMLImporterImpl per placeholder since it accumulates state between convert() calls
 					final var xhtmlImporter = new XHTMLImporterImpl(wordMLPackage);
 					replacePlaceholderWithHtml(xhtmlImporter, mainDocumentPart, entry.getKey(), stringValue);

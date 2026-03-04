@@ -8,6 +8,10 @@ logging:
   level:
     org.docx4j: ERROR
     com.openhtmltopdf: ERROR
+    # Suppress "You did not close a PDF Document" warnings from PDFBox. The unclosed PDDocument is
+    # internal to the OpenSagres PdfConverter and not accessible from our code. PDFBox 3.x fixes
+    # this but is blocked by docx4j-ImportXHTML incompatibility (see pom.xml).
+    org.apache.pdfbox.cos.COSDocument: ERROR
   jpa:
     hibernate:
       ddl-auto: validate

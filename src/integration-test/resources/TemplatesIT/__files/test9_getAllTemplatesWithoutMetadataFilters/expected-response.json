@@ -2,7 +2,7 @@
 	{
 		"identifier": "first.template",
 		"metadata": [],
-		"lastModifiedAt": "${json-unit.ignore}",
+		"lastModifiedAt": "${json-unit.regex}\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
 		"name": "First template",
 		"description": "Some description from other municipality",
 		"defaultValues": [],
