@@ -1,72 +1,70 @@
 [
 	{
-		"identifier": "third.template",
-		"metadata": [],
-		"lastModifiedAt": "${json-unit.ignore}",
-		"name": "Third template",
-		"description": "Some description",
-		"defaultValues": [],
 		"changeLog": "Updated version",
+		"defaultValues": [],
+		"description": "Some description",
+		"identifier": "third.template",
+		"lastModifiedAt": "${json-unit.regex}\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
+		"metadata": [],
+		"name": "Third template",
 		"type": "PEBBLE",
 		"version": "1.1"
 	},
 	{
+		"changeLog": "Initial version",
+		"defaultValues": [],
+		"description": "Some description",
 		"identifier": "first.template",
+		"lastModifiedAt": "${json-unit.regex}\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
 		"metadata": [],
-		"lastModifiedAt": "${json-unit.ignore}",
 		"name": "First template",
-		"description": "Some description",
-		"defaultValues": [],
-		"changeLog": "Initial version",
 		"type": "PEBBLE",
 		"version": "1.0"
 	},
 	{
-		"identifier": "third.template",
+		"changeLog": "Initial version",
+		"defaultValues": [],
+		"description": "Some description",
+		"identifier": "large.template",
+		"lastModifiedAt": "${json-unit.regex}\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
 		"metadata": [],
-		"lastModifiedAt": "${json-unit.ignore}",
+		"name": "Large template",
+		"type": "WORD",
+		"version": "1.0"
+	},
+	{
+		"changeLog": "Initial version",
+		"defaultValues": [],
+		"description": "Some description",
+		"identifier": "third.template",
+		"lastModifiedAt": "${json-unit.regex}\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
+		"metadata": [],
 		"name": "Third template",
-		"description": "Some description",
-		"defaultValues": [],
-		"changeLog": "Initial version",
 		"type": "PEBBLE",
 		"version": "1.0"
 	},
 	{
+		"changeLog": "Initial version",
+		"defaultValues": [],
+		"description": "Some description",
 		"identifier": "fourth.template",
+		"lastModifiedAt": "${json-unit.regex}\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
 		"metadata": [
 			{
-				"value": "SBK",
-				"key": "verksamhet"
+				"key": "verksamhet",
+				"value": "SBK"
 			},
 			{
-				"value": "MMU",
-				"key": "process"
+				"key": "process",
+				"value": "MMU"
 			}
 		],
-		"lastModifiedAt": "${json-unit.ignore}",
 		"name": "Fourth template",
-		"description": "Some description",
-		"defaultValues": [],
-		"changeLog": "Initial version",
 		"type": "PEBBLE",
 		"version": "1.0"
 	},
 	{
-		"identifier": "second.template",
-		"metadata": [
-			{
-				"value": "PRH",
-				"key": "process"
-			},
-			{
-				"value": "SBK",
-				"key": "verksamhet"
-			}
-		],
-		"lastModifiedAt": "${json-unit.ignore}",
-		"name": "Second template",
-		"description": "Some description",
+		"changeLog": "Initial version",
 		"defaultValues": [
 			{
 				"fieldName": "last_name",
@@ -77,7 +75,20 @@
 				"value": "Bobby"
 			}
 		],
-		"changeLog": "Initial version",
+		"description": "Some description",
+		"identifier": "second.template",
+		"lastModifiedAt": "${json-unit.regex}\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
+		"metadata": [
+			{
+				"key": "process",
+				"value": "PRH"
+			},
+			{
+				"key": "verksamhet",
+				"value": "SBK"
+			}
+		],
+		"name": "Second template",
 		"type": "PEBBLE",
 		"version": "1.0"
 	}

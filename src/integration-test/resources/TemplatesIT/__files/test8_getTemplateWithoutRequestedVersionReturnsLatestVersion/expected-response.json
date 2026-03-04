@@ -1,7 +1,7 @@
 {
 	"identifier": "third.template",
 	"metadata": [],
-	"lastModifiedAt": "${json-unit.ignore}",
+	"lastModifiedAt": "${json-unit.regex}\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
 	"name": "Third template",
 	"description": "Some description",
 	"defaultValues": [],

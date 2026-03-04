@@ -13,6 +13,8 @@ import java.util.TreeMap;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import se.sundsvall.dept44.problem.Problem;
 import se.sundsvall.templating.api.domain.DirectRenderRequest;
@@ -31,6 +33,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toMap;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static se.sundsvall.dept44.util.LogUtils.sanitizeForLogging;
 import static se.sundsvall.templating.util.TemplateUtil.bytesToString;
 import static se.sundsvall.templating.util.TemplateUtil.decodeBase64;
 import static se.sundsvall.templating.util.TemplateUtil.encodeBase64;
@@ -39,6 +42,7 @@ import static se.sundsvall.templating.util.TemplateUtil.getTemplateType;
 @Service
 public class RenderingService {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(RenderingService.class);
 	private static final String BASE64_VALUE_PREFIX = "BASE64:";
 
 	private final PebbleProperties pebbleProperties;
@@ -101,6 +105,8 @@ public class RenderingService {
 	}
 
 	byte[] renderTemplateInternal(final TemplateEntity template, final Map<String, Object> requestParameters) {
+		LOGGER.info("Rendering template '{}' version {} of type {}", template.getIdentifier(), template.getVersion(), template.getType());
+
 		// Extract template default values
 		final var defaultValues = template.getDefaultValues().stream()
 			.collect(toMap(DefaultValueEntity::getFieldName, DefaultValueEntity::getValue));
@@ -180,6 +186,7 @@ public class RenderingService {
 				.map(ignored -> format("Unable to find template using identifier: '%s'", request.getIdentifier()))
 				.orElseGet(() -> format("Unable to find template using metadata: %s", request.getMetadata()));
 
+			LOGGER.error(sanitizeForLogging(message));
 			throw Problem.valueOf(NOT_FOUND, message);
 		}
 

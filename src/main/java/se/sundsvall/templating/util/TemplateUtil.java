@@ -19,9 +19,9 @@ public final class TemplateUtil {
 	}
 
 	public static TemplateType getTemplateType(final byte[] templateContent) {
-		try (var in = new ByteArrayInputStream(templateContent); var ignored = OPCPackage.open(in)) {
+		try (var in = new ByteArrayInputStream(templateContent); var _ = OPCPackage.open(in)) {
 			return TemplateType.WORD;
-		} catch (IOException | InvalidFormatException | NotOfficeXmlFileException e) {
+		} catch (IOException | InvalidFormatException | NotOfficeXmlFileException _) {
 			return TemplateType.PEBBLE;
 		}
 	}

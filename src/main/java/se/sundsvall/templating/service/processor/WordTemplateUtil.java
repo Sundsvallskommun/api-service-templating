@@ -185,7 +185,7 @@ final class WordTemplateUtil {
 				while (c.toNextSelection()) {
 					var o = c.getObject();
 					switch (o) {
-						case CTText ignored -> {
+						case CTText _ -> {
 							if (textPos >= startText) {
 								var candidate = ((CTText) o).getStringValue();
 								if (runPos == startRun) {
@@ -222,8 +222,8 @@ final class WordTemplateUtil {
 							}
 							textPos++;
 						}
-						case CTProofErr ignored -> c.removeXml();
-						case CTRPr ignored -> {
+						case CTProofErr _ -> c.removeXml();
+						case CTRPr _ -> {
 							// Do nothing
 						}
 						case null, default -> candidateCharPos = 0;

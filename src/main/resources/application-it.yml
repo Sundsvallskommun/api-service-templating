@@ -12,4 +12,7 @@ spring:
     enabled: true
   datasource:
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    url: jdbc:tc:mariadb:10.6:///
+    # Inserting large templates so we need to increase the max_allowed_packet in MariaDB 
+    # using configuration file (db/mariadb.cnf) and then point to the directory where it's placed
+    # Not the file, that doesn't work.
+    url: jdbc:tc:mariadb:10.6:///?TC_MY_CNF=db
