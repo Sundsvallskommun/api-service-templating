@@ -17,7 +17,7 @@
 		<jsoup.version>1.22.1</jsoup.version>
 		<nu-htmlparser.version>1.4.16</nu-htmlparser.version>
 		<openpdf.version>9.3.2</openpdf.version>
-		<docx4j.version>11.5.11</docx4j.version>
+		<docx4j.version>11.5.12</docx4j.version>
 		<poi.version>5.5.1</poi.version>
 		<poi-pdf-converter.version>2.2.0</poi-pdf-converter.version>
 		<itext-html2pdf.version>6.3.2</itext-html2pdf.version>
