@@ -13,7 +13,7 @@
 	<version>2.1</version>
 	<properties>
 		<json-patch.version>1.13</json-patch.version>
-		<pebble.version>4.1.1</pebble.version>
+		<pebble.version>4.1.2</pebble.version>
 		<jsoup.version>1.22.2</jsoup.version>
 		<nu-htmlparser.version>1.4.16</nu-htmlparser.version>
 		<openpdf.version>9.4.0</openpdf.version>
