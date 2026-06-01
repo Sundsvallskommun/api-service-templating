@@ -7,7 +7,7 @@ info:
     url: https://opensource.org/licenses/MIT
   version: "2.1"
 servers:
-- url: http://localhost:56277
+- url: http://localhost:63896
   description: Generated server url
 paths:
   /{municipalityId}/templates:
@@ -632,8 +632,11 @@ components:
     Expression:
       description: Search filter expression
       examples:
-      - "{ \"or\": [ { \"eq\": { \"process\": \"PRH\" } }, { \"eq\": { \"verksamhet\"\
-        : \"SBK\" } }] }"
+      - or:
+        - eq:
+            process: PRH
+        - eq:
+            verksamhet: SBK
     KeyValue:
       type: object
       properties:
@@ -667,16 +670,18 @@ components:
             description: Template metadata
         parameters:
           type:
-          - object
           - string
           - "null"
           additionalProperties: {}
           description: "Parameters (string values may be BASE64-encoded, and in that\
             \ case they should be on the form \"BASE64:<base64-encoded-value>\")"
           examples:
-          - "{\"someKey\":\"someValue\",\"otherKey\":[\"otherValue1\",\"otherValue2\"\
-            ],\"anotherKey\":{\"someKey\":\"BASE64:c29tZUJhc2VFbmNvZGVkVmFsdWU=\"\
-            }}"
+          - someKey: someValue
+            otherKey:
+            - otherValue1
+            - otherValue2
+            anotherKey:
+              someKey: BASE64:c29tZUJhc2VFbmNvZGVkVmFsdWU=
     RenderResponse:
       type: object
       properties:
@@ -693,16 +698,18 @@ components:
           minLength: 1
         parameters:
           type:
-          - object
           - string
           - "null"
           additionalProperties: {}
           description: "Parameters (string values may be BASE64-encoded, and in that\
             \ case they should be on the form \"BASE64:<base64-encoded-value>\")"
           examples:
-          - "{\"someKey\":\"someValue\",\"otherKey\":[\"otherValue1\",\"otherValue2\"\
-            ],\"anotherKey\":{\"someKey\":\"BASE64:c29tZUJhc2VFbmNvZGVkVmFsdWU=\"\
-            }}"
+          - someKey: someValue
+            otherKey:
+            - otherValue1
+            - otherValue2
+            anotherKey:
+              someKey: BASE64:c29tZUJhc2VFbmNvZGVkVmFsdWU=
       required:
       - content
     DirectRenderResponse:
@@ -711,7 +718,11 @@ components:
         output:
           type: string
           description: "Output, as a BASE64-encoded string"
-    JsonPatch: {}
+    JsonPatch:
+      examples:
+      - - op: add|remove|replace
+          path: /some/attribute/path
+          value: '...'
     DetailedTemplateResponse:
       type: object
       description: Detailed template
