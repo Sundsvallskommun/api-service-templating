@@ -19,6 +19,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
 import lombok.AccessLevel;
@@ -92,7 +93,7 @@ public class TemplateEntity {
 	private boolean latest;
 
 	@Column(name = "last_modified_at", nullable = false)
-	private LocalDateTime lastModifiedAt = LocalDateTime.now();
+	private LocalDateTime lastModifiedAt = LocalDateTime.now(ZoneId.systemDefault());
 
 	/*
 	 * Custom @Builder-annotated constructor to exclude id and version from builder.
@@ -128,6 +129,6 @@ public class TemplateEntity {
 	@PrePersist
 	@PreUpdate
 	void updateLastModifiedAt() {
-		lastModifiedAt = LocalDateTime.now();
+		lastModifiedAt = LocalDateTime.now(ZoneId.systemDefault());
 	}
 }
