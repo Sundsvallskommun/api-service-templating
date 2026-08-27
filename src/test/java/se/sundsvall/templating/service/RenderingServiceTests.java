@@ -1,8 +1,12 @@
 package se.sundsvall.templating.service;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Optional;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -157,11 +161,11 @@ class RenderingServiceTests {
 	}
 
 	@Test
-	void renderHtmlAsPdf_withSvg() {
+	void renderHtmlAsPdf_withSvg() throws IOException {
 		var document = """
 			<p>someTemplateContent</p>
 			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-			    <rect width="100" height="100" fill="red"/>
+			    <rect width="100" height="100" fill="#ff0000"/>
 			</svg>
 			""".getBytes(UTF_8);
 
@@ -169,6 +173,55 @@ class RenderingServiceTests {
 
 		assertThat(result).isNotEmpty();
 		assertThat(new String(result, 0, 5, UTF_8)).isEqualTo("%PDF-");
+
+		// Verify that the SVG was actually rendered by rasterizing the page and
+		// checking that the pure red fill of the SVG rectangle is present
+		try (var pdf = PDDocument.load(result)) {
+			var image = new PDFRenderer(pdf).renderImage(0);
+
+			assertThat(containsColor(image, 0xFF0000)).isTrue();
+		}
+	}
+
+	@Test
+	void renderHtmlAsPdf_withNonLatin1Characters() throws IOException {
+		var document = """
+			<p>Wojciech Szczęsny Łódź</p>
+			<p>Gülşen İbrahim Doğan</p>
+			<p>Áillohaš Čohkka</p>
+			<p>Đorđe Čorić</p>
+			<p>Здравствуйте</p>
+			<p><b>Łódź Здравствуйте</b> och <i>Gülşen İzmir</i></p>
+			""".getBytes(UTF_8);
+
+		var result = service.renderHtmlAsPdf(document);
+
+		// Glyphs missing from the registered fonts are replaced with "#" at layout time,
+		// so the extracted text both proves presence and guards against silent glyph loss
+		try (var pdf = PDDocument.load(result)) {
+			var text = new PDFTextStripper().getText(pdf);
+
+			assertThat(text)
+				.contains("Wojciech Szczęsny Łódź")
+				.contains("Gülşen İbrahim Doğan")
+				.contains("Áillohaš Čohkka")
+				.contains("Đorđe Čorić")
+				.contains("Здравствуйте")
+				.contains("Łódź Здравствуйте")
+				.contains("Gülşen İzmir")
+				.doesNotContain("#");
+		}
+	}
+
+	private boolean containsColor(final BufferedImage image, final int rgb) {
+		for (var x = 0; x < image.getWidth(); x++) {
+			for (var y = 0; y < image.getHeight(); y++) {
+				if ((image.getRGB(x, y) & 0xFFFFFF) == rgb) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	@Test
