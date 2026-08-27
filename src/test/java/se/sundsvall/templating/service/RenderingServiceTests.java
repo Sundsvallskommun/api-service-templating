@@ -1,9 +1,12 @@
 package se.sundsvall.templating.service;
 
-import com.itextpdf.html2pdf.HtmlConverter;
-import java.io.ByteArrayOutputStream;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Optional;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -148,29 +152,93 @@ class RenderingServiceTests {
 
 	@Test
 	void renderHtmlAsPdf() {
-		var document = "someTemplateContent".getBytes(UTF_8);
+		var document = "<p>someTemplateContent</p>".getBytes(UTF_8);
 
-		try (var mockHtmlConverter = mockStatic(HtmlConverter.class)) {
-			service.renderHtmlAsPdf(document);
+		var result = service.renderHtmlAsPdf(document);
 
-			mockHtmlConverter.verify(() -> HtmlConverter.convertToPdf(any(String.class), any(ByteArrayOutputStream.class)));
+		assertThat(result).isNotEmpty();
+		assertThat(new String(result, 0, 5, UTF_8)).isEqualTo("%PDF-");
+	}
+
+	@Test
+	void renderHtmlAsPdf_withSvg() throws IOException {
+		var document = """
+			<p>someTemplateContent</p>
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+			    <rect width="100" height="100" fill="#ff0000"/>
+			</svg>
+			""".getBytes(UTF_8);
+
+		var result = service.renderHtmlAsPdf(document);
+
+		assertThat(result).isNotEmpty();
+		assertThat(new String(result, 0, 5, UTF_8)).isEqualTo("%PDF-");
+
+		// Verify that the SVG was actually rendered by rasterizing the page and
+		// checking that the pure red fill of the SVG rectangle is present
+		try (var pdf = PDDocument.load(result)) {
+			var image = new PDFRenderer(pdf).renderImage(0);
+
+			assertThat(containsColor(image, 0xFF0000)).isTrue();
 		}
+	}
+
+	@Test
+	void renderHtmlAsPdf_withNonLatin1Characters() throws IOException {
+		var document = """
+			<p>Wojciech Szczęsny Łódź</p>
+			<p>Gülşen İbrahim Doğan</p>
+			<p>Áillohaš Čohkka</p>
+			<p>Đorđe Čorić</p>
+			<p>Здравствуйте</p>
+			<p><b>Łódź Здравствуйте</b> och <i>Gülşen İzmir</i></p>
+			""".getBytes(UTF_8);
+
+		var result = service.renderHtmlAsPdf(document);
+
+		// Glyphs missing from the registered fonts are replaced with "#" at layout time,
+		// so the extracted text both proves presence and guards against silent glyph loss
+		try (var pdf = PDDocument.load(result)) {
+			var text = new PDFTextStripper().getText(pdf);
+
+			assertThat(text)
+				.contains("Wojciech Szczęsny Łódź")
+				.contains("Gülşen İbrahim Doğan")
+				.contains("Áillohaš Čohkka")
+				.contains("Đorđe Čorić")
+				.contains("Здравствуйте")
+				.contains("Łódź Здравствуйте")
+				.contains("Gülşen İzmir")
+				.doesNotContain("#");
+		}
+	}
+
+	private boolean containsColor(final BufferedImage image, final int rgb) {
+		for (var x = 0; x < image.getWidth(); x++) {
+			for (var y = 0; y < image.getHeight(); y++) {
+				if ((image.getRGB(x, y) & 0xFFFFFF) == rgb) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	@Test
 	void renderHtmlAsPdf_whenExceptionIsThrown() {
 		var document = "someTemplateContent".getBytes(UTF_8);
 
-		try (var mockHtmlConverter = mockStatic(HtmlConverter.class)) {
-			mockHtmlConverter.when(() -> HtmlConverter.convertToPdf(any(String.class), any(ByteArrayOutputStream.class))).thenAnswer(_ -> {
-				throw new IOException("dummy");
-			});
-
+		try (var mockRendererBuilder = mockConstruction(PdfRendererBuilder.class, (mock, _) -> {
+			when(mock.useSVGDrawer(any())).thenReturn(mock);
+			when(mock.withHtmlContent(any(String.class), any())).thenReturn(mock);
+			when(mock.toStream(any())).thenReturn(mock);
+			doThrow(new IOException("dummy")).when(mock).run();
+		})) {
 			assertThatExceptionOfType(TemplateException.class)
 				.isThrownBy(() -> service.renderHtmlAsPdf(document))
 				.withMessage("Unable to render PDF");
 
-			mockHtmlConverter.verify(() -> HtmlConverter.convertToPdf(any(String.class), any(ByteArrayOutputStream.class)));
+			assertThat(mockRendererBuilder.constructed()).hasSize(1);
 		}
 	}
 }
