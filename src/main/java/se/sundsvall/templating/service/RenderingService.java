@@ -1,5 +1,8 @@
 package se.sundsvall.templating.service;
 
+import com.openhtmltopdf.extend.FSSupplier;
+import com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder.FSFontUseCase;
+import com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder.FontStyle;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import com.openhtmltopdf.svgsupport.BatikSVGDrawer;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
@@ -7,10 +10,14 @@ import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.AbstractMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -45,6 +52,11 @@ public class RenderingService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RenderingService.class);
 	private static final String BASE64_VALUE_PREFIX = "BASE64:";
+
+	// Registered both as a regular font family and as a fallback for glyphs missing from the
+	// PDF base-14 fonts (which only cover WinAnsi/Latin-1)
+	private static final String FALLBACK_FONT_FAMILY = "Liberation Sans";
+	private static final Map<String, byte[]> FONT_CACHE = new ConcurrentHashMap<>();
 
 	private final PebbleProperties pebbleProperties;
 	private final PebbleTemplateProcessor pebbleTemplateProcessor;
@@ -155,15 +167,40 @@ public class RenderingService {
 			final var doc = Jsoup.parse(bytesToString(document), "UTF-8");
 			doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
 
-			new PdfRendererBuilder()
+			final var builder = new PdfRendererBuilder()
 				.useSVGDrawer(new BatikSVGDrawer())
 				.withHtmlContent(doc.html(), null)
-				.toStream(out)
-				.run();
+				.toStream(out);
+			registerFonts(builder);
+			builder.run();
 
 			return out.toByteArray();
 		} catch (final IOException e) {
 			throw new TemplateException("Unable to render PDF", e);
+		}
+	}
+
+	static void registerFonts(final PdfRendererBuilder builder) {
+		registerFont(builder, "/fonts/LiberationSans-Regular.ttf", 400, FontStyle.NORMAL);
+		registerFont(builder, "/fonts/LiberationSans-Bold.ttf", 700, FontStyle.NORMAL);
+		registerFont(builder, "/fonts/LiberationSans-Italic.ttf", 400, FontStyle.ITALIC);
+		registerFont(builder, "/fonts/LiberationSans-BoldItalic.ttf", 700, FontStyle.ITALIC);
+	}
+
+	static void registerFont(final PdfRendererBuilder builder, final String resource, final int weight, final FontStyle style) {
+		builder.useFont(fontSupplier(resource), FALLBACK_FONT_FAMILY, weight, style, true,
+			EnumSet.of(FSFontUseCase.DOCUMENT, FSFontUseCase.FALLBACK_FINAL));
+	}
+
+	static FSSupplier<InputStream> fontSupplier(final String resource) {
+		return () -> new ByteArrayInputStream(FONT_CACHE.computeIfAbsent(resource, RenderingService::readFontResource));
+	}
+
+	static byte[] readFontResource(final String resource) {
+		try (final var in = RenderingService.class.getResourceAsStream(resource)) {
+			return in.readAllBytes();
+		} catch (final IOException e) {
+			throw new UncheckedIOException("Unable to read font resource " + resource, e);
 		}
 	}
 
