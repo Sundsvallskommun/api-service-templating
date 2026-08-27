@@ -1,6 +1,7 @@
 package se.sundsvall.templating.service;
 
-import com.itextpdf.html2pdf.HtmlConverter;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+import com.openhtmltopdf.svgsupport.BatikSVGDrawer;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 import java.io.ByteArrayInputStream;
@@ -149,11 +150,16 @@ public class RenderingService {
 
 	byte[] renderHtmlAsPdf(final byte[] document) {
 		try (final var out = new ByteArrayOutputStream()) {
-			// Run the document through Jsoup to wrap it in a proper HTML/XML document
+			// Run the document through Jsoup to wrap it in a proper HTML/XML document, since
+			// OpenHTMLtoPDF requires well-formed XHTML
 			final var doc = Jsoup.parse(bytesToString(document), "UTF-8");
 			doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
 
-			HtmlConverter.convertToPdf(doc.html(), out);
+			new PdfRendererBuilder()
+				.useSVGDrawer(new BatikSVGDrawer())
+				.withHtmlContent(doc.html(), null)
+				.toStream(out)
+				.run();
 
 			return out.toByteArray();
 		} catch (final IOException e) {

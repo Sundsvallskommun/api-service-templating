@@ -1,7 +1,6 @@
 package se.sundsvall.templating.service;
 
-import com.itextpdf.html2pdf.HtmlConverter;
-import java.io.ByteArrayOutputStream;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import java.io.IOException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -29,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -148,29 +148,44 @@ class RenderingServiceTests {
 
 	@Test
 	void renderHtmlAsPdf() {
-		var document = "someTemplateContent".getBytes(UTF_8);
+		var document = "<p>someTemplateContent</p>".getBytes(UTF_8);
 
-		try (var mockHtmlConverter = mockStatic(HtmlConverter.class)) {
-			service.renderHtmlAsPdf(document);
+		var result = service.renderHtmlAsPdf(document);
 
-			mockHtmlConverter.verify(() -> HtmlConverter.convertToPdf(any(String.class), any(ByteArrayOutputStream.class)));
-		}
+		assertThat(result).isNotEmpty();
+		assertThat(new String(result, 0, 5, UTF_8)).isEqualTo("%PDF-");
+	}
+
+	@Test
+	void renderHtmlAsPdf_withSvg() {
+		var document = """
+			<p>someTemplateContent</p>
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+			    <rect width="100" height="100" fill="red"/>
+			</svg>
+			""".getBytes(UTF_8);
+
+		var result = service.renderHtmlAsPdf(document);
+
+		assertThat(result).isNotEmpty();
+		assertThat(new String(result, 0, 5, UTF_8)).isEqualTo("%PDF-");
 	}
 
 	@Test
 	void renderHtmlAsPdf_whenExceptionIsThrown() {
 		var document = "someTemplateContent".getBytes(UTF_8);
 
-		try (var mockHtmlConverter = mockStatic(HtmlConverter.class)) {
-			mockHtmlConverter.when(() -> HtmlConverter.convertToPdf(any(String.class), any(ByteArrayOutputStream.class))).thenAnswer(_ -> {
-				throw new IOException("dummy");
-			});
-
+		try (var mockRendererBuilder = mockConstruction(PdfRendererBuilder.class, (mock, _) -> {
+			when(mock.useSVGDrawer(any())).thenReturn(mock);
+			when(mock.withHtmlContent(any(String.class), any())).thenReturn(mock);
+			when(mock.toStream(any())).thenReturn(mock);
+			doThrow(new IOException("dummy")).when(mock).run();
+		})) {
 			assertThatExceptionOfType(TemplateException.class)
 				.isThrownBy(() -> service.renderHtmlAsPdf(document))
 				.withMessage("Unable to render PDF");
 
-			mockHtmlConverter.verify(() -> HtmlConverter.convertToPdf(any(String.class), any(ByteArrayOutputStream.class)));
+			assertThat(mockRendererBuilder.constructed()).hasSize(1);
 		}
 	}
 }
