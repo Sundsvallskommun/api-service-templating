@@ -15,6 +15,7 @@ import se.sundsvall.templating.service.pebble.loader.DelegatingLoader;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.commons.lang3.exception.ExceptionUtils.throwableOfType;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static se.sundsvall.dept44.util.LogUtils.sanitizeForLogging;
 
@@ -51,10 +52,18 @@ public class PebbleTemplateProcessor implements TemplateProcessor<String> {
 			}
 
 			return output.getBytes(UTF_8);
-		} catch (final AttributeNotFoundException e) {
-			throw Problem.valueOf(BAD_REQUEST, format("Missing template parameter '%s' (line %s)", e.getAttributeName(), e.getLineNumber()));
 		} catch (final Exception e) {
+			// Pebble wraps the exception when the missing parameter is used in a comparison or arithmetic
+			final var missingParameter = throwableOfType(e, AttributeNotFoundException.class);
+			if (missingParameter != null) {
+				throw Problem.valueOf(BAD_REQUEST, missingParameterDetail(template, missingParameter));
+			}
 			throw new TemplateException(e);
 		}
+	}
+
+	static String missingParameterDetail(final String template, final AttributeNotFoundException e) {
+		final var detail = format("Missing template parameter '%s' (line %s", e.getAttributeName(), e.getLineNumber());
+		return template.equals(e.getFileName()) ? detail + ")" : format("%s in template '%s')", detail, e.getFileName());
 	}
 }

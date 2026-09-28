@@ -60,9 +60,43 @@ class PebbleTemplateProcessorTests {
 	}
 
 	@Test
+	void process_strictWithMissingParameterInComparison() {
+		assertThatExceptionOfType(ThrowableProblem.class)
+			.isThrownBy(() -> processor.process("{% if status == \"x\" %}X{% endif %}", Map.of(), true))
+			.satisfies(problem -> {
+				assertThat(problem.getStatus()).isEqualTo(BAD_REQUEST);
+				assertThat(problem.getDetail()).isEqualTo("Missing template parameter 'status' (line 1)");
+			});
+	}
+
+	@Test
+	void process_strictWithMissingParameterInArithmetic() {
+		assertThatExceptionOfType(ThrowableProblem.class)
+			.isThrownBy(() -> processor.process("{{ count + 1 }}", Map.of(), true))
+			.satisfies(problem -> {
+				assertThat(problem.getStatus()).isEqualTo(BAD_REQUEST);
+				assertThat(problem.getDetail()).isEqualTo("Missing template parameter 'count' (line 1)");
+			});
+	}
+
+	@Test
+	void process_strictWithMissingParameterInIncludedTemplate() {
+		assertThatExceptionOfType(ThrowableProblem.class)
+			.isThrownBy(() -> processor.process("Hej {% include \"{{ name }}\" %}", Map.of(), true))
+			.satisfies(problem -> {
+				assertThat(problem.getStatus()).isEqualTo(BAD_REQUEST);
+				assertThat(problem.getDetail()).isEqualTo("Missing template parameter 'name' (line 1 in template '{{ name }}')");
+			});
+	}
+
+	@Test
 	void process_strictWithMissingConditionParameter() {
-		assertThatExceptionOfType(TemplateException.class)
-			.isThrownBy(() -> processor.process("{% if checked %}X{% endif %}", Map.of(), true));
+		assertThatExceptionOfType(ThrowableProblem.class)
+			.isThrownBy(() -> processor.process("{% if checked %}X{% endif %}", Map.of(), true))
+			.satisfies(problem -> {
+				assertThat(problem.getStatus()).isEqualTo(BAD_REQUEST);
+				assertThat(problem.getDetail()).isEqualTo("Missing template parameter 'checked' (line 1)");
+			});
 	}
 
 	@Test

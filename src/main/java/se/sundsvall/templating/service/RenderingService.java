@@ -151,7 +151,7 @@ public class RenderingService {
 
 	static boolean hasStrictParameters(final TemplateEntity template) {
 		return ofNullable(template.getMetadata()).orElse(List.of()).stream()
-			.anyMatch(metadata -> STRICT_PARAMETERS_KEY.equalsIgnoreCase(metadata.getKey()) && Boolean.parseBoolean(metadata.getValue()));
+			.anyMatch(metadata -> STRICT_PARAMETERS_KEY.equals(metadata.getKey()) && Boolean.parseBoolean(metadata.getValue()));
 	}
 
 	byte[] renderDirectInternal(final DirectRenderRequest request) {

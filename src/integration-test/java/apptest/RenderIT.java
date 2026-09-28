@@ -113,4 +113,16 @@ class RenderIT extends AbstractAppTest {
 			.withExpectedResponse(RESPONSE)
 			.sendRequestAndVerifyResponse();
 	}
+
+	@Test
+	@Sql({ "/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql" })
+	void test7_renderPdfStrictTemplateWithMissingParameter() {
+		setupCall()
+			.withServicePath(PATH_2281 + "/pdf")
+			.withHttpMethod(POST)
+			.withRequest(REQUEST)
+			.withExpectedResponseStatus(BAD_REQUEST)
+			.withExpectedResponse(RESPONSE)
+			.sendRequestAndVerifyResponse();
+	}
 }

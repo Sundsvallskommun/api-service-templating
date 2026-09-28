@@ -1,0 +1,5 @@
+{
+	"title": "Bad Request",
+	"status": 400,
+	"detail": "Missing template parameter 'name' (line 1)"
+}

@@ -116,7 +116,8 @@ class RenderingServiceTests {
 	@ParameterizedTest
 	@CsvSource(value = {
 		"strictParameters,true,true",
-		"STRICTPARAMETERS,TRUE,true",
+		"strictParameters,TRUE,true",
+		"STRICTPARAMETERS,true,false",
 		"strictParameters,false,false",
 		"strictParameters,yes,false",
 		"someOtherKey,true,false"
