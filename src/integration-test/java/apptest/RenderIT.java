@@ -2,6 +2,7 @@ package apptest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.io.ByteArrayInputStream;
@@ -87,5 +88,29 @@ class RenderIT extends AbstractAppTest {
 
 			assertThat(documentText).isEqualToNormalizingWhitespace(expectedContent);
 		}
+	}
+
+	@Test
+	@Sql({ "/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql" })
+	void test5_renderStrictTemplate() {
+		setupCall()
+			.withServicePath(PATH_2281)
+			.withHttpMethod(POST)
+			.withRequest(REQUEST)
+			.withExpectedResponseStatus(OK)
+			.withExpectedResponse(RESPONSE)
+			.sendRequestAndVerifyResponse();
+	}
+
+	@Test
+	@Sql({ "/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql" })
+	void test6_renderStrictTemplateWithMissingParameter() {
+		setupCall()
+			.withServicePath(PATH_2281)
+			.withHttpMethod(POST)
+			.withRequest(REQUEST)
+			.withExpectedResponseStatus(BAD_REQUEST)
+			.withExpectedResponse(RESPONSE)
+			.sendRequestAndVerifyResponse();
 	}
 }

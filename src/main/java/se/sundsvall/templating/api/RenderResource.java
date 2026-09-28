@@ -29,6 +29,10 @@ import se.sundsvall.templating.service.RenderingService;
 	consumes = MediaType.APPLICATION_JSON_VALUE,
 	produces = MediaType.APPLICATION_JSON_VALUE)
 @ApiResponse(
+	responseCode = "400",
+	description = "Bad Request",
+	content = @Content(schema = @Schema(implementation = Problem.class)))
+@ApiResponse(
 	responseCode = "500",
 	description = "Internal Server Error",
 	content = @Content(schema = @Schema(implementation = Problem.class)))

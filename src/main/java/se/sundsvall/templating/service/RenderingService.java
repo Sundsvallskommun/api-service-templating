@@ -52,6 +52,7 @@ public class RenderingService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RenderingService.class);
 	private static final String BASE64_VALUE_PREFIX = "BASE64:";
+	private static final String STRICT_PARAMETERS_KEY = "strictParameters";
 
 	// Registered both as a regular font family and as a fallback for glyphs missing from the
 	// PDF base-14 fonts (which only cover WinAnsi/Latin-1)
@@ -143,9 +144,14 @@ public class RenderingService {
 
 		// Process the template
 		return switch (template.getType()) {
-			case PEBBLE -> pebbleTemplateProcessor.process(template.getIdentifier() + ":" + template.getVersion(), mergedParametersAndDefaultValues);
+			case PEBBLE -> pebbleTemplateProcessor.process(template.getIdentifier() + ":" + template.getVersion(), mergedParametersAndDefaultValues, hasStrictParameters(template));
 			case WORD -> wordTemplateProcessor.process(decodeBase64(template.getContent()), mergedParametersAndDefaultValues);
 		};
+	}
+
+	static boolean hasStrictParameters(final TemplateEntity template) {
+		return ofNullable(template.getMetadata()).orElse(List.of()).stream()
+			.anyMatch(metadata -> STRICT_PARAMETERS_KEY.equalsIgnoreCase(metadata.getKey()) && Boolean.parseBoolean(metadata.getValue()));
 	}
 
 	byte[] renderDirectInternal(final DirectRenderRequest request) {

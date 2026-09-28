@@ -51,8 +51,8 @@ class PebbleConfiguration {
 			.build();
 	}
 
-	@Bean("debug-pebble-engine")
-	PebbleEngine debugPebbleEngine(@Qualifier("pebble.delegating-loader") final DelegatingLoader loader) {
+	@Bean("strict-pebble-engine")
+	PebbleEngine strictPebbleEngine(@Qualifier("pebble.delegating-loader") final DelegatingLoader loader) {
 		return new PebbleEngine.Builder()
 			.loader(loader)
 			.syntax(syntax())
