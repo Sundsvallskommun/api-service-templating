@@ -194,8 +194,10 @@ public class RenderingService {
 	}
 
 	static void registerFont(final PdfRendererBuilder builder, final String resource, final int weight, final FontStyle style) {
-		builder.useFont(fontSupplier(resource), FALLBACK_FONT_FAMILY, weight, style, true,
-			EnumSet.of(FSFontUseCase.DOCUMENT, FSFontUseCase.FALLBACK_FINAL));
+		// Registered once per use case, since OpenHTMLtoPDF only puts a font registered for both
+		// DOCUMENT and FALLBACK_FINAL in the fallback group, making it unusable via font-family
+		builder.useFont(fontSupplier(resource), FALLBACK_FONT_FAMILY, weight, style, true, EnumSet.of(FSFontUseCase.DOCUMENT));
+		builder.useFont(fontSupplier(resource), FALLBACK_FONT_FAMILY, weight, style, true, EnumSet.of(FSFontUseCase.FALLBACK_FINAL));
 	}
 
 	static FSSupplier<InputStream> fontSupplier(final String resource) {

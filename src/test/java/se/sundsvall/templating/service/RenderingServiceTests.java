@@ -3,6 +3,7 @@ package se.sundsvall.templating.service;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -223,6 +224,24 @@ class RenderingServiceTests {
 			var image = new PDFRenderer(pdf).renderImage(0);
 
 			assertThat(containsColor(image, 0xFF0000)).isTrue();
+		}
+	}
+
+	@Test
+	void renderHtmlAsPdf_withLiberationSansFontFamily() throws IOException {
+		var document = "<p style=\"font-family: 'Liberation Sans'\">someTemplateContent</p>".getBytes(UTF_8);
+
+		var result = service.renderHtmlAsPdf(document);
+
+		try (var pdf = PDDocument.load(result)) {
+			var resources = pdf.getPage(0).getResources();
+			var fontNames = new ArrayList<String>();
+			for (var name : resources.getFontNames()) {
+				fontNames.add(resources.getFont(name).getName());
+			}
+
+			assertThat(fontNames).anyMatch(fontName -> fontName.contains("LiberationSans"));
+			assertThat(fontNames).noneMatch(fontName -> fontName.startsWith("Times"));
 		}
 	}
 
