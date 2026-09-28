@@ -28,7 +28,7 @@ public class PebbleTemplateProcessor implements TemplateProcessor<String> {
 	private final PebbleEngine strictPebbleEngine;
 
 	public PebbleTemplateProcessor(@Qualifier("pebbleEngine") final PebbleEngine pebbleEngine,
-		@Qualifier("strict-pebble-engine") final PebbleEngine strictPebbleEngine) {
+		@Qualifier("strictPebbleEngine") final PebbleEngine strictPebbleEngine) {
 		this.pebbleEngine = pebbleEngine;
 		this.strictPebbleEngine = strictPebbleEngine;
 	}
