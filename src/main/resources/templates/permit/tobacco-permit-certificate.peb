@@ -1,0 +1,178 @@
+{% macro box(checked) %}<span class="box">{% if (checked | lower) == "true" %}X{% endif %}</span>{% endmacro %}
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8"/>
+<title>Beslut / Tillståndsbevis</title>
+<style>
+	@page {
+		size: A4 portrait;
+		margin: 14mm 16mm 30mm 16mm;
+		@bottom-center { content: element(footer); vertical-align: top; }
+	}
+	body { font-family: 'Liberation Sans'; font-size: 9pt; margin: 0; }
+	table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+	td, th { padding: 0; vertical-align: top; text-align: left; font-weight: normal; }
+	tr { page-break-inside: avoid; }
+
+	.header td { vertical-align: top; }
+	.doc-title { font-size: 11pt; font-weight: bold; margin-bottom: 3pt; }
+	.holder { margin: 22pt 0 0 12pt; }
+	.holder .lines { font-family: serif; font-size: 10.5pt; line-height: 1.6; }
+
+	.permit-title { text-align: center; font-size: 10pt; font-weight: bold; margin: 34pt 0 8pt 0; }
+
+	.grid { border: 1.5pt solid #000; }
+	.c { border: 1pt solid #000; }
+	.section { font-family: serif; font-size: 10pt; font-weight: bold; vertical-align: middle; padding: 3pt; }
+	.label { font-size: 8pt; padding: 1pt 2pt 0 2pt; }
+	.value { font-family: serif; font-size: 11.5pt; line-height: 1.15; padding: 0 3pt; min-height: 13.5pt; }
+	.tall { min-height: 34pt; padding-top: 6pt; }
+
+	.opts td { border: none; padding: 1pt 2pt; vertical-align: middle; font-size: 9pt; }
+	.opts .value { padding: 0; }
+	.box { display: inline-block; width: 9pt; height: 9pt; border: 1pt solid #000; text-align: center; line-height: 9pt; font-family: serif; font-size: 10pt; vertical-align: middle; margin-right: 3pt; }
+
+	.block-title { font-size: 10pt; font-weight: bold; margin: 3pt 0 1pt 0; }
+	.plain { border: 1.5pt solid #000; }
+
+	.footer { position: running(footer); border-top: 1pt solid #000; padding-top: 2pt; font-size: 7pt; }
+	.footer b { font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="footer">
+	<table>
+		<colgroup>
+			<col style="width: 36%;"/>
+			<col style="width: 22%;"/>
+			<col style="width: 13%;"/>
+			<col style="width: 29%;"/>
+		</colgroup>
+		<tr>
+			<td><b>Postadress</b><br/>Sundsvalls kommun<br/>Individ- och arbetsmarknadsförvaltningen<br/>Alkohol- och tobaksenheten<br/>851 85 SUNDSVALL</td>
+			<td><b>Besöksadress</b><br/>Kyrkogatan 26</td>
+			<td><b>Telefon</b><br/>060-19 18 60</td>
+			<td><b>E-post</b><br/>alkohol&amp;tobaksenheten@sundsvall.se</td>
+		</tr>
+	</table>
+</div>
+
+<table class="header">
+	<tr>
+		<td style="width: 48%; padding-top: 6pt;">{% include "sundsvall.logo" %}</td>
+		<td>
+			<div class="doc-title">Beslut / Tillståndsbevis</div>
+			<table>
+				<tr>
+					<td><div class="label" style="padding-left: 0;">Beslutsdatum</div><div class="value" style="padding-left: 0; font-size: 10.5pt;">{{ decisionDate | escape }}</div></td>
+					<td><div class="label" style="padding-left: 0;">Dnr</div><div class="value" style="padding-left: 0; font-size: 10.5pt;">{{ caseNumber | escape }}</div></td>
+				</tr>
+			</table>
+			<div class="holder">
+				<div class="label" style="padding-left: 0;">Tillståndshavare</div>
+				<div class="lines">
+					{{ permitHolderName | escape }}<br/>
+					{% if (permitHolderCareOf | default("")) is not empty %}{{ permitHolderCareOf | escape }}<br/>
+					{% endif %}{{ permitHolderStreet | escape }}<br/>
+					{{ permitHolderPostalAddress | escape }}
+				</div>
+			</div>
+		</td>
+	</tr>
+</table>
+
+<div class="permit-title">Tillstånd för försäljning av tobak och andra liknande produkter<br/>enligt 5 kap 1 § Lag om tobak och liknande produkter (2018:2088)</div>
+
+<table class="grid">
+	<colgroup>
+		<col style="width: 19%;"/>
+		<col style="width: 53%;"/>
+		<col style="width: 28%;"/>
+	</colgroup>
+
+	<tr>
+		<th class="c section" rowspan="2">Giltighetstid</th>
+		<td class="c">
+			<table class="opts">
+				<tr>
+					<td>{{ box(validityIndefinite | default("")) }}Tillsvidare från och med <span class="value">{{ validFrom | default("") | escape }}</span></td>
+				</tr>
+			</table>
+		</td>
+		<td class="c"><div class="label">Organisationsnummer</div><div class="value">{{ permitHolderOrgNumber | escape }}</div></td>
+	</tr>
+	<tr>
+		<td class="c">
+			<table class="opts">
+				<tr>
+					<td>{{ box(validityTemporary | default("")) }}Tillfällig period; <span class="value">{{ temporaryPeriod | default("") | escape }}</span></td>
+				</tr>
+			</table>
+		</td>
+		<td class="c"></td>
+	</tr>
+
+	<tr>
+		<th class="c section" rowspan="3">Försäljnings-<br/>ställe</th>
+		<td class="c"><div class="label">Namn</div><div class="value">{{ premisesName | escape }}</div></td>
+		<td class="c" rowspan="2"><div class="label">Fastighetsbeteckning</div><div class="value">{{ premisesPropertyDesignation | default("") | escape }}</div></td>
+	</tr>
+	<tr>
+		<td class="c"><div class="label">Gatuadress</div><div class="value">{{ premisesStreet | escape }}</div></td>
+	</tr>
+	<tr>
+		<td class="c"><div class="label">Postadress</div><div class="value">{{ premisesPostalAddress | escape }}</div></td>
+		<td class="c"><div class="label">Telefon</div><div class="value">{{ premisesPhone | escape }}</div></td>
+	</tr>
+
+	<tr>
+		<th class="c section">Definition av<br/>försäljningen</th>
+		<td class="c" colspan="2">
+			<table class="opts">
+				<tr>
+					<td style="width: 35%;">{{ box(salesRetail | default("")) }}Detaljhandel</td>
+					<td style="width: 30%;">{{ box(salesWholesale | default("")) }}Partihandel</td>
+					<td style="width: 35%;">{{ box(salesOnline | default("")) }}Näthandel</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+
+	<tr>
+		<th class="c section">Upplysningar/<br/>föreskrifter</th>
+		<td class="c" colspan="2"><div class="value tall" style="padding-top: 2pt;">{{ information | escape | replace({'
+': '<br/>'}) | raw }}</div></td>
+	</tr>
+</table>
+
+<div class="block-title">Tillståndsbeslut</div>
+<table class="plain">
+	<tr>
+		<td class="c" rowspan="2" style="width: 50%;">
+			<div class="label">Beslutsfattare och diarienummer</div>
+			<div class="value">{{ decisionMaker | escape }}</div>
+			<div class="value" style="padding-top: 8pt;">{{ decisionOfficerAndCaseNumber | escape }}</div>
+		</td>
+		<td class="c"><div class="label">Ersätter tidigare beslut datum / diarienummer</div><div class="value">{{ replacesDecision | default("") | escape }}</div></td>
+	</tr>
+	<tr>
+		<td class="c"><div class="label">Beslut</div><div class="value">{{ decisionText | escape }}</div></td>
+	</tr>
+</table>
+
+<div class="block-title">Beslutsfattare/Utfärdat av</div>
+<table class="plain">
+	<tr>
+		<td class="c" style="width: 50%;">
+			<div class="label">Namn, befattning</div>
+			<div class="value">{{ issuedByNameAndTitle | escape }}</div>
+			<div class="value">{{ issuedByUnit | escape }}</div>
+		</td>
+		<td class="c"><div class="label">Utförandedatum</div><div class="value">{{ executionDate | escape }}</div></td>
+	</tr>
+</table>
+
+</body>
+</html>
