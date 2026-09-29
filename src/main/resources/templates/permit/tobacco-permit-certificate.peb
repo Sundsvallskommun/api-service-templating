@@ -36,24 +36,27 @@
 	.block-title { font-size: 10pt; font-weight: bold; margin: 3pt 0 1pt 0; }
 	.plain { border: 1.5pt solid #000; }
 
-	.footer { position: running(footer); border-top: 1pt solid #000; padding-top: 2pt; font-size: 7pt; }
+	.footer { position: running(footer); font-size: 7pt; }
 	.footer b { font-weight: bold; }
+	.footer a { color: #000; text-decoration: none; }
+	.footer-info { margin-bottom: 2pt; }
+	.footer-contacts { border-top: 1pt solid #000; }
+	.footer-contacts td { padding-top: 2pt; }
 </style>
 </head>
 <body>
 
 <div class="footer">
-	<table>
+	<div class="footer-info">Du kan följa dina tillstånd och ärenden på Mina sidor, <a href="https://minasidor.sundsvall.se">minasidor.sundsvall.se</a>.</div>
+	<table class="footer-contacts">
 		<colgroup>
-			<col style="width: 36%;"/>
-			<col style="width: 22%;"/>
-			<col style="width: 13%;"/>
-			<col style="width: 29%;"/>
+			<col style="width: 40%;"/>
+			<col style="width: 25%;"/>
+			<col style="width: 35%;"/>
 		</colgroup>
 		<tr>
 			<td><b>Postadress</b><br/>Sundsvalls kommun<br/>Individ- och arbetsmarknadsförvaltningen<br/>Alkohol- och tobaksenheten<br/>851 85 SUNDSVALL</td>
 			<td><b>Besöksadress</b><br/>Kyrkogatan 26</td>
-			<td><b>Telefon</b><br/>060-19 18 60</td>
 			<td><b>E-post</b><br/>alkohol&amp;tobaksenheten@sundsvall.se</td>
 		</tr>
 	</table>

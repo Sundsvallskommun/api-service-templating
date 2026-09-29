@@ -5,7 +5,11 @@
 <meta charset="UTF-8"/>
 <title>Tillståndsbevis</title>
 <style>
-	@page { size: A4 portrait; margin: 14mm 16mm; }
+	@page {
+		size: A4 portrait;
+		margin: 14mm 16mm 30mm 16mm;
+		@bottom-center { content: element(footer); vertical-align: top; }
+	}
 	body { font-family: 'Liberation Sans'; font-size: 9pt; margin: 0; }
 	table { border-collapse: collapse; width: 100%; table-layout: fixed; }
 	td, th { padding: 0; vertical-align: top; text-align: left; font-weight: normal; }
@@ -31,9 +35,32 @@
 
 	.block-title { font-size: 10pt; font-weight: bold; margin: 3pt 0 1pt 0; }
 	.plain { border: 1.5pt solid #000; }
+
+	.footer { position: running(footer); font-size: 7pt; }
+	.footer b { font-weight: bold; }
+	.footer a { color: #000; text-decoration: none; }
+	.footer-info { margin-bottom: 2pt; }
+	.footer-contacts { border-top: 1pt solid #000; }
+	.footer-contacts td { padding-top: 2pt; }
 </style>
 </head>
 <body>
+
+<div class="footer">
+	<div class="footer-info">Du kan följa dina tillstånd och ärenden på Mina sidor, <a href="https://minasidor.sundsvall.se">minasidor.sundsvall.se</a>.</div>
+	<table class="footer-contacts">
+		<colgroup>
+			<col style="width: 40%;"/>
+			<col style="width: 25%;"/>
+			<col style="width: 35%;"/>
+		</colgroup>
+		<tr>
+			<td><b>Postadress</b><br/>Sundsvalls kommun<br/>Individ- och arbetsmarknadsförvaltningen<br/>Alkohol- och tobaksenheten<br/>851 85 SUNDSVALL</td>
+			<td><b>Besöksadress</b><br/>Kyrkogatan 26</td>
+			<td><b>E-post</b><br/>alkohol&amp;tobaksenheten@sundsvall.se</td>
+		</tr>
+	</table>
+</div>
 
 <table class="header">
 	<tr>
