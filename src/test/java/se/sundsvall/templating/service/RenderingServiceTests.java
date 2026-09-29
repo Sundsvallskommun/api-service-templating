@@ -3,6 +3,8 @@ package se.sundsvall.templating.service;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -10,6 +12,7 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -21,6 +24,7 @@ import se.sundsvall.templating.configuration.properties.PebbleProperties;
 import se.sundsvall.templating.domain.TemplateType;
 import se.sundsvall.templating.exception.TemplateException;
 import se.sundsvall.templating.integration.db.DbIntegration;
+import se.sundsvall.templating.integration.db.entity.MetadataEntity;
 import se.sundsvall.templating.integration.db.entity.TemplateEntity;
 import se.sundsvall.templating.service.processor.PebbleTemplateProcessor;
 import se.sundsvall.templating.service.processor.WordTemplateProcessor;
@@ -30,7 +34,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
@@ -78,7 +84,7 @@ class RenderingServiceTests {
 		when(mockTemplateEntity.getType()).thenReturn(PEBBLE);
 		when(mockDbIntegration.getTemplate(any(), any(), any()))
 			.thenReturn(Optional.of(mockTemplateEntity));
-		when(mockPebbleTemplateProcessor.process(any(String.class), anyMap())).thenReturn("someResult".getBytes(UTF_8));
+		when(mockPebbleTemplateProcessor.process(any(String.class), anyMap(), anyBoolean())).thenReturn("someResult".getBytes(UTF_8));
 
 		var result = service.renderTemplate(MUNICIPALITY_ID, mockRenderRequest);
 		assertThat(result).isNotNull();
@@ -86,8 +92,47 @@ class RenderingServiceTests {
 		verify(mockRenderRequest).getIdentifier();
 		verify(mockRenderRequest).getParameters();
 		verify(mockDbIntegration).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
-		verify(mockPebbleTemplateProcessor).process(any(String.class), anyMap());
+		verify(mockPebbleTemplateProcessor).process(any(String.class), anyMap(), eq(false));
 		verifyNoInteractions(mockWordTemplateProcessor);
+	}
+
+	@Test
+	void renderTemplate_withStrictParameters() {
+		when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockTemplateEntity.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockTemplateEntity.getType()).thenReturn(PEBBLE);
+		when(mockTemplateEntity.getMetadata()).thenReturn(List.of(MetadataEntity.builder().withKey("strictParameters").withValue("true").build()));
+		when(mockDbIntegration.getTemplate(any(), any(), any()))
+			.thenReturn(Optional.of(mockTemplateEntity));
+		when(mockPebbleTemplateProcessor.process(any(String.class), anyMap(), anyBoolean())).thenReturn("someResult".getBytes(UTF_8));
+
+		var result = service.renderTemplate(MUNICIPALITY_ID, mockRenderRequest);
+		assertThat(result).isNotNull();
+
+		verify(mockPebbleTemplateProcessor).process(any(String.class), anyMap(), eq(true));
+		verifyNoInteractions(mockWordTemplateProcessor);
+	}
+
+	@ParameterizedTest
+	@CsvSource(value = {
+		"strictParameters,true,true",
+		"strictParameters,TRUE,true",
+		"STRICTPARAMETERS,true,false",
+		"strictParameters,false,false",
+		"strictParameters,yes,false",
+		"someOtherKey,true,false"
+	})
+	void hasStrictParameters(final String key, final String value, final boolean expected) {
+		var template = TemplateEntity.builder()
+			.withMetadata(List.of(MetadataEntity.builder().withKey(key).withValue(value).build()))
+			.build();
+
+		assertThat(RenderingService.hasStrictParameters(template)).isEqualTo(expected);
+	}
+
+	@Test
+	void hasStrictParameters_withoutMetadata() {
+		assertThat(RenderingService.hasStrictParameters(TemplateEntity.builder().build())).isFalse();
 	}
 
 	@Test
@@ -96,7 +141,7 @@ class RenderingServiceTests {
 		when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
 		when(mockDbIntegration.getTemplate(any(), any(), any())).thenReturn(Optional.of(mockTemplateEntity));
 		when(mockTemplateEntity.getType()).thenReturn(PEBBLE);
-		doThrow(new TemplateException(new IOException())).when(mockPebbleTemplateProcessor).process(any(), anyMap());
+		doThrow(new TemplateException(new IOException())).when(mockPebbleTemplateProcessor).process(any(), anyMap(), anyBoolean());
 
 		assertThatExceptionOfType(RuntimeException.class)
 			.isThrownBy(() -> service.renderTemplate(MUNICIPALITY_ID, mockRenderRequest));
@@ -180,6 +225,24 @@ class RenderingServiceTests {
 			var image = new PDFRenderer(pdf).renderImage(0);
 
 			assertThat(containsColor(image, 0xFF0000)).isTrue();
+		}
+	}
+
+	@Test
+	void renderHtmlAsPdf_withLiberationSansFontFamily() throws IOException {
+		var document = "<p style=\"font-family: 'Liberation Sans'\">someTemplateContent</p>".getBytes(UTF_8);
+
+		var result = service.renderHtmlAsPdf(document);
+
+		try (var pdf = PDDocument.load(result)) {
+			var resources = pdf.getPage(0).getResources();
+			var fontNames = new ArrayList<String>();
+			for (var name : resources.getFontNames()) {
+				fontNames.add(resources.getFont(name).getName());
+			}
+
+			assertThat(fontNames).anyMatch(fontName -> fontName.contains("LiberationSans"));
+			assertThat(fontNames).noneMatch(fontName -> fontName.startsWith("Times"));
 		}
 	}
 

@@ -1,0 +1,8 @@
+{
+	"identifier": "strict.template",
+	"parameters": {
+		"person": {
+			"name": "Bobby"
+		}
+	}
+}
