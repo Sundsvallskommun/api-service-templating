@@ -7,8 +7,12 @@
 <style>
 	@page {
 		size: A4 portrait;
-		margin: 14mm 16mm 30mm 16mm;
+		margin: 14mm 16mm 58mm 16mm;
 		@bottom-center { content: element(footer); vertical-align: top; }
+		@top-right { content: element(pageHeader); vertical-align: bottom; }
+	}
+	@page :first {
+		@top-right { content: element(firstPageHeader); vertical-align: bottom; }
 	}
 	body { font-family: 'Liberation Sans'; font-size: 9pt; margin: 0; }
 	table { border-collapse: collapse; width: 100%; table-layout: fixed; }
@@ -20,7 +24,7 @@
 	.holder { margin: 22pt 0 0 12pt; }
 	.holder .lines { font-family: serif; font-size: 10.5pt; line-height: 1.6; }
 
-	.permit-title { text-align: center; font-size: 10pt; font-weight: bold; margin: 34pt 0 8pt 0; }
+	.permit-title { text-align: center; font-size: 10pt; font-weight: bold; margin: 14pt 0 8pt 0; }
 
 	.grid { border: 1.5pt solid #000; }
 	.c { border: 1pt solid #000; }
@@ -36,31 +40,31 @@
 	.block-title { font-size: 10pt; font-weight: bold; margin: 3pt 0 1pt 0; }
 	.plain { border: 1.5pt solid #000; }
 
-	.footer { position: running(footer); font-size: 7pt; }
+	.footer { position: running(footer); font-size: 8.5pt; }
 	.footer b { font-weight: bold; }
-	.footer a { color: #000; text-decoration: none; }
-	.footer-info { margin-bottom: 2pt; }
+	.footer a { color: #005595; text-decoration: underline; }
+	.minasidor { border: 1pt solid #005595; border-left: 4pt solid #005595; margin-bottom: 6pt; }
+	.minasidor td { vertical-align: middle; }
+	.minasidor-text { padding: 6pt 8pt; line-height: 1.4; }
+	.minasidor-title { font-size: 10pt; font-weight: bold; margin-bottom: 3pt; }
+	.minasidor-link { font-weight: bold; font-size: 9.5pt; }
+	.minasidor-qr { width: 26mm; padding: 4pt 6pt; text-align: center; font-size: 7.5pt; }
+	.qr { display: block; width: 20mm; height: 20mm; margin: 0 auto 2pt auto; }
 	.footer-contacts { border-top: 1pt solid #000; }
 	.footer-contacts td { padding-top: 2pt; }
+	.last-block { page-break-inside: avoid; }
+
+	.page-header { font-size: 8pt; text-align: right; }
+	.page-header-first { position: running(firstPageHeader); }
+	.page-header-next { position: running(pageHeader); }
+	.page-number::before { content: counter(page); }
+	.page-count::before { content: counter(pages); }
 </style>
 </head>
 <body>
 
-<div class="footer">
-	<div class="footer-info">Du kan följa dina tillstånd och ärenden på Mina sidor, <a href="https://minasidor.sundsvall.se">minasidor.sundsvall.se</a>.</div>
-	<table class="footer-contacts">
-		<colgroup>
-			<col style="width: 40%;"/>
-			<col style="width: 25%;"/>
-			<col style="width: 35%;"/>
-		</colgroup>
-		<tr>
-			<td><b>Postadress</b><br/>Sundsvalls kommun<br/>Individ- och arbetsmarknadsförvaltningen<br/>Alkohol- och tobaksenheten<br/>851 85 SUNDSVALL</td>
-			<td><b>Besöksadress</b><br/>Kyrkogatan 26</td>
-			<td><b>E-post</b><br/>alkohol&amp;tobaksenheten@sundsvall.se</td>
-		</tr>
-	</table>
-</div>
+<div class="page-header page-header-first">Sida <span class="page-number"></span> (<span class="page-count"></span>)</div>
+<div class="page-header page-header-next">Dnr {{ caseNumber | escape }} &#183; Sida <span class="page-number"></span> (<span class="page-count"></span>)</div>
 
 <table class="header">
 	<tr>
@@ -180,6 +184,31 @@
 	</tr>
 </table>
 
+<div class="last-block">
+<div class="footer">
+	<table class="minasidor">
+		<tr>
+			<td class="minasidor-text">
+				<div class="minasidor-title">Följ ditt ärende i Mina sidor</div>
+				I Mina sidor kan du kommunicera med din handläggare och se dina beslut.<br/>
+				Logga in med e-legitimation på <a class="minasidor-link" href="https://minasidor.sundsvall.se">minasidor.sundsvall.se</a>
+			</td>
+			<td class="minasidor-qr">{% include "sundsvall.minasidor.qr" %}Skanna med<br/>mobilen</td>
+		</tr>
+	</table>
+	<table class="footer-contacts">
+		<colgroup>
+			<col style="width: 40%;"/>
+			<col style="width: 25%;"/>
+			<col style="width: 35%;"/>
+		</colgroup>
+		<tr>
+			<td><b>Postadress</b><br/>Sundsvalls kommun<br/>Individ- och arbetsmarknadsförvaltningen<br/>Alkohol- och tobaksenheten<br/>851 85 SUNDSVALL</td>
+			<td><b>Besöksadress</b><br/>Kyrkogatan 26</td>
+			<td><b>E-post</b><br/><a href="mailto:alkohol%26tobaksenheten@sundsvall.se">alkohol&amp;tobaksenheten@sundsvall.se</a></td>
+		</tr>
+	</table>
+</div>
 <div class="block-title">Tillståndsbeslut</div>
 <table class="plain">
 	<tr>
@@ -206,6 +235,7 @@
 		<td class="c"><div class="label">Utförandedatum</div><div class="value">{{ executionDate | escape }}</div></td>
 	</tr>
 </table>
+</div>
 
 </body>
 </html>
