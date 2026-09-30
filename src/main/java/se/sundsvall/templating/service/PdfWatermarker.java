@@ -1,5 +1,6 @@
 package se.sundsvall.templating.service;
 
+import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -24,7 +25,7 @@ public class PdfWatermarker {
 
 	private static final String FONT = "/fonts/LiberationSans-Bold.ttf";
 	private static final float OPACITY = 0.45f;
-	private static final float GRAY = 0.5f;
+	private static final Color COLOR = new Color(180, 80, 80);
 	private static final float TITLE_WIDTH_OF_DIAGONAL = 0.7f;
 	private static final float SUBTITLE_SIZE_OF_TITLE = 0.6f;
 	private static final float SUBTITLE_OFFSET_OF_TITLE = 0.9f;
@@ -55,7 +56,7 @@ public class PdfWatermarker {
 
 		try (final var stream = new PDPageContentStream(document, page, APPEND, true, true)) {
 			stream.setGraphicsStateParameters(graphicsState);
-			stream.setNonStrokingColor(GRAY);
+			stream.setNonStrokingColor(COLOR);
 			stream.beginText();
 			showCentered(stream, font, TITLE, titleSize, box, angle, 0);
 			showCentered(stream, font, SUBTITLE, titleSize * SUBTITLE_SIZE_OF_TITLE, box, angle, -titleSize * SUBTITLE_OFFSET_OF_TITLE);
