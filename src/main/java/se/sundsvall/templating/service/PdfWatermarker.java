@@ -23,10 +23,11 @@ public class PdfWatermarker {
 	static final String SUBTITLE = "Ej giltig handling";
 
 	private static final String FONT = "/fonts/LiberationSans-Bold.ttf";
-	private static final float OPACITY = 0.25f;
+	private static final float OPACITY = 0.45f;
 	private static final float GRAY = 0.5f;
 	private static final float TITLE_WIDTH_OF_DIAGONAL = 0.7f;
-	private static final float SUBTITLE_SIZE_OF_TITLE = 0.4f;
+	private static final float SUBTITLE_SIZE_OF_TITLE = 0.6f;
+	private static final float SUBTITLE_OFFSET_OF_TITLE = 0.9f;
 
 	public byte[] watermark(final byte[] pdf) {
 		try (final var document = PDDocument.load(pdf);
@@ -57,7 +58,7 @@ public class PdfWatermarker {
 			stream.setNonStrokingColor(GRAY);
 			stream.beginText();
 			showCentered(stream, font, TITLE, titleSize, box, angle, 0);
-			showCentered(stream, font, SUBTITLE, titleSize * SUBTITLE_SIZE_OF_TITLE, box, angle, -titleSize * 0.8f);
+			showCentered(stream, font, SUBTITLE, titleSize * SUBTITLE_SIZE_OF_TITLE, box, angle, -titleSize * SUBTITLE_OFFSET_OF_TITLE);
 			stream.endText();
 		}
 	}
