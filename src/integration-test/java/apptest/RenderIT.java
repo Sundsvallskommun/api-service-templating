@@ -130,7 +130,8 @@ class RenderIT extends AbstractAppTest {
 	}
 
 	/**
-	 * Only verifies that the rendered PDF carries the watermark, since the PDF bytes are not deterministic.
+	 * Only verifies the text content of the rendered PDF (template output and watermark), since the PDF bytes are not
+	 * deterministic.
 	 */
 	@Test
 	@Sql({ "/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql" })
