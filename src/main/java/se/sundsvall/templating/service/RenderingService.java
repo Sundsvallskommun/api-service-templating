@@ -84,17 +84,19 @@ public class RenderingService {
 	}
 
 	public String renderTemplateAsPdf(final String municipalityId, final RenderRequest request) {
+		return encodeBase64(renderPdf(municipalityId, request));
+	}
+
+	byte[] renderPdf(final String municipalityId, final RenderRequest request) {
 		// Get the template
 		final var template = getTemplate(municipalityId, request);
 		// Pre-render it
 		final var output = renderTemplateInternal(template, request.getParameters());
 		// Render it as a PDF
-		final var renderedPdf = switch (template.getType()) {
+		return switch (template.getType()) {
 			case PEBBLE -> renderHtmlAsPdf(output);
 			case WORD -> renderWordAsPdf(output);
 		};
-
-		return encodeBase64(renderedPdf);
 	}
 
 	public String renderDirect(final DirectRenderRequest request) {
