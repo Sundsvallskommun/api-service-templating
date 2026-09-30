@@ -95,6 +95,31 @@ class RenderResource {
 		return ResponseEntity.ok(response);
 	}
 
+	@Operation(
+		summary = "Render a stored template as a watermarked PDF preview",
+		description = "Renders the template like /pdf and stamps every page to mark the document as a preview")
+	@ApiResponse(
+		responseCode = "200",
+		description = "Successful operation",
+		content = @Content(schema = @Schema(implementation = RenderResponse.class)))
+	@ApiResponse(
+		responseCode = "404",
+		description = "Not Found - the template could not be found",
+		content = @Content(schema = @Schema(implementation = RenderResponse.class)))
+	@PostMapping("/pdf/preview")
+	ResponseEntity<RenderResponse> renderPdfPreview(
+		@Parameter(name = "municipalityId", description = "Municipality ID", example = "2281") @ValidMunicipalityId @PathVariable final String municipalityId,
+		@Valid @RequestBody final RenderRequest request) {
+		requestScopedMunicipalityId.setValue(municipalityId);
+		final var output = renderingService.renderTemplateAsPdfPreview(municipalityId, request);
+
+		final var response = RenderResponse.builder()
+			.withOutput(output)
+			.build();
+
+		return ResponseEntity.ok(response);
+	}
+
 	@Operation(summary = "Render provided template contents, optionally with parameters")
 	@ApiResponse(
 		responseCode = "200",
