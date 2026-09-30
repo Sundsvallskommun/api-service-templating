@@ -168,6 +168,22 @@ class RenderingServiceTests {
 	}
 
 	@Test
+	void renderTemplateAsPdf() {
+		when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockTemplateEntity.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockTemplateEntity.getType()).thenReturn(PEBBLE);
+		when(mockDbIntegration.getTemplate(any(), any(), any())).thenReturn(Optional.of(mockTemplateEntity));
+		when(mockPebbleTemplateProcessor.process(any(String.class), anyMap(), anyBoolean())).thenReturn("<p>someResult</p>".getBytes(UTF_8));
+
+		final var result = TemplateUtil.decodeBase64(service.renderTemplateAsPdf(MUNICIPALITY_ID, mockRenderRequest));
+
+		assertThat(result).startsWith("%PDF-".getBytes(UTF_8));
+		verify(mockDbIntegration).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
+		verify(mockPebbleTemplateProcessor).process(any(String.class), anyMap(), eq(false));
+		verifyNoInteractions(mockWordTemplateProcessor, mockPdfWatermarker);
+	}
+
+	@Test
 	void renderTemplateAsPdfPreview() {
 		final var watermarkedPdf = "someWatermarkedPdf".getBytes(UTF_8);
 
