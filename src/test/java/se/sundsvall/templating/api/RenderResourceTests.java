@@ -56,6 +56,19 @@ class RenderResourceTests {
 	}
 
 	@Test
+	void test_renderAsPdfPreview() {
+		when(mockRenderingService.renderTemplateAsPdfPreview(any(), any(RenderRequest.class))).thenReturn("someText");
+
+		var result = resource.renderPdfPreview(MUNICIPALITY_ID, new RenderRequest());
+		assertThat(result.getStatusCode()).isEqualTo(OK);
+		assertThat(result.getBody()).isNotNull();
+		assertThat(result.getBody().getOutput()).isEqualTo("someText");
+
+		verify(mockContextMunicipalityId).setValue(MUNICIPALITY_ID);
+		verify(mockRenderingService).renderTemplateAsPdfPreview(eq(MUNICIPALITY_ID), any(RenderRequest.class));
+	}
+
+	@Test
 	void test_renderDirect() {
 		when(mockRenderingService.renderDirect(any(DirectRenderRequest.class)))
 			.thenReturn("someText");

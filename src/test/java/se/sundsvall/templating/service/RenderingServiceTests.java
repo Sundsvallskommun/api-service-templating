@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import se.sundsvall.dept44.problem.Problem;
 import se.sundsvall.dept44.problem.ThrowableProblem;
 import se.sundsvall.templating.api.domain.DirectRenderRequest;
 import se.sundsvall.templating.api.domain.RenderRequest;
@@ -36,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockConstruction;
@@ -45,6 +47,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static se.sundsvall.templating.domain.TemplateType.PEBBLE;
 import static se.sundsvall.templating.domain.TemplateType.WORD;
 
@@ -73,6 +77,9 @@ class RenderingServiceTests {
 
 	@Mock
 	private TemplateEntity mockTemplateEntity;
+
+	@Mock
+	private PdfWatermarker mockPdfWatermarker;
 
 	@InjectMocks
 	private RenderingService service;
@@ -158,6 +165,72 @@ class RenderingServiceTests {
 
 		verify(mockDbIntegration).getTemplate(MUNICIPALITY_ID, IDENTIFIER, "1.8");
 		verify(mockRenderRequest, times(3)).getIdentifier();
+	}
+
+	@Test
+	void renderTemplateAsPdf() {
+		when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockTemplateEntity.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockTemplateEntity.getType()).thenReturn(PEBBLE);
+		when(mockDbIntegration.getTemplate(any(), any(), any())).thenReturn(Optional.of(mockTemplateEntity));
+		when(mockPebbleTemplateProcessor.process(any(String.class), anyMap(), anyBoolean())).thenReturn("<p>someResult</p>".getBytes(UTF_8));
+
+		final var result = TemplateUtil.decodeBase64(service.renderTemplateAsPdf(MUNICIPALITY_ID, mockRenderRequest));
+
+		assertThat(result).startsWith("%PDF-".getBytes(UTF_8));
+		verify(mockDbIntegration).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
+		verify(mockPebbleTemplateProcessor).process(any(String.class), anyMap(), eq(false));
+		verifyNoInteractions(mockWordTemplateProcessor, mockPdfWatermarker);
+	}
+
+	@Test
+	void renderTemplateAsPdfPreview() {
+		final var watermarkedPdf = "someWatermarkedPdf".getBytes(UTF_8);
+
+		when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockTemplateEntity.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockTemplateEntity.getType()).thenReturn(PEBBLE);
+		when(mockDbIntegration.getTemplate(any(), any(), any())).thenReturn(Optional.of(mockTemplateEntity));
+		when(mockPebbleTemplateProcessor.process(any(String.class), anyMap(), anyBoolean())).thenReturn("<p>someResult</p>".getBytes(UTF_8));
+		when(mockPdfWatermarker.watermark(any())).thenReturn(watermarkedPdf);
+
+		final var result = service.renderTemplateAsPdfPreview(MUNICIPALITY_ID, mockRenderRequest);
+
+		assertThat(result).isEqualTo(TemplateUtil.encodeBase64(watermarkedPdf));
+		verify(mockDbIntegration).getTemplate(MUNICIPALITY_ID, IDENTIFIER, null);
+		verify(mockPebbleTemplateProcessor).process(any(String.class), anyMap(), eq(false));
+		verify(mockPdfWatermarker).watermark(argThat(pdf -> new String(pdf, 0, 5, UTF_8).equals("%PDF-")));
+		verifyNoMoreInteractions(mockPdfWatermarker);
+		verifyNoInteractions(mockWordTemplateProcessor);
+	}
+
+	@Test
+	void renderTemplateAsPdfPreview_withStrictParametersAndMissingParameter() {
+		when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockTemplateEntity.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockTemplateEntity.getType()).thenReturn(PEBBLE);
+		when(mockTemplateEntity.getMetadata()).thenReturn(List.of(MetadataEntity.builder().withKey("strictParameters").withValue("true").build()));
+		when(mockDbIntegration.getTemplate(any(), any(), any())).thenReturn(Optional.of(mockTemplateEntity));
+		when(mockPebbleTemplateProcessor.process(any(String.class), anyMap(), anyBoolean())).thenThrow(Problem.valueOf(BAD_REQUEST, "Missing template parameter"));
+
+		assertThatExceptionOfType(ThrowableProblem.class)
+			.isThrownBy(() -> service.renderTemplateAsPdfPreview(MUNICIPALITY_ID, mockRenderRequest))
+			.satisfies(problem -> assertThat(problem.getStatus()).isEqualTo(BAD_REQUEST));
+
+		verify(mockPebbleTemplateProcessor).process(any(String.class), anyMap(), eq(true));
+		verifyNoInteractions(mockPdfWatermarker);
+	}
+
+	@Test
+	void renderTemplateAsPdfPreview_whenTemplateDoesNotExist() {
+		when(mockRenderRequest.getIdentifier()).thenReturn(IDENTIFIER);
+		when(mockDbIntegration.getTemplate(any(), any(), any())).thenReturn(Optional.empty());
+
+		assertThatExceptionOfType(ThrowableProblem.class)
+			.isThrownBy(() -> service.renderTemplateAsPdfPreview(MUNICIPALITY_ID, mockRenderRequest))
+			.satisfies(problem -> assertThat(problem.getStatus()).isEqualTo(NOT_FOUND));
+
+		verifyNoInteractions(mockPebbleTemplateProcessor, mockWordTemplateProcessor, mockPdfWatermarker);
 	}
 
 	@ParameterizedTest

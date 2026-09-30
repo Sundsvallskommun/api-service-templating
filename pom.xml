@@ -153,6 +153,11 @@
 			<artifactId>openhtmltopdf-svg-support</artifactId>
 			<version>${openhtmltopdf.version}</version>
 		</dependency>
+		<!-- PDFBox (PDF post-processing) -->
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+		</dependency>
 		<!-- Apache POI -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>

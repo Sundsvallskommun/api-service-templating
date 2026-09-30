@@ -3,10 +3,13 @@ package apptest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.docx4j.TextUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.junit.jupiter.api.Test;
@@ -122,6 +125,53 @@ class RenderIT extends AbstractAppTest {
 			.withHttpMethod(POST)
 			.withRequest(REQUEST)
 			.withExpectedResponseStatus(BAD_REQUEST)
+			.withExpectedResponse(RESPONSE)
+			.sendRequestAndVerifyResponse();
+	}
+
+	/**
+	 * Only verifies the text content of the rendered PDF (template output and watermark), since the PDF bytes are not
+	 * deterministic.
+	 */
+	@Test
+	@Sql({ "/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql" })
+	void test8_renderPdfPreview() throws Exception {
+		setupCall()
+			.withServicePath(PATH_2281 + "/pdf/preview")
+			.withHttpMethod(POST)
+			.withRequest(REQUEST)
+			.withExpectedResponseStatus(OK)
+			.sendRequest();
+
+		final var pdfBytes = Base64.getDecoder().decode(getResponseBody(RenderResponse.class).getOutput());
+
+		try (final var pdf = PDDocument.load(pdfBytes)) {
+			// The watermark is rotated, so line breaks may end up between its characters
+			final var text = new PDFTextStripper().getText(pdf).replaceAll("\\s", "");
+
+			assertThat(text).contains("HejBobby", "FÖRHANDSGRANSKNING", "Ejgiltighandling");
+		}
+	}
+
+	@Test
+	@Sql({ "/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql" })
+	void test9_renderPdfPreviewStrictTemplateWithMissingParameter() {
+		setupCall()
+			.withServicePath(PATH_2281 + "/pdf/preview")
+			.withHttpMethod(POST)
+			.withRequest(REQUEST)
+			.withExpectedResponseStatus(BAD_REQUEST)
+			.withExpectedResponse(RESPONSE)
+			.sendRequestAndVerifyResponse();
+	}
+
+	@Test
+	void test10_renderPdfPreviewTemplateNotFound() {
+		setupCall()
+			.withServicePath(PATH_2281 + "/pdf/preview")
+			.withHttpMethod(POST)
+			.withRequest(REQUEST)
+			.withExpectedResponseStatus(NOT_FOUND)
 			.withExpectedResponse(RESPONSE)
 			.sendRequestAndVerifyResponse();
 	}

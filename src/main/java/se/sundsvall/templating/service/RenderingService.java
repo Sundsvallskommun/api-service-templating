@@ -63,15 +63,18 @@ public class RenderingService {
 	private final PebbleTemplateProcessor pebbleTemplateProcessor;
 	private final WordTemplateProcessor wordTemplateProcessor;
 	private final DbIntegration dbIntegration;
+	private final PdfWatermarker pdfWatermarker;
 
 	public RenderingService(final PebbleProperties pebbleProperties,
 		final PebbleTemplateProcessor pebbleTemplateProcessor,
 		final WordTemplateProcessor wordTemplateProcessor,
-		final DbIntegration dbIntegration) {
+		final DbIntegration dbIntegration,
+		final PdfWatermarker pdfWatermarker) {
 		this.pebbleProperties = pebbleProperties;
 		this.pebbleTemplateProcessor = pebbleTemplateProcessor;
 		this.wordTemplateProcessor = wordTemplateProcessor;
 		this.dbIntegration = dbIntegration;
+		this.pdfWatermarker = pdfWatermarker;
 	}
 
 	public String renderTemplate(final String municipalityId, final RenderRequest request) {
@@ -84,17 +87,25 @@ public class RenderingService {
 	}
 
 	public String renderTemplateAsPdf(final String municipalityId, final RenderRequest request) {
+		return encodeBase64(renderPdf(municipalityId, request));
+	}
+
+	public String renderTemplateAsPdfPreview(final String municipalityId, final RenderRequest request) {
+		LOGGER.info("Rendering preview of template");
+
+		return encodeBase64(pdfWatermarker.watermark(renderPdf(municipalityId, request)));
+	}
+
+	byte[] renderPdf(final String municipalityId, final RenderRequest request) {
 		// Get the template
 		final var template = getTemplate(municipalityId, request);
 		// Pre-render it
 		final var output = renderTemplateInternal(template, request.getParameters());
 		// Render it as a PDF
-		final var renderedPdf = switch (template.getType()) {
+		return switch (template.getType()) {
 			case PEBBLE -> renderHtmlAsPdf(output);
 			case WORD -> renderWordAsPdf(output);
 		};
-
-		return encodeBase64(renderedPdf);
 	}
 
 	public String renderDirect(final DirectRenderRequest request) {
