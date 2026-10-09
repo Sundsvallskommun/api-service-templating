@@ -1,11 +1,5 @@
 package apptest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.OK;
-
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -19,11 +13,18 @@ import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
 import se.sundsvall.templating.Application;
 import se.sundsvall.templating.api.domain.RenderResponse;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.OK;
+
 @WireMockAppTestSuite(
 	files = "classpath:/RenderIT/",
-	classes = Application.class
-)
-@Sql({ "/db/truncate.sql", "/db/data.sql" })
+	classes = Application.class)
+@Sql({
+	"/db/truncate.sql", "/db/data.sql"
+})
 class RenderIT extends AbstractAppTest {
 
 	private static final String PATH_2281 = "/2281/render";
@@ -67,6 +68,7 @@ class RenderIT extends AbstractAppTest {
 	/**
 	 * Only verifies the content of the rendered Word document, not the entire response structure.
 	 * Also doesn't verify the exact formatting of the document, just that the expected text is present.
+	 * 
 	 * @throws Exception if there is an error during the test execution
 	 */
 	@Test
@@ -94,7 +96,9 @@ class RenderIT extends AbstractAppTest {
 	}
 
 	@Test
-	@Sql({ "/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql" })
+	@Sql({
+		"/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql"
+	})
 	void test5_renderStrictTemplate() {
 		setupCall()
 			.withServicePath(PATH_2281)
@@ -106,7 +110,9 @@ class RenderIT extends AbstractAppTest {
 	}
 
 	@Test
-	@Sql({ "/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql" })
+	@Sql({
+		"/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql"
+	})
 	void test6_renderStrictTemplateWithMissingParameter() {
 		setupCall()
 			.withServicePath(PATH_2281)
@@ -118,7 +124,9 @@ class RenderIT extends AbstractAppTest {
 	}
 
 	@Test
-	@Sql({ "/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql" })
+	@Sql({
+		"/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql"
+	})
 	void test7_renderPdfStrictTemplateWithMissingParameter() {
 		setupCall()
 			.withServicePath(PATH_2281 + "/pdf")
@@ -134,7 +142,9 @@ class RenderIT extends AbstractAppTest {
 	 * deterministic.
 	 */
 	@Test
-	@Sql({ "/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql" })
+	@Sql({
+		"/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql"
+	})
 	void test8_renderPdfPreview() throws Exception {
 		setupCall()
 			.withServicePath(PATH_2281 + "/pdf/preview")
@@ -154,7 +164,9 @@ class RenderIT extends AbstractAppTest {
 	}
 
 	@Test
-	@Sql({ "/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql" })
+	@Sql({
+		"/db/truncate.sql", "/db/data.sql", "/db/data-strict.sql"
+	})
 	void test9_renderPdfPreviewStrictTemplateWithMissingParameter() {
 		setupCall()
 			.withServicePath(PATH_2281 + "/pdf/preview")

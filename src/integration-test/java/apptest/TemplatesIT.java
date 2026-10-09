@@ -1,14 +1,5 @@
 package apptest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.web.util.UriComponentsBuilder.fromPath;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
@@ -18,11 +9,21 @@ import se.sundsvall.templating.Application;
 import se.sundsvall.templating.integration.db.TemplateRepository;
 import se.sundsvall.templating.integration.db.entity.Version;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.web.util.UriComponentsBuilder.fromPath;
+
 @WireMockAppTestSuite(
 	files = "classpath:/TemplatesIT/",
-	classes = Application.class
-)
-@Sql({ "/db/truncate.sql", "/db/data.sql" })
+	classes = Application.class)
+@Sql({
+	"/db/truncate.sql", "/db/data.sql"
+})
 class TemplatesIT extends AbstractAppTest {
 
 	private static final String PATH_2281 = "/2281/templates";
