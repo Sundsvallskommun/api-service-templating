@@ -1,9 +1,5 @@
 package apptest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpStatus.OK;
-
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import org.docx4j.TextUtils;
@@ -15,11 +11,16 @@ import se.sundsvall.dept44.test.annotation.wiremock.WireMockAppTestSuite;
 import se.sundsvall.templating.Application;
 import se.sundsvall.templating.api.domain.RenderResponse;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpStatus.OK;
+
 @WireMockAppTestSuite(
 	files = "classpath:/RenderIT/",
-	classes = Application.class
-)
-@Sql({ "/db/truncate.sql", "/db/data.sql" })
+	classes = Application.class)
+@Sql({
+	"/db/truncate.sql", "/db/data.sql"
+})
 class RenderIT extends AbstractAppTest {
 
 	private static final String PATH_2281 = "/2281/render";
@@ -63,6 +64,7 @@ class RenderIT extends AbstractAppTest {
 	/**
 	 * Only verifies the content of the rendered Word document, not the entire response structure.
 	 * Also doesn't verify the exact formatting of the document, just that the expected text is present.
+	 * 
 	 * @throws Exception if there is an error during the test execution
 	 */
 	@Test
