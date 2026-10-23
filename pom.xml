@@ -17,7 +17,7 @@
 		<jsoup.version>1.23.2</jsoup.version>
 		<nu-htmlparser.version>1.4.16</nu-htmlparser.version>
 		<docx4j.version>11.5.14</docx4j.version>
-		<poi.version>5.5.1</poi.version>
+		<poi.version>6.0.0</poi.version>
 		<poi-pdf-converter.version>2.2.0</poi-pdf-converter.version>
 		<openhtmltopdf.version>1.0.10</openhtmltopdf.version>
 		<!-- Pinned to avoid known CVEs in the version pulled in by openhtmltopdf-svg-support -->
